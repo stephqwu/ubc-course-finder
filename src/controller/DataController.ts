@@ -1,7 +1,8 @@
 import JSZip = require("jszip");
 import {JSZipObject} from "jszip";
-import {InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import Log from "../Util";
+import {InsightDataset, InsightDatasetKind} from "./IInsightFacade";
+
 const dataFolder = "./";
 
 export interface IDataset {
@@ -21,7 +22,6 @@ export default class DataController {
 
     // This method adds a new dataset with specified id and content. The content is a base64 string that we need
     // to deserialize using JSZip. The addDataset() method of InsightFacade should make use of this method.
-
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<boolean> {
         // JS objects passed as queries, not JSON string (already parsed)
         // Check JS object for validity, rather than validating JSON string/file
