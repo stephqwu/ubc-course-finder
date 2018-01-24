@@ -45,10 +45,14 @@ export default class DataController {
                         jsons.push(json);
                         numRows += json["result"].length;
                     });
+                    // TODO: at this point, we've read all the files in the zip folder, so we should the data to disk
+                    // TODO: we probably need to think of a way to represent an IDataset object as a single string for caching.
                     curr.datasets.push({metadata: {id, kind: InsightDatasetKind.Courses, numRows}, data: jsons});
                     fulfill(true);
                 });
             });
         });
     }
+
+    // TODO: we should implement delete and listing in this class as well
 }
