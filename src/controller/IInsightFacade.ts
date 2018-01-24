@@ -4,7 +4,7 @@
  * You should not change this interface at all or the test suite will not work.
  */
 
-export interface InsightResponse {
+export interface InsightResponse { // interface for the objects your method with fulfill with
     code: number;
     body: InsightResponseSuccessBody | InsightResponseErrorBody; // The actual response
 }
@@ -25,10 +25,16 @@ export enum InsightDatasetKind {
 export interface InsightDataset {
     id: string;
     kind: InsightDatasetKind;
-    numRows: number;
+    numRows: number; // number of sections/successfully parsed entries for that dataset. Example response:
 }
+/* [
+    {id: "entry-level", kind: "courses", numRows: 50},
+    {id: "majors", kind: "courses", numRows: 40},
+    ]
+ */
 
-export interface IInsightFacade {
+export interface IInsightFacade { // front end (wrapper) for the query engine
+    // In practice, it defines the endpoints for the deliverable. Provides several methods:
     /**
      * Add a dataset to UBCInsight.
      *
@@ -59,7 +65,8 @@ export interface IInsightFacade {
      *
      */
     addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<InsightResponse>;
-
+    // Adds a dataset to the internal model, providing the id of the dataset, the string of the content of the dataset,
+    // and the kind of the dataset (courses)
     /**
      * Remove a dataset from UBCInsight.
      *
@@ -82,7 +89,7 @@ export interface IInsightFacade {
      *
      */
     removeDataset(id: string): Promise<InsightResponse>;
-
+    // removes a dataset form the internal model, given the id.
     /**
      * Perform a query on UBCInsight.
      *
@@ -100,7 +107,6 @@ export interface IInsightFacade {
      * 400: the query failed; body should contain {"error": "my text"} providing extra detail.
      */
     performQuery(query: any): Promise<InsightResponse>;
-
     /**
      * List a list of datasets and their types.
      *

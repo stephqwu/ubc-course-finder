@@ -1,6 +1,7 @@
 import JSZip = require("jszip");
 import {JSZipObject} from "jszip";
 import {InsightDataset, InsightDatasetKind} from "./IInsightFacade";
+import Log from "../Util";
 const dataFolder = "./";
 
 export interface IDataset {
@@ -14,11 +15,17 @@ export default class DataController {
     constructor() {
         this.datasets = new Array();
         // TODO:
+        // add 10 datasets, datasets length would be 10
+        // each object within the array has a list of JSON which is just the contents of each file in the zip folder
     }
 
     // This method adds a new dataset with specified id and content. The content is a base64 string that we need
     // to deserialize using JSZip. The addDataset() method of InsightFacade should make use of this method.
+
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<boolean> {
+        // JS objects passed as queries, not JSON string (already parsed)
+        // Check JS object for validity, rather than validating JSON string/file
+        const fs = require("fs");
         const curr = this;
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
@@ -45,14 +52,35 @@ export default class DataController {
                         jsons.push(json);
                         numRows += json["result"].length;
                     });
-                    // TODO: at this point, we've read all the files in the zip folder, so we should the data to disk
-                    // TODO: we probably need to think of a way to represent an IDataset object as a single string for caching.
-                    curr.datasets.push({metadata: {id, kind: InsightDatasetKind.Courses, numRows}, data: jsons});
-                    fulfill(true);
+                    if (numRows > 0) {
+                        curr.datasets.push({metadata: {id, kind: InsightDatasetKind.Courses, numRows}, data: jsons});
+                        fs.writeFile("/test/data", jsons, function (err: any) {
+                            if (err) {
+                                Log.trace(err);
+                                reject(err);
+                            } else {
+                                Log.trace("add was successful!");
+                                fulfill(true);
+                            }
+                            // TODO: we've read all the files in the zip folder, so we should the data to disk
+                            // InsightFacade.controller.addDataset(id, content, kind).then(function (result: boolean) {
+                            // Promise<InsightResponse>)) {
+                            // form the JSON response based on what the method returns
+
+                            /*const handleJSONFile = function (err: any, data: any) {
+                                if (err) {
+                                    throw err;
+                                }
+                                // response = JSON.parse(data);
+                                // Read the file, and pass it to your callback (move to outside/below block end?)
+                                fs.readFile("./response.json", handleJSONFile);
+                            };*/
+                            // TODO: represent an IDataset object as a single string for caching.
+                        });
+                    }
                 });
             });
         });
     }
-
     // TODO: we should implement delete and listing in this class as well
 }
