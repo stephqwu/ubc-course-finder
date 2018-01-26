@@ -54,7 +54,10 @@ export default class DataController {
                     });
                     if (numRows > 0) {
                         curr.datasets.push({metadata: {id, kind: InsightDatasetKind.Courses, numRows}, data: jsons});
-                        fs.writeFile("/test/data", jsons, function (err: any) {
+                        if (!fs.existsSync("./data")) {
+                            fs.mkdirSync("./data");
+                        }
+                        fs.writeFile("./data/" + id + ".json", jsons, function (err: any) {
                             if (err) {
                                 Log.trace(err);
                                 reject(err);
