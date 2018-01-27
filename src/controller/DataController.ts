@@ -29,20 +29,42 @@ export default class DataController {
         const curr = this;
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
-
+            Log.trace("DEBUG: inside addDataset 1");
+            if (id === null) { // || id === "") { // what if id is a key that is not there?
+                reject(false);
+                return;
+            }
             currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
                 const jsons: JSON[] = new Array();
                 const promises: Array<Promise<string>> = new Array();
                 let numRows: number = 0;
+
+
                 zip.forEach(function (relativePath: string, file: JSZipObject) {
-                    try {
-                        if (!file.dir) {
-                            // If the current file is not a directory, add to Promise array
-                            promises.push(file.async("text"));
+                    // Log.trace( "two");
+                    // if (zip.files[0].dir === false ) {
+                    //    reject();
+                    //    return;
+                    // }
+                   // if (zip.files[0].dir) {
+                    // TODO: figure out why won't this work
+                    if (zip.files[0].dir && zip.files[0].name === "courses/" ) {
+                        Log.trace("it is a folder named courses");
+                        try {
+                            if (!file.dir) {
+                                // If the current file is not a directory, add to Promise array
+                                promises.push(file.async("text"));
+                            }
+                        } catch (err) {
+                            reject(err);
+                            Log.trace("Reject#1");
                         }
-                    } catch (err) {
-                        reject(err);
-                    }
+                    } // else {
+                    //    reject();
+                   // }
+                   //     fulfill();
+                   //     Log.trace("Reject#2");
+                   // }
                 });
                 // Once all promises have resolved, we iterate through the contents of each file and add to the current
                 // dataset.
@@ -54,9 +76,9 @@ export default class DataController {
                     });
                     if (numRows > 0) {
                         curr.datasets.push({metadata: {id, kind: InsightDatasetKind.Courses, numRows}, data: jsons});
-                        if (!fs.existsSync("./data")) {
+                       /* if (!fs.existsSync("./data")) {
                             fs.mkdirSync("./data");
-                        }
+                        } */
                         fs.writeFile("./data/" + id + ".json", jsons, function (err: any) {
                             if (err) {
                                 Log.trace(err);
@@ -80,8 +102,12 @@ export default class DataController {
                             };*/
                             // TODO: represent an IDataset object as a single string for caching.
                         });
+                    } else {
+                        reject();
                     }
                 });
+            }).catch(function (err) {
+                reject(err);
             });
         });
     }

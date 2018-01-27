@@ -142,7 +142,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
     });
 
     it("Should add a dataset with files and folders", async () => {
-        const id: string = "onefolderonefile";
+        const id: string = "onefileonefolder";
         const expectedCode: number = 204;
         let response: InsightResponse;
 
@@ -189,7 +189,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
         let response: InsightResponse;
 
         try {
-            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+            response = await insightFacade.addDataset(id, datasets["courses"], InsightDatasetKind.Courses);
         } catch (err) {
             response = err;
         } finally {

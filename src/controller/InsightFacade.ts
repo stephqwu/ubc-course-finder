@@ -26,14 +26,17 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<InsightResponse> {
-        // TODO: this isn't actually a working implementation, just wrote this part so I could debug DataController
-        return new Promise(function (fulfill, reject) {
-            InsightFacade.controller.addDataset(id, content, kind).then(function (result: boolean) {
-                fulfill({code: 204, body: {result: ""}});
-            }).catch(function (err: Error) {
-                reject({code: 400, error: "blah"});
-            });
-        });
+       return new Promise(function (fulfill, reject) {
+           InsightFacade.controller.addDataset(id, content, kind).then(function (result: boolean) {
+               Log.trace("finalfulfill");
+               fulfill({code: 204, body: {result: ""}});
+           }).catch(function (err: Error) {
+               reject({code: 400, error: "blah"});
+               Log.trace("finalreject");
+           });
+       });
+       // return InsightFacade.controller.addDataset(id, content, kind);
+        }
 
         // const JSONResponse = function loadJSON()=>String {
 
@@ -51,7 +54,6 @@ export default class InsightFacade implements IInsightFacade {
                 Promise.reject({code: 400, body: null});
             }
         }*/
-    }
 
     public removeDataset(id: string): Promise<InsightResponse> {
         return Promise.reject({code: -1, body: null});
