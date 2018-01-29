@@ -1,5 +1,5 @@
 import Log from "../Util";
-import DataController from "./DataController";
+import DataController, {IDataset} from "./DataController";
 import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";
 
 // import fs = require('fs');
@@ -64,6 +64,13 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public listDatasets(): Promise<InsightResponse> {
-        return Promise.reject({code: -1, body: null});
+        return new Promise(function (fulfill) {
+            const datasets: IDataset[] = InsightFacade.controller.getDatasets();
+            const result: InsightDataset[] = [];
+            for (const dataset of datasets) {
+                result.push(dataset["metadata"]);
+            }
+            fulfill({code: 200, body: {result}});
+        });
     }
 }

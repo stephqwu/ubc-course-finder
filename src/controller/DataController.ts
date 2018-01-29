@@ -38,8 +38,6 @@ export default class DataController {
                 const jsons: JSON[] = new Array();
                 const promises: Array<Promise<string>> = new Array();
                 let numRows: number = 0;
-
-
                 zip.forEach(function (relativePath: string, file: JSZipObject) {
                     // Log.trace( "two");
                     // if (zip.files[0].dir === false ) {
@@ -111,5 +109,9 @@ export default class DataController {
             });
         });
     }
+    public getDatasets(): IDataset[] {
+        return this.datasets;
+    }
+
     // TODO: we should implement delete and listing in this class as well
 }

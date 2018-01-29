@@ -14,7 +14,7 @@ export interface ITestQuery {
     filename: string;  // This is injected when reading the file
 }
 
-describe("InsightFacade Add/Remove Dataset", function () {
+describe("InsightFacade Add/Remove/List Dataset", function () {
     // Reference any datasets you've added to test/data here and they will
     // automatically be loaded in the Before All hook.
     const datasetsToLoad: { [id: string]: string } = {
@@ -75,6 +75,21 @@ describe("InsightFacade Add/Remove Dataset", function () {
 
         try {
             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response.code).to.equal(expectedCode);
+        }
+    });
+
+    it("Should list datasets", async () => {
+        const id: string = "courses";
+        const expectedCode: number = 200;
+        let response: InsightResponse;
+
+        try {
+            await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+            response = await insightFacade.listDatasets();
         } catch (err) {
             response = err;
         } finally {
