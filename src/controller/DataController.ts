@@ -46,18 +46,15 @@ export default class DataController {
                     // }
                    // if (zip.files[0].dir) {
                     // TODO: figure out why won't this work
-                    if (zip.files[0].dir && zip.files[0].name === "courses/" ) {
-                        Log.trace("it is a folder named courses");
-                        try {
-                            if (!file.dir) {
-                                // If the current file is not a directory, add to Promise array
-                                promises.push(file.async("text"));
-                            }
-                        } catch (err) {
-                            reject(err);
-                            Log.trace("Reject#1");
+                    if (!file.dir) {
+                        // If the current file is not a directory, add to Promise array
+                        if (file.name.indexOf("courses") >= 0) {
+                            promises.push(file.async("text"));
+                        } else {
+                            reject();
                         }
-                    } // else {
+                    }
+                    // else {
                     //    reject();
                    // }
                    //     fulfill();
