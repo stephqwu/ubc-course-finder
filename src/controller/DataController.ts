@@ -1,7 +1,7 @@
 import JSZip = require("jszip");
 import {JSZipObject} from "jszip";
 import Log from "../Util";
-import {InsightDataset, InsightDatasetKind} from "./IInsightFacade";
+import {InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";
 
 const dataFolder = "./";
 
@@ -29,7 +29,7 @@ export default class DataController {
         const curr = this;
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
-            Log.trace("DEBUG: inside addDataset 1");
+            Log.trace("YAY");
             if (id === null) { // || id === "") { // what if id is a key that is not there?
                 reject(false);
                 return;
@@ -65,15 +65,19 @@ export default class DataController {
                 // dataset.
                 Promise.all(promises).then(function (datas: string[]) {
                     datas.forEach(function (data: string) {
-                        const json = JSON.parse(data);
-                        jsons.push(json);
-                        numRows += json["result"].length;
+                        try {
+                            const json = JSON.parse(data);
+                            jsons.push(json);
+                            numRows += json["result"].length;
+                        } catch (err) {
+                            reject(err);
+                        }
                     });
                     if (numRows > 0) {
                         curr.datasets.push({metadata: {id, kind: InsightDatasetKind.Courses, numRows}, data: jsons});
-                       /* if (!fs.existsSync("./data")) {
+                        if (!fs.existsSync("./data")) {
                             fs.mkdirSync("./data");
-                        } */
+                        }
                         fs.writeFile("./data/" + id + ".json", jsons, function (err: any) {
                             if (err) {
                                 Log.trace(err);
@@ -106,9 +110,20 @@ export default class DataController {
             });
         });
     }
+    // TODO: we should implement delete and listing in this class as well
+    public removeDataset(id: string): Promise<boolean> {
+        const fs = require("fs");
+        return new Promise(function (fulfill, reject) {
+            try {
+                fs.unlinkSync("./data/" + id + ".json");
+                return fulfill();
+            } catch (err) {
+                return reject();
+            }
+        });
+    }
+
     public getDatasets(): IDataset[] {
         return this.datasets;
     }
-
-    // TODO: we should implement delete and listing in this class as well
 }
