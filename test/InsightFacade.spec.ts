@@ -2,6 +2,7 @@ import { expect } from "chai";
 
 import { InsightDatasetKind, InsightResponse, InsightResponseSuccessBody } from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
+import QueryController from "../src/controller/QueryController";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
 
@@ -13,6 +14,84 @@ export interface ITestQuery {
     response: InsightResponse;
     filename: string;  // This is injected when reading the file
 }
+
+describe("QueryController parse/validation tests", function () {
+    it ("Should return true for valid query", () => {
+        const controller = new QueryController();
+        const isValid = controller.isValidQuery("{\n" +
+            "        \"WHERE\": {\n" +
+            "            \"OR\": [\n" +
+            "                {\n" +
+            "                    \"AND\":[\n" +
+            "                        {\n" +
+            "                            \"GT\": {\n" +
+            "                                \"courses_avg\":90\n" +
+            "                            }\n" +
+            "                        },\n" +
+            "                        {\n" +
+            "                            \"IS\": {\n" +
+            "                                \"courses_dept\":\"adhe\"\n" +
+            "                            }\n" +
+            "                        }\n" +
+            "                    ]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"EQ\": {\n" +
+            "                        \"courses_avg\":95\n" +
+            "                    }\n" +
+            "                }\n" +
+            "            ]\n" +
+            "        },\n" +
+            "        \"OPTIONS\": {\n" +
+            "            \"COLUMNS\": [\n" +
+            "                \"courses_dept\",\n" +
+            "                \"courses_id\",\n" +
+            "                \"courses_avg\"\n" +
+            "            ],\n" +
+            "            \"ORDER\": \"courses_avg\"\n" +
+            "        }\n" +
+            "    }");
+        expect(isValid).to.equal(true);
+    });
+
+    it ("Should return false for invalid query", () => {
+        const controller = new QueryController();
+        const isValid = controller.isValidQuery("{\n" +
+            "        \"WHERE\": {\n" +
+            "            \"OR\": [\n" +
+            "                {\n" +
+            "                    \"AND\":[\n" +
+            "                        {\n" +
+            "                            \"GT\": {\n" +
+            "                                \"courses_avg\":90\n" +
+            "                            }\n" +
+            "                        },\n" +
+            "                        {\n" +
+            "                            \"IS\": {\n" +
+            "                                \"courses_dept\":\"adhe\"\n" +
+            "                            }\n" +
+            "                        }\n" +
+            "                    ]\n" +
+            "                },\n" +
+            "                {\n" +
+            "                    \"EQ\": {\n" +
+            "                        \"courses_avg\":95\n" +
+            "                    }\n" +
+            "                }\n" +
+            "            ]\n" +
+            "        },\n" +
+            "        \"OPTIONS\": {\n" +
+            "            \"COLUMNS\": [\n" +
+            "                \"courses_dept\",\n" +
+            "                \"courses_id\",\n" +
+            "                \"courses\"\n" +
+            "            ],\n" +
+            "            \"ORDER\": \"courses\"\n" +
+            "        }\n" +
+            "    }");
+        expect(isValid).to.equal(false);
+    });
+});
 
 describe("InsightFacade Add/Remove/List Dataset", function () {
     // Reference any datasets you've added to test/data here and they will
