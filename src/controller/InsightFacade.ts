@@ -36,25 +36,7 @@ export default class InsightFacade implements IInsightFacade {
                Log.trace("finalreject");
            });
        });
-       // return InsightFacade.controller.addDataset(id, content, kind);
-        }
-
-        // const JSONResponse = function loadJSON()=>String {
-
-/* const didItWork: Promise<any> = InsightFacade.controller.addDataset(id, content, kind);
-        didItWork.then(Log.trace(didItWork));
-           let JSONResponse: boolean;
-           JSONResponse = InsightFacade.controller.addDataset(id, content, kind)
-               .then(Log.trace(JSONResponse.toString()));
-               */
-        // }
-        /*return InsightFacade.controller.addDataset(id, content, kind).then(function (result: boolean) {
-            if (result) {
-                Promise.fulfill({code: 204, body: "yay!"});
-            } else {
-                Promise.reject({code: 400, body: null});
-            }
-        }*/
+     }
 
     public removeDataset(id: string): Promise<InsightResponse> {
         return new Promise(function (fulfill, reject) {
@@ -67,10 +49,17 @@ export default class InsightFacade implements IInsightFacade {
             });
         });
     }
-
+    
     public performQuery(query: any): Promise <InsightResponse> {
         const controller: QueryController = new QueryController(InsightFacade.controller.getDatasets());
-        return Promise.reject({code: -1, body: null});
+        return new Promise(function (fulfill, reject) {
+            // TODO: build what should go in the result response body
+            if (controller.isValidQuery(query)) {
+                fulfill({code: 200, body: {result: "sent in JSON according in the response body"}});
+            } else {
+                reject({code: 400, error: "Invalid query format (check that there is a WHERE and an OPTIONS"});
+            }
+        });
     }
 
     public listDatasets(): Promise<InsightResponse> {
