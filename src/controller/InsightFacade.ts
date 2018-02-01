@@ -49,7 +49,7 @@ export default class InsightFacade implements IInsightFacade {
             });
         });
     }
-    
+
     public performQuery(query: any): Promise <InsightResponse> {
         const controller: QueryController = new QueryController(InsightFacade.controller.getDatasets());
         return new Promise(function (fulfill, reject) {

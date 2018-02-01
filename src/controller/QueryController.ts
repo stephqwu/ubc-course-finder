@@ -9,10 +9,8 @@ export default class QueryController {
        this.datasets = datasets;
     }
 // ------------------------------- PARSING AND VALIDATION OF QUERY ---------------------------------------------
-    public isValidQuery(query: any): boolean {
+    public isValidQuery(jsonQuery: any): boolean {
         try {
-            // The argument should at least be a valid JSON to be a valid query
-            const jsonQuery = JSON.parse(query);
             // The body should have exactly 2 keys "WHERE" and "OPTIONS"
             if (!jsonQuery.hasOwnProperty("WHERE") || !jsonQuery.hasOwnProperty("OPTIONS") ||
                 Object.keys(jsonQuery).length !== 2) {
