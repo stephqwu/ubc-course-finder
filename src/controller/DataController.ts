@@ -78,7 +78,7 @@ export default class DataController {
                         if (!fs.existsSync("./data")) {
                             fs.mkdirSync("./data");
                         }
-                        fs.writeFile("./data/" + id + ".json", jsons, function (err: any) {
+                        fs.writeFile("./data/" + id + ".json", JSON.stringify(jsons), function (err: any) {
                             if (err) {
                                 Log.trace(err);
                                 reject(err);
