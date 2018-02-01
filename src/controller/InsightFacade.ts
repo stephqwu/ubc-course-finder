@@ -1,6 +1,7 @@
 import Log from "../Util";
 import DataController, {IDataset} from "./DataController";
 import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";
+import QueryController from "./QueryController";
 
 // import fs = require('fs');
 
@@ -68,6 +69,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise <InsightResponse> {
+        const controller: QueryController = new QueryController(InsightFacade.controller.getDatasets());
         return Promise.reject({code: -1, body: null});
     }
 

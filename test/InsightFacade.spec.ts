@@ -17,7 +17,7 @@ export interface ITestQuery {
 
 describe("QueryController parse/validation tests", function () {
     it ("Should return true for valid query", () => {
-        const controller = new QueryController();
+        const controller = new QueryController(null);
         const isValid = controller.isValidQuery("{\n" +
             "        \"WHERE\": {\n" +
             "            \"OR\": [\n" +
@@ -55,7 +55,7 @@ describe("QueryController parse/validation tests", function () {
     });
 
     it ("Should return false for invalid query", () => {
-        const controller = new QueryController();
+        const controller = new QueryController(null);
         const isValid = controller.isValidQuery("{\n" +
             "        \"WHERE\": {\n" +
             "            \"OR\": [\n" +

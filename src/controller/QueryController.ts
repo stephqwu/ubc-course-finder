@@ -1,7 +1,12 @@
 
+import {IDataset} from "./DataController";
+
 export default class QueryController {
-    constructor() {
-       // Does nothing atm
+
+    private datasets: IDataset[];
+
+    constructor(datasets: IDataset[]) {
+       this.datasets = datasets;
     }
 // ------------------------------- PARSING AND VALIDATION OF QUERY ---------------------------------------------
     public isValidQuery(query: any): boolean {
