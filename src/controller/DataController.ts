@@ -1,9 +1,11 @@
+import fs = require("fs");
 import JSZip = require("jszip");
 import {JSZipObject} from "jszip";
+import path = require("path");
 import Log from "../Util";
 import {InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";
 
-const dataFolder = "./";
+const dataFolder = "./data";
 
 export interface IDataset {
     metadata: InsightDataset;
@@ -15,9 +17,13 @@ export default class DataController {
 
     constructor() {
         this.datasets = new Array();
-        // TODO:
-        // add 10 datasets, datasets length would be 10
-        // each object within the array has a list of JSON which is just the contents of each file in the zip folder
+        // If any data files exist on disk, load datasets from those files
+        const curr = this;
+        if (fs.existsSync(dataFolder)) {
+            fs.readdirSync(dataFolder).forEach(function (file, index) {
+                curr.datasets.push(JSON.parse(fs.readFileSync(path.join(dataFolder, file), "utf-8")));
+            });
+        }
     }
 
     // This method adds a new dataset with specified id and content. The content is a base64 string that we need
@@ -25,9 +31,14 @@ export default class DataController {
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<boolean> {
         // JS objects passed as queries, not JSON string (already parsed)
         // Check JS object for validity, rather than validating JSON string/file
-        const fs = require("fs");
         const curr = this;
         return new Promise(function (fulfill, reject) {
+            // If a dataset with the same ID already exists, we reject
+            for (const dataset of curr.datasets) {
+                if (dataset["metadata"]["id"] === id) {
+                    reject(false);
+                }
+            }
             const currZip = new JSZip();
             Log.trace("YAY");
             if (id === null) { // || id === "") { // what if id is a key that is not there?
@@ -74,11 +85,12 @@ export default class DataController {
                         }
                     });
                     if (numRows > 0) {
-                        curr.datasets.push({metadata: {id, kind: InsightDatasetKind.Courses, numRows}, data: jsons});
-                        if (!fs.existsSync("./data")) {
-                            fs.mkdirSync("./data");
+                        const internalData = {metadata: {id, kind: InsightDatasetKind.Courses, numRows}, data: jsons};
+                        curr.datasets.push(internalData);
+                        if (!fs.existsSync(dataFolder)) {
+                            fs.mkdirSync(dataFolder);
                         }
-                        fs.writeFile("./data/" + id + ".json", JSON.stringify(jsons), function (err: any) {
+                        fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData), function (err: any) {
                             if (err) {
                                 Log.trace(err);
                                 reject(err);
@@ -112,7 +124,6 @@ export default class DataController {
     }
     // TODO: we should implement delete and listing in this class as well
     public removeDataset(id: string): Promise<boolean> {
-        const fs = require("fs");
         return new Promise(function (fulfill, reject) {
             try {
                 fs.unlinkSync("./data/" + id + ".json");

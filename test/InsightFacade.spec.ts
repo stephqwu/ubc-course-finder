@@ -167,7 +167,6 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         let response: InsightResponse;
 
         try {
-            await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
             response = await insightFacade.listDatasets();
         } catch (err) {
             response = err;
@@ -251,10 +250,11 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
 
     it("Should 400 trying to add an existing dataset", async () => { // run consecutively right
         const id: string = "courses";
-        const expectedCode: number = 204; // 400; (?) investigate spec
+        const expectedCode: number = 400; // 400; (?) investigate spec
         let response: InsightResponse;
 
         try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
         } catch (err) {
             response = err;
