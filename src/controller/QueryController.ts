@@ -31,7 +31,11 @@ export default class QueryController {
         }
         const columns = query["OPTIONS"]["COLUMNS"];
         // TODO: instead of just returning what's back from the helper, order the results first
-        return this.performQueryHelper(query, id, columns);
+        const result = this.performQueryHelper(query["WHERE"], id, columns);
+        result.sort(function (a: any, b: any) {
+            return a[order] - b[order];
+        });
+        return result;
     }
 
 // ------------------------------- PARSING AND VALIDATION OF QUERY ---------------------------------------------
@@ -148,30 +152,66 @@ export default class QueryController {
         return null;
     }
 
+    private resolveKeySuffix(keySuffix: string) {
+        if (keySuffix === "dept") {
+            return "Subject";
+        } else if (keySuffix === "id") {
+            return "Course";
+        } else if (keySuffix === "avg") {
+            return "Avg";
+        } else if (keySuffix === "instructor") {
+            return "Professor";
+        } else if (keySuffix === "title") {
+            return "Title";
+        } else if (keySuffix === "pass") {
+            return "Pass";
+        } else if (keySuffix === "fail") {
+            return "Fail";
+        } else if (keySuffix === "audit") {
+            return "Audit";
+        } else if (keySuffix === "uuid") {
+            return "id";
+        } else {
+            throw Error("That is not a pre-defined column name");
+        }
+    }
+
     // Helper to return only entries in the dataset that match the MCOMPARATOR constraint
     private comparatorHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
                              query: any): JSON[] {
         const data: any = [];
+        const keySuffix = key.split("_")[1];
+        const keySuffixCap = keySuffix.charAt(0).toUpperCase() + keySuffix.slice(1);
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                const response: any = {};
-                if (comparator === Comparator.GT && course[key] > query["GT"][key]) {
+                if (comparator === Comparator.GT && course[keySuffixCap] > query["GT"][key]) {
+                    const response: any = {};
                     for (const column of columns) {
-                        response[column] = course[column];
+                        const columnSuffix = column.split("_")[1];
+                        const colName = this.resolveKeySuffix(columnSuffix);
+                        response[column] = course[colName];
                     }
-                } else if (comparator === Comparator.LT && course[key] < query["LT"][key]) {
+                    data.push(response);
+                } else if (comparator === Comparator.LT && course[keySuffixCap] < query["LT"][key]) {
+                    const response: any = {};
                     for (const column of columns) {
-                        response[column] = course[column];
+                        const columnSuffix = column.split("_")[1];
+                        const colName = this.resolveKeySuffix(columnSuffix);
+                        response[column] = course[colName];
                     }
-                } else if (comparator === Comparator.EQ && course[key] === query["EQ"][key]) {
+                    data.push(response);
+                } else if (comparator === Comparator.EQ && course[keySuffixCap] === query["EQ"][key]) {
+                    const response: any = {};
                     for (const column of columns) {
-                        response[column] = course[column];
+                        const columnSuffix = column.split("_")[1];
+                        const colName = this.resolveKeySuffix(columnSuffix);
+                        response[column] = course[colName];
                     }
+                    data.push(response);
                 }
-                data.push(response);
             }
         }
         return data;

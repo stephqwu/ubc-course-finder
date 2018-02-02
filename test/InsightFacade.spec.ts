@@ -18,77 +18,77 @@ export interface ITestQuery {
 describe("QueryController parse/validation tests", function () {
     it ("Should return true for valid query", () => {
         const controller = new QueryController(null);
-        const isValid = controller.isValidQuery("{\n" +
-            "        \"WHERE\": {\n" +
-            "            \"OR\": [\n" +
-            "                {\n" +
-            "                    \"AND\":[\n" +
-            "                        {\n" +
-            "                            \"GT\": {\n" +
-            "                                \"courses_avg\":90\n" +
-            "                            }\n" +
-            "                        },\n" +
-            "                        {\n" +
-            "                            \"IS\": {\n" +
-            "                                \"courses_dept\":\"adhe\"\n" +
-            "                            }\n" +
-            "                        }\n" +
-            "                    ]\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"EQ\": {\n" +
-            "                        \"courses_avg\":95\n" +
-            "                    }\n" +
-            "                }\n" +
-            "            ]\n" +
-            "        },\n" +
-            "        \"OPTIONS\": {\n" +
-            "            \"COLUMNS\": [\n" +
-            "                \"courses_dept\",\n" +
-            "                \"courses_id\",\n" +
-            "                \"courses_avg\"\n" +
-            "            ],\n" +
-            "            \"ORDER\": \"courses_avg\"\n" +
-            "        }\n" +
-            "    }");
+        const isValid = controller.isValidQuery({
+            WHERE: {
+                OR: [
+                    {
+                        AND: [
+                            {
+                                GT: {
+                                    courses_avg: 90,
+                                },
+                            },
+                            {
+                                IS: {
+                                    courses_dept: "adhe",
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        EQ: {
+                            courses_avg: 95,
+                        },
+                    },
+                ],
+            },
+            OPTIONS: {
+                COLUMNS: [
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg",
+                ],
+                ORDER: "courses_avg",
+            },
+        });
         expect(isValid).to.equal(true);
     });
 
     it ("Should return false for invalid query", () => {
         const controller = new QueryController(null);
-        const isValid = controller.isValidQuery("{\n" +
-            "        \"WHERE\": {\n" +
-            "            \"OR\": [\n" +
-            "                {\n" +
-            "                    \"AND\":[\n" +
-            "                        {\n" +
-            "                            \"GT\": {\n" +
-            "                                \"courses_avg\":90\n" +
-            "                            }\n" +
-            "                        },\n" +
-            "                        {\n" +
-            "                            \"IS\": {\n" +
-            "                                \"courses_dept\":\"adhe\"\n" +
-            "                            }\n" +
-            "                        }\n" +
-            "                    ]\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"EQ\": {\n" +
-            "                        \"courses_avg\":95\n" +
-            "                    }\n" +
-            "                }\n" +
-            "            ]\n" +
-            "        },\n" +
-            "        \"OPTIONS\": {\n" +
-            "            \"COLUMNS\": [\n" +
-            "                \"courses_dept\",\n" +
-            "                \"courses_id\",\n" +
-            "                \"courses\"\n" +
-            "            ],\n" +
-            "            \"ORDER\": \"courses\"\n" +
-            "        }\n" +
-            "    }");
+        const isValid = controller.isValidQuery({
+            WHERE: {
+                OR: [
+                    {
+                        AND: [
+                            {
+                                GT: {
+                                    courses_avg: 90,
+                                },
+                            },
+                            {
+                                IS: {
+                                    courses_dept: "adhe",
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        EQ: {
+                            courses_avg: 95,
+                        },
+                    },
+                ],
+            },
+            OPTIONS: {
+                COLUMNS: [
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg",
+                ],
+                ORDER: "courses",
+            },
+        });
         expect(isValid).to.equal(false);
     });
 });
