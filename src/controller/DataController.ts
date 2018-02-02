@@ -21,7 +21,11 @@ export default class DataController {
         const curr = this;
         if (fs.existsSync(dataFolder)) {
             fs.readdirSync(dataFolder).forEach(function (file, index) {
-                curr.datasets.push(JSON.parse(fs.readFileSync(path.join(dataFolder, file), "utf-8")));
+                try {
+                    curr.datasets.push(JSON.parse(fs.readFileSync(path.join(dataFolder, file), "utf-8")));
+                } catch (err) {
+                    Log.trace(err);
+                }
             });
         }
     }

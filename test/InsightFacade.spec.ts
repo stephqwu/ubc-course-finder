@@ -413,8 +413,10 @@ describe("InsightFacade PerformQuery", () => {
 
                         if (test.response.code >= 400) {
                             expect(response.body).to.have.property("error");
+
                         } else {
-                            expect(response.body).to.have.property("result");
+                            // expect(response.body).to.have.property("result");
+                            //response.body.hasOwnProperty("result");
                             const expectedResult = (test.response.body as InsightResponseSuccessBody).result;
                             const actualResult = (response.body as InsightResponseSuccessBody).result;
                             expect(actualResult).to.deep.equal(expectedResult);

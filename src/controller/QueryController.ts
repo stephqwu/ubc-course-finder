@@ -226,8 +226,8 @@ export default class QueryController {
             return firstArr.filter((n) => secondArr.includes(n));
         } else if (query.hasOwnProperty("OR")) {
             // Get the union of the two subsets
-            const firstArr = this.performQueryHelper(query["AND"][0], id, columns);
-            const secondArr = this.performQueryHelper(query["AND"][1], id, columns);
+            const firstArr = this.performQueryHelper(query["OR"][0], id, columns);
+            const secondArr = this.performQueryHelper(query["OR"][1], id, columns);
             const set = new Set(firstArr.concat(secondArr));
             return Array.from(set);
         } else if (query.hasOwnProperty("GT")) {
