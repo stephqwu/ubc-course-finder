@@ -54,32 +54,34 @@ export default class InsightFacade implements IInsightFacade {
 
         const controller: QueryController = new QueryController(InsightFacade.controller.getDatasets());
 
-        const response: string | any[] = [];
-        const row: any = {};
+        const response: string | any[] = []; // Array [ ]
+        const row: any = {};                 // Object to add to array { }
 
         // for every file in the courses folder
         const dataFolder = "./data";
 
         if (fs.existsSync(dataFolder)) {
-            fs.readdirSync(dataFolder).forEach(function(file, index) {
+            fs.readdirSync(dataFolder).forEach(function (file, index) {
 
-                const fileContents = JSON.parse(fs.readFileSync(path.join(dataFolder, file), "utf-8"));
+                // 1. Access the course JSON file
+                // 2. Look for the queried properties in the file
+                // 3. Extract the correct property value(s)
+
+                const fileContents = fs.readFileSync(dataFolder + "/" + file, "utf-8");
+                Log.trace(fileContents);
 
                 // for every property in the "COLUMNS" array
-
                 const optionsBody = query["OPTIONS"];
                 const columnProperties = optionsBody["COLUMNS"];
 
                 for (let i = 0; i < columnProperties.length; i++) {
-
-                    // 1. Access the course JSON file
-                    // 2. Look for the queried properties in the file
-                    // 3. Extract the property value
-
+                    // TODO: Put the correct value in propertyValue
                     const propertyValue = "";
+                    // Adds the property with it's value to the Object
                     row[columnProperties[i]] = propertyValue;
                 }
 
+                // Adds each object to the array
                 response.push(row);
             });
         }
