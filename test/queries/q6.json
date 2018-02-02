@@ -1,0 +1,27 @@
+{
+    "title": "SELECT instructor, title, pass, fail, uuid WHERE audit > 5",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_audit":5
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_instructor",
+                "courses_title",
+                "courses_pass",
+                "courses_fail",
+                "courses_uuid"
+            ],
+            "FORM": "TABLE"
+        }
+    },
+    "response": {
+        "code": 200,
+        "body": {
+            "result": [
+            ]
+        }
+    }
+}

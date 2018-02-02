@@ -298,13 +298,13 @@ export default class QueryController {
                      query: any): JSON[] {
         const data: any = [];
         const keySuffix = key.split("_")[1];
-        const keySuffixCap = keySuffix.charAt(0).toUpperCase() + keySuffix.slice(1);
+        const keySuffixCap = this.resolveKeySuffix(keySuffix);
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                if (comparator === Comparator.IS && Object.is(course[keySuffixCap], query["IS"][key])) {
+                if (Object.is(course[keySuffixCap], query["IS"][key])) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
