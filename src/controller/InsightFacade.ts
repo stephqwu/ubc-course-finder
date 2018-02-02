@@ -53,11 +53,11 @@ export default class InsightFacade implements IInsightFacade {
     public performQuery(query: any): Promise <InsightResponse> {
 
         const controller: QueryController = new QueryController(InsightFacade.controller.getDatasets());
-
+        let response: any = null;
         // TODO: build what should go in the result response body
         return new Promise(function (fulfill, reject) {
             if (controller.isValidQuery(query)) {
-                const response = controller.performQuery(query);
+                response = controller.performQuery(query);
                 fulfill({code: 200, body: {result: response}});
             } else {
                 reject({code: 400, error: "Invalid query format (check that there is a WHERE and an OPTIONS"});

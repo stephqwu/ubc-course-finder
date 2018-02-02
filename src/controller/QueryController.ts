@@ -2,7 +2,7 @@
 import {IDataset} from "./DataController";
 
 enum Comparator {
-    "GT", "LT", "EQ",
+    "GT", "LT", "EQ", "IS", "NOT",
 }
 
 export interface IResponseData {
@@ -265,8 +265,81 @@ export default class QueryController {
                     throw new Error("Dataset with id: " + id + " does not exist");
                 }
                 return this.comparatorHelper(Comparator.EQ, currDataset, columns, key, query);
+            } // TODO: implement the IS and NOT cases
+        } else if (query.hasOwnProperty("IS")) {
+            // The first part of the key MUST match the id of the dataset we are querying
+            const key = Object.keys(query["IS"])[0];
+            if (key.split("_")[0] !== id) {
+                throw new Error("The key used in IS is not valid");
+            } else {
+                const currDataset = this.getDatasetWithID(id);
+                if (currDataset === null) {
+                    throw new Error("Dataset with id: " + id + " does not exist");
+                }
+                return this.isHelper(Comparator.IS, currDataset, columns, key, query);
+            }
+        } else if (query.hasOwnProperty("NOT")) {
+            // The first part of the key MUST match the id of the dataset we are querying
+            const key = Object.keys(query["NOT"])[0];
+            if (key.split("_")[0] !== id) {
+                throw new Error("The key used in NOT is not valid");
+            } else {
+                const currDataset = this.getDatasetWithID(id);
+                if (currDataset === null) {
+                    throw new Error("Dataset with id: " + id + " does not exist");
+                }
+                return this.notHelper(Comparator.NOT, currDataset, columns, key, query);
             }
         }
-        // TODO: implement the IS and NOT cases
+    }
+
+    // Helper to return only entries in the dataset that match the SCOMPARISON constraint
+    private isHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
+                     query: any): JSON[] {
+        const data: any = [];
+        const keySuffix = key.split("_")[1];
+        const keySuffixCap = keySuffix.charAt(0).toUpperCase() + keySuffix.slice(1);
+        // Iterate through each data block (this corresponds to one file in the zip)
+        for (const json of currDataset["data"]) {
+            const realJson: any = json; // This is a workaround for a tslint bug
+            // Iterate through the results array within the data block
+            for (const course of realJson["result"]) {
+                if (comparator === Comparator.IS && Object.is(course[keySuffixCap], query["IS"][key])) {
+                    const response: any = {};
+                    for (const column of columns) {
+                        const columnSuffix = column.split("_")[1];
+                        const colName = this.resolveKeySuffix(columnSuffix);
+                        response[column] = course[colName];
+                    }
+                    data.push(response);
+                }
+            }
+        }
+        return data;
+    }
+
+    // Helper to return only entries in the dataset that match the NEGATION constraint
+    private notHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
+                      query: any): JSON[] {
+        const data: any = [];
+        const keySuffix = key.split("_")[1];
+        const keySuffixCap = keySuffix.charAt(0).toUpperCase() + keySuffix.slice(1);
+        // Iterate through each data block (this corresponds to one file in the zip)
+        for (const json of currDataset["data"]) {
+            const realJson: any = json; // This is a workaround for a tslint bug
+            // Iterate through the results array within the data block
+            for (const course of realJson["result"]) {
+                if (comparator === Comparator.NOT && !Object.is(course[keySuffixCap], query["IS"][key])) {
+                    const response: any = {};
+                    for (const column of columns) {
+                        const columnSuffix = column.split("_")[1];
+                        const colName = this.resolveKeySuffix(columnSuffix);
+                        response[column] = course[colName];
+                    }
+                    data.push(response);
+                }
+            }
+        }
+        return data;
     }
 }
