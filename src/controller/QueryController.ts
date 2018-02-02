@@ -1,6 +1,14 @@
 
 import {IDataset} from "./DataController";
 
+enum Comparator {
+    "GT", "LT", "EQ",
+}
+
+export interface IResponseData {
+    data: number | string;
+}
+
 export default class QueryController {
 
     private datasets: IDataset[];
@@ -22,7 +30,8 @@ export default class QueryController {
             order = null;
         }
         const columns = query["OPTIONS"]["COLUMNS"];
-        return this.performQueryHelper(query, id, order, columns);
+        // TODO: instead of just returning what's back from the helper, order the results first
+        return this.performQueryHelper(query, id, columns);
     }
 
 // ------------------------------- PARSING AND VALIDATION OF QUERY ---------------------------------------------
@@ -130,18 +139,94 @@ export default class QueryController {
         return query["OPTIONS"]["COLUMNS"][0].split("_")[0];
     }
 
-    private performQueryHelper(query: any, id: string, order: string, columns: string[]): JSON[] {
+    private getDatasetWithID(id: string) {
+        for (const dataset of this.datasets) {
+            if (dataset["metadata"]["id"] === id) {
+                return dataset;
+            }
+        }
+        return null;
+    }
+
+    // Helper to return only entries in the dataset that match the MCOMPARATOR constraint
+    private comparatorHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
+                             query: any): JSON[] {
+        const data: any = [];
+        // Iterate through each data block (this corresponds to one file in the zip)
+        for (const json of currDataset["data"]) {
+            const realJson: any = json; // This is a workaround for a tslint bug
+            // Iterate through the results array within the data block
+            for (const course of realJson["result"]) {
+                const response: any = {};
+                if (comparator === Comparator.GT && course[key] > query["GT"][key]) {
+                    for (const column of columns) {
+                        response[column] = course[column];
+                    }
+                } else if (comparator === Comparator.LT && course[key] < query["LT"][key]) {
+                    for (const column of columns) {
+                        response[column] = course[column];
+                    }
+                } else if (comparator === Comparator.EQ && course[key] === query["EQ"][key]) {
+                    for (const column of columns) {
+                        response[column] = course[column];
+                    }
+                }
+                data.push(response);
+            }
+        }
+        return data;
+    }
+
+    // Returns unordered results after filtering the dataset based on query
+    private performQueryHelper(query: any, id: string, columns: string[]): JSON[] {
         if (query.hasOwnProperty("AND")) {
             // Get the intersection of the two subsets
-            const firstArr = this.performQueryHelper(query["AND"][0], id, order, columns);
-            const secondArr = this.performQueryHelper(query["AND"][1], id, order, columns);
+            const firstArr = this.performQueryHelper(query["AND"][0], id, columns);
+            const secondArr = this.performQueryHelper(query["AND"][1], id, columns);
             return firstArr.filter((n) => secondArr.includes(n));
         } else if (query.hasOwnProperty("OR")) {
             // Get the union of the two subsets
-            const firstArr = this.performQueryHelper(query["AND"][0], id, order, columns);
-            const secondArr = this.performQueryHelper(query["AND"][1], id, order, columns);
+            const firstArr = this.performQueryHelper(query["AND"][0], id, columns);
+            const secondArr = this.performQueryHelper(query["AND"][1], id, columns);
             const set = new Set(firstArr.concat(secondArr));
             return Array.from(set);
+        } else if (query.hasOwnProperty("GT")) {
+            // The first part of the key MUST match the id of the dataset we are querying
+            const key = Object.keys(query["GT"])[0];
+            if (key.split("_")[0] !== id) {
+                throw new Error("The key used in GT is not valid");
+            } else {
+                const currDataset = this.getDatasetWithID(id);
+                if (currDataset === null) {
+                    throw new Error("Dataset with id: " + id + " does not exist");
+                }
+                return this.comparatorHelper(Comparator.GT, currDataset, columns, key, query);
+            }
+        } else if (query.hasOwnProperty("LT")) {
+            // The first part of the key MUST match the id of the dataset we are querying
+            const key = Object.keys(query["LT"])[0];
+            if (key.split("_")[0] !== id) {
+                throw new Error("The key used in LT is not valid");
+            } else {
+                const currDataset = this.getDatasetWithID(id);
+                if (currDataset === null) {
+                    throw new Error("Dataset with id: " + id + " does not exist");
+                }
+                return this.comparatorHelper(Comparator.LT, currDataset, columns, key, query);
+            }
+        } else if (query.hasOwnProperty("EQ")) {
+            // The first part of the key MUST match the id of the dataset we are querying
+            const key = Object.keys(query["EQ"])[0];
+            if (key.split("_")[0] !== id) {
+                throw new Error("The key used in EQ is not valid");
+            } else {
+                const currDataset = this.getDatasetWithID(id);
+                if (currDataset === null) {
+                    throw new Error("Dataset with id: " + id + " does not exist");
+                }
+                return this.comparatorHelper(Comparator.EQ, currDataset, columns, key, query);
+            }
         }
+        // TODO: implement the IS and NOT cases
     }
 }
