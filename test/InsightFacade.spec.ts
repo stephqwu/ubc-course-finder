@@ -416,7 +416,7 @@ describe("InsightFacade PerformQuery", () => {
 
                         } else {
                             // expect(response.body).to.have.property("result");
-                            //response.body.hasOwnProperty("result");
+                            // response.body.hasOwnProperty("result");
                             const expectedResult = (test.response.body as InsightResponseSuccessBody).result;
                             const actualResult = (response.body as InsightResponseSuccessBody).result;
                             expect(actualResult).to.deep.equal(expectedResult);
