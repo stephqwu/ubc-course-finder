@@ -1,9 +1,9 @@
+import fs = require("fs");
+import path = require("path");
 import Log from "../Util";
 import DataController, {IDataset} from "./DataController";
 import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";
 import QueryController from "./QueryController";
-
-// import fs = require('fs');
 
 /**
  * This is the main programmatic entry point for the project.
@@ -51,11 +51,43 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise <InsightResponse> {
+
         const controller: QueryController = new QueryController(InsightFacade.controller.getDatasets());
+
+        const response: string | any[] = [];
+        const row: any = {};
+
+        // for every file in the courses folder
+        const dataFolder = "./data";
+
+        if (fs.existsSync(dataFolder)) {
+            fs.readdirSync(dataFolder).forEach(function(file, index) {
+
+                const fileContents = JSON.parse(fs.readFileSync(path.join(dataFolder, file), "utf-8"));
+
+                // for every property in the "COLUMNS" array
+
+                const optionsBody = query["OPTIONS"];
+                const columnProperties = optionsBody["COLUMNS"];
+
+                for (let i = 0; i < columnProperties.length; i++) {
+
+                    // 1. Access the course JSON file
+                    // 2. Look for the queried properties in the file
+                    // 3. Extract the property value
+
+                    const propertyValue = "";
+                    row[columnProperties[i]] = propertyValue;
+                }
+
+                response.push(row);
+            });
+        }
+
+        // TODO: build what should go in the result response body
         return new Promise(function (fulfill, reject) {
-            // TODO: build what should go in the result response body
             if (controller.isValidQuery(query)) {
-                fulfill({code: 200, body: {result: "sent in JSON according in the response body"}});
+                fulfill({code: 200, body: {result: response}});
             } else {
                 reject({code: 400, error: "Invalid query format (check that there is a WHERE and an OPTIONS"});
             }
