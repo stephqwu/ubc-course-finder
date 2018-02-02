@@ -8,6 +8,23 @@ export default class QueryController {
     constructor(datasets: IDataset[]) {
        this.datasets = datasets;
     }
+
+    // ----------------------------------- filtering by query ------------------------------------------------------
+
+    // Searches through the relevant dataset and returns only the rows/columns that match the constraints in query
+    public performQuery(query: any): JSON[] {
+        const id: string = this.getQueryID(query);
+        let order: string;
+        // Order is optional so we only provide it to the helper if it is specified
+        if (query["OPTIONS"].hasOwnProperty("ORDER")) {
+            order = query["OPTIONS"]["ORDER"];
+        } else {
+            order = null;
+        }
+        const columns = query["OPTIONS"]["COLUMNS"];
+        return this.performQueryHelper(query, id, order, columns);
+    }
+
 // ------------------------------- PARSING AND VALIDATION OF QUERY ---------------------------------------------
     public isValidQuery(jsonQuery: any): boolean {
         try {
@@ -106,6 +123,25 @@ export default class QueryController {
             } else {
                 return validKeys;
             }
+        }
+    }
+
+    private getQueryID(query: any): string {
+        return query["OPTIONS"]["COLUMNS"][0].split("_")[0];
+    }
+
+    private performQueryHelper(query: any, id: string, order: string, columns: string[]): JSON[] {
+        if (query.hasOwnProperty("AND")) {
+            // Get the intersection of the two subsets
+            const firstArr = this.performQueryHelper(query["AND"][0], id, order, columns);
+            const secondArr = this.performQueryHelper(query["AND"][1], id, order, columns);
+            return firstArr.filter((n) => secondArr.includes(n));
+        } else if (query.hasOwnProperty("OR")) {
+            // Get the union of the two subsets
+            const firstArr = this.performQueryHelper(query["AND"][0], id, order, columns);
+            const secondArr = this.performQueryHelper(query["AND"][1], id, order, columns);
+            const set = new Set(firstArr.concat(secondArr));
+            return Array.from(set);
         }
     }
 }
