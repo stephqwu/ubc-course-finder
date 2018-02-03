@@ -180,14 +180,13 @@ export default class QueryController {
     private comparatorHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
                              query: any): JSON[] {
         const data: any = [];
-        const keySuffix = key.split("_")[1];
-        const keySuffixCap = keySuffix.charAt(0).toUpperCase() + keySuffix.slice(1);
+        const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                if (comparator === Comparator.GT && course[keySuffixCap] > query["GT"][key]) {
+                if (comparator === Comparator.GT && course[keySuffix] > query["GT"][key]) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -195,7 +194,7 @@ export default class QueryController {
                         response[column] = course[colName];
                     }
                     data.push(response);
-                } else if (comparator === Comparator.LT && course[keySuffixCap] < query["LT"][key]) {
+                } else if (comparator === Comparator.LT && course[keySuffix] < query["LT"][key]) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -203,7 +202,7 @@ export default class QueryController {
                         response[column] = course[colName];
                     }
                     data.push(response);
-                } else if (comparator === Comparator.EQ && course[keySuffixCap] === query["EQ"][key]) {
+                } else if (comparator === Comparator.EQ && course[keySuffix] === query["EQ"][key]) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -301,14 +300,13 @@ export default class QueryController {
     private isHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
                      query: any): JSON[] {
         const data: any = [];
-        const keySuffix = key.split("_")[1];
-        const keySuffixCap = this.resolveKeySuffix(keySuffix);
+        const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                if (Object.is(course[keySuffixCap], query["IS"][key])) {
+                if (Object.is(course[keySuffix], query["IS"][key])) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -326,14 +324,13 @@ export default class QueryController {
     private notHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
                       query: any): JSON[] {
         const data: any = [];
-        const keySuffix = key.split("_")[1];
-        const keySuffixCap = keySuffix.charAt(0).toUpperCase() + keySuffix.slice(1);
+        const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                if (comparator === Comparator.NOT && !Object.is(course[keySuffixCap], query["IS"][key])) {
+                if (comparator === Comparator.NOT && !Object.is(course[keySuffix], query["IS"][key])) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
