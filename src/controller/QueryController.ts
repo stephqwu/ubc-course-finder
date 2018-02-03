@@ -92,7 +92,7 @@ export default class QueryController {
                 return this.isValidFilter(jsonBody["OR"][0]) && this.isValidFilter(jsonBody["OR"][1]);
             }
         } else if (jsonBody.hasOwnProperty("NOT")) {
-            if (jsonBody["NOT"].length !== 1) {
+            if (Object.keys(jsonBody["NOT"]).length !== 1) {
                 return false;
             } else {
                 return this.isValidFilter(jsonBody["NOT"]);
@@ -292,6 +292,8 @@ export default class QueryController {
             }
         } else if (query.hasOwnProperty("NOT")) {
             // The first part of the key MUST match the id of the dataset we are querying
+            // TODO: we're trying to deal with a NOT here like we would deal with a LT, GT, or EQ. NOT is not a
+            // TODO: a comparator. It takes in a filter, not a key-value pair
             const key = Object.keys(query["NOT"])[0];
             if (key.split("_")[0] !== id) {
                 throw new Error("The key used in NOT is not valid");

@@ -33,8 +33,7 @@
                 "courses_audit",
                 "courses_uuid"
             ],
-            "ORDER": "courses_avg",
-            "FORM": "TABLE"
+            "ORDER": "courses_avg"
         }
     },
     "response": {
