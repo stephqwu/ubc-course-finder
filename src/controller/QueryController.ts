@@ -306,7 +306,7 @@ export default class QueryController {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                if (Object.is(course[keySuffix], query["IS"][key])) {
+                if (this.matchWildCard(query["IS"][key], course[keySuffix])) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -379,5 +379,14 @@ export default class QueryController {
             }
         }
         return result;
+    }
+
+    private matchWildCard(inputString: string, stringToMatch: string): boolean {
+        if (inputString.indexOf("*") === -1) {
+            return inputString === stringToMatch;
+        } else {
+            // if the input string has wild cards, we need to deal with it
+            return new RegExp("^" + inputString.split("*").join(".*") + "$").test(stringToMatch);
+        }
     }
 }
