@@ -375,7 +375,7 @@ export default class QueryController {
         for (i = 0; i < courses.length; i++) {
             value = JSON.stringify(courses[i]);
             if (value in object) {
-                result.push(value);
+                result.push(JSON.parse(value));
             }
         }
         return result;
