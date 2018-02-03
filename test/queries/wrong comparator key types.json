@@ -1,0 +1,63 @@
+{
+    "title": "Wrong key types for comparators",
+    "query": {
+        "WHERE": {
+            "AND": [
+                {
+                    "AND":[
+                        {
+                            "NOT":{
+                                "GT": {
+                                    "courses_instructor":"bob"
+                                }
+                            }
+                        },
+                        {
+                            "IS": {
+                                "courses_fail":100
+                            }
+                        }
+
+                    ]
+                },
+                {
+                    "AND":[
+                        {
+                            "NOT":{
+                                "GT": {
+                                    "courses_instructor":"bob"
+                                }
+                            }
+                        },
+                        {
+                            "IS": {
+                                "courses_pass":500
+                            }
+                        }
+
+                    ]
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg",
+                "courses_instructor",
+                "courses_title",
+                "courses_pass",
+                "courses_fail",
+                "courses_audit",
+                "courses_uuid"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "response": {
+        "code": 400,
+        "body": {
+            "error": "this query is NOT correct"
+        }
+    }
+}

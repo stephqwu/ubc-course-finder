@@ -57,7 +57,12 @@ export default class InsightFacade implements IInsightFacade {
         // TODO: build what should go in the result response body
         return new Promise(function (fulfill, reject) {
             if (controller.isValidQuery(query)) {
-                response = controller.performQuery(query);
+                try {
+                    response = controller.performQuery(query);
+                } catch(err) {
+                    Log.trace(err);
+                    reject({code: 400, body: {error: err}});
+                }
                 fulfill({code: 200, body: {result: response}});
             } else {
                 reject({code: 400, body: {error: "Invalid query format (check that there is a WHERE and an OPTIONS"}});

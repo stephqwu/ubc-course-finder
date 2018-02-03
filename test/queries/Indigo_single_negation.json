@@ -1,5 +1,5 @@
 {
-    "title": "SELECT dept, id, avg WHERE avg == 95 || avg > 90 && dept == 'adhe' ORDER BY avg",
+    "title": "SELECT dept, avg WHERE ! (avg > 70) && dept == 'adhe' ORDER BY avg",
     "query": {
         "WHERE": {
             "AND":[
@@ -22,20 +22,12 @@
         "OPTIONS": {
             "COLUMNS": [
                 "courses_dept",
-                "courses_id",
-                "courses_avg",
-                "courses_instructor",
-                "courses_title",
-                "courses_pass",
-                "courses_fail",
-                "courses_audit",
-                "courses_uuid"
+                "courses_avg"
             ],
             "ORDER": "courses_avg"
         }
     },
     "response": {
         "code": 200,
-        "body": {"result":[{"courses_dept":"adhe","courses_id":"329","courses_avg":67.5,"courses_instructor":"palacios, carolina","courses_title":"dev wkshp/sem","courses_pass":25,"courses_fail":1,"courses_audit":0,"courses_uuid":"62725"},{"courses_dept":"adhe","courses_id":"329","courses_avg":67.95,"courses_instructor":"smulders, dave","courses_title":"dev wkshp/sem","courses_pass":19,"courses_fail":3,"courses_audit":0,"courses_uuid":"91928"},{"courses_dept":"adhe","courses_id":"412","courses_avg":68.29,"courses_instructor":"palacios, carolina","courses_title":"adul educ","courses_pass":19,"courses_fail":2,"courses_audit":0,"courses_uuid":"68553"},{"courses_dept":"adhe","courses_id":"412","courses_avg":68.89,"courses_instructor":"palacios, carolina","courses_title":"adul educ","courses_pass":15,"courses_fail":3,"courses_audit":0,"courses_uuid":"36027"},{"courses_dept":"adhe","courses_id":"412","courses_avg":69.96,"courses_instructor":"palacios, carolina","courses_title":"adul educ","courses_pass":22,"courses_fail":2,"courses_audit":0,"courses_uuid":"79485"}]}
-    }
+        "body": {"result":[{"courses_dept":"adhe","courses_avg":67.5},{"courses_dept":"adhe","courses_avg":67.95},{"courses_dept":"adhe","courses_avg":68.29},{"courses_dept":"adhe","courses_avg":68.89},{"courses_dept":"adhe","courses_avg":69.96}]}}
 }

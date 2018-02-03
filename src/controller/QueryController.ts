@@ -1,9 +1,18 @@
 
 import {IDataset} from "./DataController";
+import Log from "../Util";
 
 // TODO: we should take out NOT from this enum after notHelper is fixed. NOT is not a comparator
 enum Comparator {
-    "GT", "LT", "EQ", "IS", "NOT",
+    "GT", "LT", "EQ", "IS",
+}
+
+enum StringKeys {
+    "Subject", "Course", "Professor", "Title", "id",
+}
+
+enum NumberKeys {
+    "Avg", "Pass", "Fail", "Audit",
 }
 
 export interface IResponseData {
@@ -22,21 +31,25 @@ export default class QueryController {
 
     // Searches through the relevant dataset and returns only the rows/columns that match the constraints in query
     public performQuery(query: any): JSON[] {
-        const id: string = this.getQueryID(query);
-        let order: string;
-        // Order is optional so we only provide it to the helper if it is specified
-        if (query["OPTIONS"].hasOwnProperty("ORDER")) {
-            order = query["OPTIONS"]["ORDER"];
-        } else {
-            order = null;
-        }
-        const columns = query["OPTIONS"]["COLUMNS"];
-        // TODO: instead of just returning what's back from the helper, order the results first
-        const result = this.performQueryHelper(query["WHERE"], id, columns);
-        result.sort(function (a: any, b: any) {
-            return a[order] - b[order];
-        });
-        return result;
+        // try {
+            const id: string = this.getQueryID(query);
+            let order: string;
+            // Order is optional so we only provide it to the helper if it is specified
+            if (query["OPTIONS"].hasOwnProperty("ORDER")) {
+                order = query["OPTIONS"]["ORDER"];
+            } else {
+                order = null;
+            }
+            const columns = query["OPTIONS"]["COLUMNS"];
+            // TODO: instead of just returning what's back from the helper, order the results first
+            const result = this.performQueryHelper(query["WHERE"], id, columns);
+            result.sort(function (a: any, b: any) {
+                return a[order] - b[order];
+            });
+            return result;
+        /* } catch (err) {
+            Log.trace(err);
+        }*/
     }
 
 // ------------------------------- PARSING AND VALIDATION OF QUERY ---------------------------------------------
@@ -162,6 +175,7 @@ export default class QueryController {
         return null;
     }
 
+
     private resolveKeySuffix(keySuffix: string) {
         if (keySuffix === "dept") {
             return "Subject";
@@ -191,11 +205,27 @@ export default class QueryController {
                              query: any): JSON[] {
         const data: any = [];
         const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
+        /* let rightKeyType = true;
+        for (key in NumberKeys) {
+            if (keySuffix === key) {
+                rightKeyType = true;
+            }
+            rightKeyType = false;
+        }
+        if (!rightKeyType) {
+            throw new Error("Key type" + keySuffix + "cannot be used with MCOMPARATORs");
+        } */
+        if (keySuffix !== "Avg" && keySuffix !== "Pass" && keySuffix !== "Fail" && keySuffix !== "Audit") {
+            throw new Error("Key type " + keySuffix + " cannot be used with MCOMPARATORs");
+        }
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
+                if (typeof course[keySuffix] !== "number") {
+                    throw Error("Value " + course[keySuffix] + "is not a number");
+                }
                 if (comparator === Comparator.GT && course[keySuffix] > query["GT"][key]) {
                     const response: any = {};
                     for (const column of columns) {
@@ -228,84 +258,90 @@ export default class QueryController {
 
     // Returns unordered results after filtering the dataset based on query
     private performQueryHelper(query: any, id: string, columns: string[]): JSON[] {
-        if (query.hasOwnProperty("AND")) {
-            // Get the intersection of the 1 or more subsets
-            let result = this.performQueryHelper(query["AND"][0], id, columns);
-            for (let i = 1; i < query["AND"].length; i++) {
-                result = this.intersectArray(result, this.performQueryHelper(query["AND"][i], id, columns));
-            }
-            return result;
-        } else if (query.hasOwnProperty("OR")) {
-            // Get the union of the 1 or more subsets
-            let result = this.performQueryHelper(query["OR"][0], id, columns);
-            for (let i = 1; i < query["OR"].length; i++) {
-                result = result.concat(this.performQueryHelper(query["OR"][i], id, columns));
-            }
-            const set = new Set(result);
-            return Array.from(set);
-        } else if (query.hasOwnProperty("GT")) {
-            // The first part of the key MUST match the id of the dataset we are querying
-            const key = Object.keys(query["GT"])[0];
-            if (key.split("_")[0] !== id) {
-                throw new Error("The key used in GT is not valid");
-            } else {
-                const currDataset = this.getDatasetWithID(id);
-                if (currDataset === null) {
-                    throw new Error("Dataset with id: " + id + " does not exist");
+        // try {
+            if (query.hasOwnProperty("AND")) {
+                // Get the intersection of the 1 or more subsets
+                let result = this.performQueryHelper(query["AND"][0], id, columns);
+                for (let i = 1; i < query["AND"].length; i++) {
+                    result = this.intersectArray(result, this.performQueryHelper(query["AND"][i], id, columns));
                 }
-                return this.comparatorHelper(Comparator.GT, currDataset, columns, key, query);
-            }
-        } else if (query.hasOwnProperty("LT")) {
-            // The first part of the key MUST match the id of the dataset we are querying
-            const key = Object.keys(query["LT"])[0];
-            if (key.split("_")[0] !== id) {
-                throw new Error("The key used in LT is not valid");
-            } else {
-                const currDataset = this.getDatasetWithID(id);
-                if (currDataset === null) {
-                    throw new Error("Dataset with id: " + id + " does not exist");
+                return result;
+            } else if (query.hasOwnProperty("OR")) {
+                // Get the union of the 1 or more subsets
+                let result = this.performQueryHelper(query["OR"][0], id, columns);
+                for (let i = 1; i < query["OR"].length; i++) {
+                    result = result.concat(this.performQueryHelper(query["OR"][i], id, columns));
                 }
-                return this.comparatorHelper(Comparator.LT, currDataset, columns, key, query);
-            }
-        } else if (query.hasOwnProperty("EQ")) {
-            // The first part of the key MUST match the id of the dataset we are querying
-            const key = Object.keys(query["EQ"])[0];
-            if (key.split("_")[0] !== id) {
-                throw new Error("The key used in EQ is not valid");
-            } else {
-                const currDataset = this.getDatasetWithID(id);
-                if (currDataset === null) {
-                    throw new Error("Dataset with id: " + id + " does not exist");
+                const set = new Set(result);
+                return Array.from(set);
+            } else if (query.hasOwnProperty("GT")) {
+                // The first part of the key MUST match the id of the dataset we are querying
+                const key = Object.keys(query["GT"])[0];
+                if (key.split("_")[0] !== id) {
+                    throw new Error("The key used in GT is not valid");
+                } else {
+                    const currDataset = this.getDatasetWithID(id);
+                    if (currDataset === null) {
+                        throw new Error("Dataset with id: " + id + " does not exist");
+                    }
+                    return this.comparatorHelper(Comparator.GT, currDataset, columns, key, query);
                 }
-                return this.comparatorHelper(Comparator.EQ, currDataset, columns, key, query);
-            } // TODO: implement the IS and NOT cases
-        } else if (query.hasOwnProperty("IS")) {
-            // The first part of the key MUST match the id of the dataset we are querying
-            const key = Object.keys(query["IS"])[0];
-            if (key.split("_")[0] !== id) {
-                throw new Error("The key used in IS is not valid");
-            } else {
-                const currDataset = this.getDatasetWithID(id);
-                if (currDataset === null) {
-                    throw new Error("Dataset with id: " + id + " does not exist");
+            } else if (query.hasOwnProperty("LT")) {
+                // The first part of the key MUST match the id of the dataset we are querying
+                const key = Object.keys(query["LT"])[0];
+                if (key.split("_")[0] !== id) {
+                    throw new Error("The key used in LT is not valid");
+                } else {
+                    const currDataset = this.getDatasetWithID(id);
+                    if (currDataset === null) {
+                        throw new Error("Dataset with id: " + id + " does not exist");
+                    }
+                    return this.comparatorHelper(Comparator.LT, currDataset, columns, key, query);
                 }
-                return this.isHelper(Comparator.IS, currDataset, columns, key, query);
-            }
-        } else if (query.hasOwnProperty("NOT")) {
-            // The first part of the key MUST match the id of the dataset we are querying
-            // TODO: we're trying to deal with a NOT here like we would deal with a LT, GT, or EQ. NOT is not a
-            // TODO: a comparator. It takes in a filter, not a key-value pair
-            const key = Object.keys(query["NOT"])[0];
-            if (key.split("_")[0] !== id) {
-                throw new Error("The key used in NOT is not valid");
-            } else {
-                const currDataset = this.getDatasetWithID(id);
-                if (currDataset === null) {
-                    throw new Error("Dataset with id: " + id + " does not exist");
+            } else if (query.hasOwnProperty("EQ")) {
+                // The first part of the key MUST match the id of the dataset we are querying
+                const key = Object.keys(query["EQ"])[0];
+                if (key.split("_")[0] !== id) {
+                    throw new Error("The key used in EQ is not valid");
+                } else {
+                    const currDataset = this.getDatasetWithID(id);
+                    if (currDataset === null) {
+                        throw new Error("Dataset with id: " + id + " does not exist");
+                    }
+                    return this.comparatorHelper(Comparator.EQ, currDataset, columns, key, query);
+                } // TODO: implement the IS and NOT cases
+            } else if (query.hasOwnProperty("IS")) {
+                // The first part of the key MUST match the id of the dataset we are querying
+                const key = Object.keys(query["IS"])[0];
+                if (key.split("_")[0] !== id) {
+                    throw new Error("The key used in IS is not valid");
+                } else {
+                    const currDataset = this.getDatasetWithID(id);
+                    if (currDataset === null) {
+                        throw new Error("Dataset with id: " + id + " does not exist");
+                    }
+                    return this.isHelper(Comparator.IS, currDataset, columns, key, query);
                 }
-                return this.notHelper(Comparator.NOT, currDataset, columns, key, query);
+            } else if (query.hasOwnProperty("NOT")) {
+                // Get the complement/difference of a subset
+                /* const subset = this.performQueryHelper(query["NOT"][0], id, columns);
+                const all = ;
+                return all.filter((n) => !subset.includes(n)); */
+
+                /*const key = Object.keys(query["NOT"])[0];
+                if (key.split("_")[0] !== id) {
+                    throw new Error("The key used in NOT is not valid");
+                } else {
+                    const currDataset = this.getDatasetWithID(id);
+                    if (currDataset === null) {
+                        throw new Error("Dataset with id: " + id + " does not exist");
+                    }
+                    return this.notHelper(Comparator.NOT, currDataset, columns, key, query);
+                }*/
             }
-        }
+       /* } catch (err) {
+            Log.trace(err);
+        } */
     }
 
     // Helper to return only entries in the dataset that match the SCOMPARISON constraint
@@ -313,11 +349,18 @@ export default class QueryController {
                      query: any): JSON[] {
         const data: any = [];
         const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
+        if (keySuffix !== "Subject" && keySuffix !== "Course" && keySuffix !== "Professor" && keySuffix !== "Title"
+            && keySuffix !== "id") {
+            throw new Error("Key type " + keySuffix + " cannot be used with SCOMPARATORs");
+        }
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
+                if (typeof course[keySuffix] !== "string") {
+                    throw Error("Value " + course[keySuffix] + "is not a string");
+                }
                 if (this.matchWildCard(query["IS"][key], course[keySuffix])) {
                     const response: any = {};
                     for (const column of columns) {
@@ -335,7 +378,7 @@ export default class QueryController {
     // TODO: this entire helper needs to be re-written because it assumes that NOT has a key-value pair although it
     // TODO: takes in a filter
     // Helper to return only entries in the dataset that match the NEGATION constraint
-    private notHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
+    /* private notHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
                       query: any): JSON[] {
         const data: any = [];
         const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
@@ -356,7 +399,7 @@ export default class QueryController {
             }
         }
         return data;
-    }
+    } */
 
     private intersectArray (courses: any[], courses2: any[]): any[] {
         if (courses.length === 0) {

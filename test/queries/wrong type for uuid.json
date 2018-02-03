@@ -1,0 +1,23 @@
+{
+    "title": "Wrong value type for key",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_uuid":97
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "response": {
+        "code": 400,
+        "body": {
+            "error": "not correct"
+        }
+    }
+}
