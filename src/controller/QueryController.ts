@@ -220,15 +220,19 @@ export default class QueryController {
     // Returns unordered results after filtering the dataset based on query
     private performQueryHelper(query: any, id: string, columns: string[]): JSON[] {
         if (query.hasOwnProperty("AND")) {
-            // Get the intersection of the two subsets
-            const firstArr = this.performQueryHelper(query["AND"][0], id, columns);
-            const secondArr = this.performQueryHelper(query["AND"][1], id, columns);
-            return firstArr.filter((n) => secondArr.includes(n));
+            // Get the intersection of the 1 or more subsets
+            let result = this.performQueryHelper(query["AND"][0], id, columns);
+            for (let i = 1; i < query["AND"].length; i++) {
+                result = this.intersectArray(result, this.performQueryHelper(query["AND"][i], id, columns));
+            }
+            return result;
         } else if (query.hasOwnProperty("OR")) {
-            // Get the union of the two subsets
-            const firstArr = this.performQueryHelper(query["OR"][0], id, columns);
-            const secondArr = this.performQueryHelper(query["OR"][1], id, columns);
-            const set = new Set(firstArr.concat(secondArr));
+            // Get the union of the 1 or more subsets
+            let result = this.performQueryHelper(query["OR"][0], id, columns);
+            for (let i = 1; i < query["OR"].length; i++) {
+                result = result.concat(this.performQueryHelper(query["OR"][i], id, columns));
+            }
+            const set = new Set(result);
             return Array.from(set);
         } else if (query.hasOwnProperty("GT")) {
             // The first part of the key MUST match the id of the dataset we are querying
@@ -341,5 +345,23 @@ export default class QueryController {
             }
         }
         return data;
+    }
+
+    private intersectArray (courses: any[], courses2: any[]): any[] {
+        if (courses.length === 0) {
+            return courses;
+        }
+        const result: any = [];
+        for (const i in courses) {
+            if (courses.hasOwnProperty(i)) {
+                for (const j in courses2) {
+                    if (JSON.stringify(courses[i]) === JSON.stringify(courses2[j])) {
+                        result.push(courses[i]);
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
     }
 }
