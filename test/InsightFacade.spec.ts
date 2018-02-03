@@ -409,6 +409,7 @@ describe("InsightFacade PerformQuery", () => {
                     } catch (err) {
                         response = err;
                     } finally {
+                        Log.trace(JSON.stringify(response));
                         expect(response.code).to.equal(test.response.code);
 
                         if (test.response.code >= 400) {
@@ -417,9 +418,9 @@ describe("InsightFacade PerformQuery", () => {
                         } else {
                             // expect(response.body).to.have.property("result");
                             // response.body.hasOwnProperty("result");
-                            const expectedResult = (test.response.body as InsightResponseSuccessBody).result;
-                            const actualResult = (response.body as InsightResponseSuccessBody).result;
-                            expect(actualResult).to.deep.equal(expectedResult);
+                            const expectedResult = (test.response.body as InsightResponseSuccessBody).result as any[];
+                            const actualResult = (response.body as InsightResponseSuccessBody).result as any[];
+                            expect(actualResult).to.deep.include.members(expectedResult);
                         }
                     }
                 });

@@ -60,7 +60,7 @@ export default class InsightFacade implements IInsightFacade {
                 response = controller.performQuery(query);
                 fulfill({code: 200, body: {result: response}});
             } else {
-                reject({code: 400, error: "Invalid query format (check that there is a WHERE and an OPTIONS"});
+                reject({code: 400, body: {error: "Invalid query format (check that there is a WHERE and an OPTIONS"}});
             }
         });
     }
