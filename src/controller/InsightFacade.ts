@@ -1,5 +1,3 @@
-import fs = require("fs");
-import path = require("path");
 import Log from "../Util";
 import DataController, {IDataset} from "./DataController";
 import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";

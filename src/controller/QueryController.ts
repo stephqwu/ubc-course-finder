@@ -1,6 +1,5 @@
 
 import {IDataset} from "./DataController";
-import Log from "../Util";
 
 // TODO: we should take out NOT from this enum after notHelper is fixed. NOT is not a comparator
 enum Comparator {
@@ -31,7 +30,6 @@ export default class QueryController {
 
     // Searches through the relevant dataset and returns only the rows/columns that match the constraints in query
     public performQuery(query: any): JSON[] {
-        // try {
             const id: string = this.getQueryID(query);
             let order: string;
             // Order is optional so we only provide it to the helper if it is specified
@@ -47,9 +45,6 @@ export default class QueryController {
                 return a[order] - b[order];
             });
             return result;
-        /* } catch (err) {
-            Log.trace(err);
-        }*/
     }
 
 // ------------------------------- PARSING AND VALIDATION OF QUERY ---------------------------------------------
@@ -174,7 +169,6 @@ export default class QueryController {
         }
         return null;
     }
-
 
     private resolveKeySuffix(keySuffix: string) {
         if (keySuffix === "dept") {
