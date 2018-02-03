@@ -180,14 +180,13 @@ export default class QueryController {
     private comparatorHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
                              query: any): JSON[] {
         const data: any = [];
-        const keySuffix = key.split("_")[1];
-        const keySuffixCap = keySuffix.charAt(0).toUpperCase() + keySuffix.slice(1);
+        const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                if (comparator === Comparator.GT && course[keySuffixCap] > query["GT"][key]) {
+                if (comparator === Comparator.GT && course[keySuffix] > query["GT"][key]) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -195,7 +194,7 @@ export default class QueryController {
                         response[column] = course[colName];
                     }
                     data.push(response);
-                } else if (comparator === Comparator.LT && course[keySuffixCap] < query["LT"][key]) {
+                } else if (comparator === Comparator.LT && course[keySuffix] < query["LT"][key]) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -203,7 +202,7 @@ export default class QueryController {
                         response[column] = course[colName];
                     }
                     data.push(response);
-                } else if (comparator === Comparator.EQ && course[keySuffixCap] === query["EQ"][key]) {
+                } else if (comparator === Comparator.EQ && course[keySuffix] === query["EQ"][key]) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -220,15 +219,19 @@ export default class QueryController {
     // Returns unordered results after filtering the dataset based on query
     private performQueryHelper(query: any, id: string, columns: string[]): JSON[] {
         if (query.hasOwnProperty("AND")) {
-            // Get the intersection of the two subsets
-            const firstArr = this.performQueryHelper(query["AND"][0], id, columns);
-            const secondArr = this.performQueryHelper(query["AND"][1], id, columns);
-            return firstArr.filter((n) => secondArr.includes(n));
+            // Get the intersection of the 1 or more subsets
+            let result = this.performQueryHelper(query["AND"][0], id, columns);
+            for (let i = 1; i < query["AND"].length; i++) {
+                result = this.intersectArray(result, this.performQueryHelper(query["AND"][i], id, columns));
+            }
+            return result;
         } else if (query.hasOwnProperty("OR")) {
-            // Get the union of the two subsets
-            const firstArr = this.performQueryHelper(query["OR"][0], id, columns);
-            const secondArr = this.performQueryHelper(query["OR"][1], id, columns);
-            const set = new Set(firstArr.concat(secondArr));
+            // Get the union of the 1 or more subsets
+            let result = this.performQueryHelper(query["OR"][0], id, columns);
+            for (let i = 1; i < query["OR"].length; i++) {
+                result = result.concat(this.performQueryHelper(query["OR"][i], id, columns));
+            }
+            const set = new Set(result);
             return Array.from(set);
         } else if (query.hasOwnProperty("GT")) {
             // The first part of the key MUST match the id of the dataset we are querying
@@ -297,14 +300,13 @@ export default class QueryController {
     private isHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
                      query: any): JSON[] {
         const data: any = [];
-        const keySuffix = key.split("_")[1];
-        const keySuffixCap = this.resolveKeySuffix(keySuffix);
+        const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                if (Object.is(course[keySuffixCap], query["IS"][key])) {
+                if (Object.is(course[keySuffix], query["IS"][key])) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -322,14 +324,13 @@ export default class QueryController {
     private notHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
                       query: any): JSON[] {
         const data: any = [];
-        const keySuffix = key.split("_")[1];
-        const keySuffixCap = keySuffix.charAt(0).toUpperCase() + keySuffix.slice(1);
+        const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
         // Iterate through each data block (this corresponds to one file in the zip)
         for (const json of currDataset["data"]) {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                if (comparator === Comparator.NOT && !Object.is(course[keySuffixCap], query["IS"][key])) {
+                if (comparator === Comparator.NOT && !Object.is(course[keySuffix], query["IS"][key])) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -341,5 +342,23 @@ export default class QueryController {
             }
         }
         return data;
+    }
+
+    private intersectArray (courses: any[], courses2: any[]): any[] {
+        if (courses.length === 0) {
+            return courses;
+        }
+        const result: any = [];
+        for (const i in courses) {
+            if (courses.hasOwnProperty(i)) {
+                for (const j in courses2) {
+                    if (JSON.stringify(courses[i]) === JSON.stringify(courses2[j])) {
+                        result.push(courses[i]);
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
     }
 }
