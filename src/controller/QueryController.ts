@@ -344,7 +344,7 @@ export default class QueryController {
         return data;
     }
 
-    private intersectArray (courses: any[], courses2: any[]): any[] {
+    /* private intersectArray (courses: any[], courses2: any[]): any[] {
         if (courses.length === 0) {
             return courses;
         }
@@ -357,6 +357,25 @@ export default class QueryController {
                         break;
                     }
                 }
+            }
+        }
+        return result;
+    } */
+    private intersectArray (courses: any[], courses2: any[]): any[] {
+        if (courses.length === 0) {
+            return courses;
+        }
+        const result: any = [];
+        const object: any = {};
+        let value;
+        let i;
+        for (i = 0; i < courses2.length; i++) {
+            object[JSON.stringify(courses2[i])] = true;
+        }
+        for (i = 0; i < courses.length; i++) {
+            value = JSON.stringify(courses[i]);
+            if (value in object) {
+                result.push(value);
             }
         }
         return result;
