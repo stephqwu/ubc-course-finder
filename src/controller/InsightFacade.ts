@@ -27,11 +27,9 @@ export default class InsightFacade implements IInsightFacade {
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<InsightResponse> {
        return new Promise(function (fulfill, reject) {
            InsightFacade.controller.addDataset(id, content, kind).then(function (result: boolean) {
-               Log.trace("finalfulfill");
                fulfill({code: 204, body: {result: ""}});
            }).catch(function (err: Error) {
-               reject({code: 400, error: "blah"});
-               Log.trace("finalreject");
+               reject({code: 400, error: err});
            });
        });
      }
@@ -39,11 +37,9 @@ export default class InsightFacade implements IInsightFacade {
     public removeDataset(id: string): Promise<InsightResponse> {
         return new Promise(function (fulfill, reject) {
             InsightFacade.controller.removeDataset(id).then(function (result: boolean) {
-                Log.trace("finalfulfill");
                 fulfill({code: 204, body: {result: ""}});
             }).catch(function (err: Error) {
                 reject({code: 404, error: "Could not find zip file"});
-                Log.trace("finalreject");
             });
         });
     }

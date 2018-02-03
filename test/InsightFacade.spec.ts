@@ -192,6 +192,23 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         }
     });
 
+    it("Should not add a valid zip that does not contain any real data", async () => {
+        const id: string = "morecourses";
+        const expectedCode: number = 400;
+        let response: InsightResponse;
+
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response.code).to.equal(expectedCode);
+            // The body should contain {"error": "my text"}
+            // to explain what went wrong. This should also be used if the provided dataset
+            // is invalid or if it was added more than once with the same id.
+        }
+    });
+
     it("Should not add a dataset with invalid zip", async () => {
         const id: string = "notazip";
         const expectedCode: number = 400;
@@ -254,7 +271,6 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         let response: InsightResponse;
 
         try {
-            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
         } catch (err) {
             response = err;
