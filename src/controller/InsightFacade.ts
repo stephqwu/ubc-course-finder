@@ -57,7 +57,7 @@ export default class InsightFacade implements IInsightFacade {
             if (controller.isValidQuery(query)) {
                 try {
                     response = controller.performQuery(query);
-                } catch(err) {
+                } catch (err) {
                     Log.trace(err);
                     reject({code: 400, body: {error: err}});
                 }
