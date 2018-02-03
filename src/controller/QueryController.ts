@@ -127,10 +127,19 @@ export default class QueryController {
             return false;
         } else {
             let validKeys = true;
+            let existingKey = false;
             for (const key of optionsBody["COLUMNS"]) {
                 validKeys = validKeys && this.isValidKey(key);
+                if (key === optionsBody["ORDER"]) {
+                    existingKey = true;
+                }
             }
-
+            if (!optionsBody.hasOwnProperty("ORDER")) {
+                existingKey = true;
+            }
+            if (!existingKey) {
+                validKeys = false;
+            }
             if (optionsBody.hasOwnProperty("ORDER")) {
                 return validKeys && this.isValidKey(optionsBody["ORDER"]);
             } else {
@@ -330,7 +339,7 @@ export default class QueryController {
             const realJson: any = json; // This is a workaround for a tslint bug
             // Iterate through the results array within the data block
             for (const course of realJson["result"]) {
-                if (comparator === Comparator.NOT && !Object.is(course[keySuffix], query["IS"][key])) {
+                if (!Object.is(course[keySuffix], query["NOT"][key])) {
                     const response: any = {};
                     for (const column of columns) {
                         const columnSuffix = column.split("_")[1];
@@ -344,23 +353,6 @@ export default class QueryController {
         return data;
     }
 
-    /* private intersectArray (courses: any[], courses2: any[]): any[] {
-        if (courses.length === 0) {
-            return courses;
-        }
-        const result: any = [];
-        for (const i in courses) {
-            if (courses.hasOwnProperty(i)) {
-                for (const j in courses2) {
-                    if (JSON.stringify(courses[i]) === JSON.stringify(courses2[j])) {
-                        result.push(courses[i]);
-                        break;
-                    }
-                }
-            }
-        }
-        return result;
-    } */
     private intersectArray (courses: any[], courses2: any[]): any[] {
         if (courses.length === 0) {
             return courses;
