@@ -78,7 +78,7 @@ export default class QueryController {
                     typeof jsonBody["EQ"][Object.keys(jsonBody["EQ"])[0]] === "number";
             }
         } else if (jsonBody.hasOwnProperty("AND")) {
-            if (jsonBody["AND"].length !== 2) {
+            if (jsonBody["AND"].length < 1) {
                 return false;
             } else {
                 const filter = this.isValidFilter(jsonBody["AND"][0]);
@@ -86,7 +86,7 @@ export default class QueryController {
                 return this.isValidFilter(jsonBody["AND"][0]) && this.isValidFilter(jsonBody["AND"][1]);
             }
         } else if (jsonBody.hasOwnProperty("OR")) {
-            if (jsonBody["OR"].length !== 2) {
+            if (jsonBody["OR"].length < 1) {
                 return false;
             } else {
                 return this.isValidFilter(jsonBody["OR"][0]) && this.isValidFilter(jsonBody["OR"][1]);
