@@ -1,7 +1,6 @@
 
 import {IDataset} from "./DataController";
 
-// TODO: we should take out NOT from this enum after notHelper is fixed. NOT is not a comparator
 enum Comparator {
     "GT", "LT", "EQ", "IS",
 }
@@ -297,7 +296,7 @@ export default class QueryController {
                         throw new Error("Dataset with id: " + id + " does not exist");
                     }
                     return this.comparatorHelper(Comparator.EQ, currDataset, columns, key, query);
-                } // TODO: implement the IS and NOT cases
+                }
             } else if (query.hasOwnProperty("IS")) {
                 // The first part of the key MUST match the id of the dataset we are querying
                 const key = Object.keys(query["IS"])[0];
@@ -377,17 +376,6 @@ export default class QueryController {
         return response;
     }
 
-    // TODO: this entire helper needs to be re-written because it assumes that NOT has a key-value pair although it
-    // TODO: takes in a filter
-    // Helper to return only entries in the dataset that match the NEGATION constraint
-    //  private notHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
-    //                    query: any): JSON[] {
-    //     const data: any = [];
-    //     const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
-    //     // Iterate through each data block (this corresponds to one file in the zip)
-    //     return this.setDifference(this.performQueryHelper(query["NOT"], ), currDataset["data"])
-    // }
-    //
     private setDifference (courses: any[], courses2: any[]): any[] {
         // const courses1Arr: any = [];
         // const courses2Arr: any = [];
