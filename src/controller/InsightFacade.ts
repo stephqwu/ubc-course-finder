@@ -27,9 +27,9 @@ export default class InsightFacade implements IInsightFacade {
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<InsightResponse> {
        return new Promise(function (fulfill, reject) {
            InsightFacade.controller.addDataset(id, content, kind).then(function (result: boolean) {
-               fulfill({code: 204, body: {result: ""}});
+               fulfill({code: 204, body: {result: "We are successful"}});
            }).catch(function (err: Error) {
-               reject({code: 400, error: err});
+               reject({code: 400, body: {error: err}});
            });
        });
      }
@@ -37,9 +37,9 @@ export default class InsightFacade implements IInsightFacade {
     public removeDataset(id: string): Promise<InsightResponse> {
         return new Promise(function (fulfill, reject) {
             InsightFacade.controller.removeDataset(id).then(function (result: boolean) {
-                fulfill({code: 204, body: {result: ""}});
+                fulfill({code: 204, body: {result: "It's gone!"}});
             }).catch(function (err: Error) {
-                reject({code: 404, error: "Could not find zip file"});
+                reject({code: 404, body: {error: "Could not find zip file"}});
             });
         });
     }
@@ -71,7 +71,7 @@ export default class InsightFacade implements IInsightFacade {
             for (const dataset of datasets) {
                 result.push(dataset["metadata"]);
             }
-            fulfill({code: 200, body: {result}});
+            fulfill({code: 200, body: {result: "Okay we've listed"}});
         });
     }
 }
