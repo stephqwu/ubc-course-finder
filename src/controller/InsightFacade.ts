@@ -71,7 +71,7 @@ export default class InsightFacade implements IInsightFacade {
             for (const dataset of datasets) {
                 result.push(dataset["metadata"]);
             }
-            fulfill({code: 200, body: {result: "Okay we've listed"}});
+            fulfill({code: 200, body: {result}});
         });
     }
 }
