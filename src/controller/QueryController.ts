@@ -221,27 +221,21 @@ export default class QueryController {
                     throw Error("Value " + course[keySuffix] + "is not a number");
                 }
                 if (comparator === Comparator.GT && course[keySuffix] > query["GT"][key]) {
-                    const response: any = {};
+                    let response: any = {};
                     for (const column of columns) {
-                        const columnSuffix = column.split("_")[1];
-                        const colName = this.resolveKeySuffix(columnSuffix);
-                        response[column] = course[colName];
+                        response = this.extractFromDataset(column, course, response);
                     }
                     data.push(response);
                 } else if (comparator === Comparator.LT && course[keySuffix] < query["LT"][key]) {
-                    const response: any = {};
+                    let response: any = {};
                     for (const column of columns) {
-                        const columnSuffix = column.split("_")[1];
-                        const colName = this.resolveKeySuffix(columnSuffix);
-                        response[column] = course[colName];
+                        response = this.extractFromDataset(column, course, response);
                     }
                     data.push(response);
                 } else if (comparator === Comparator.EQ && course[keySuffix] === query["EQ"][key]) {
-                    const response: any = {};
+                    let response: any = {};
                     for (const column of columns) {
-                        const columnSuffix = column.split("_")[1];
-                        const colName = this.resolveKeySuffix(columnSuffix);
-                        response[column] = course[colName];
+                        response = this.extractFromDataset(column, course, response);
                     }
                     data.push(response);
                 }
@@ -317,21 +311,25 @@ export default class QueryController {
                     return this.isHelper(Comparator.IS, currDataset, columns, key, query);
                 }
             } else if (query.hasOwnProperty("NOT")) {
-                // Get the complement/difference of a subset
-                /* const subset = this.performQueryHelper(query["NOT"][0], id, columns);
-                const all = ;
-                return all.filter((n) => !subset.includes(n)); */
-
-                /*const key = Object.keys(query["NOT"])[0];
-                if (key.split("_")[0] !== id) {
-                    throw new Error("The key used in NOT is not valid");
-                } else {
-                    const currDataset = this.getDatasetWithID(id);
-                    if (currDataset === null) {
-                        throw new Error("Dataset with id: " + id + " does not exist");
+                const currDataset = this.getDatasetWithID(id);
+                if (currDataset === null) {
+                    throw new Error("Dataset with id: " + id + " does not exist");
+                }
+                const currDataColumns: any[] = [];
+                for (const json of currDataset["data"]) {
+                    const realJson: any = json; // This is a workaround for a tslint bug
+                    // Iterate through the results array within the data block
+                    for (const course of realJson["result"]) {
+                        let response: any = {};
+                        for (const column of columns) {
+                            response = this.extractFromDataset(column, course, response);
+                        }
+                        currDataColumns.push(response);
                     }
-                    return this.notHelper(Comparator.NOT, currDataset, columns, key, query);
-                }*/
+                }
+                const blah = this.setDifference(this.performQueryHelper(query["NOT"], id, columns),
+                    currDataColumns);
+                return blah;
             }
        /* } catch (err) {
             Log.trace(err);
@@ -356,11 +354,9 @@ export default class QueryController {
                     throw Error("Value " + course[keySuffix] + "is not a string");
                 }
                 if (this.matchWildCard(query["IS"][key], course[keySuffix])) {
-                    const response: any = {};
+                    let response: any = {};
                     for (const column of columns) {
-                        const columnSuffix = column.split("_")[1];
-                        const colName = this.resolveKeySuffix(columnSuffix);
-                        response[column] = course[colName];
+                        response = this.extractFromDataset(column, course, response);
                     }
                     data.push(response);
                 }
@@ -369,31 +365,60 @@ export default class QueryController {
         return data;
     }
 
+    private extractFromDataset(column: string, course: any, response: any): any {
+        const columnSuffix = column.split("_")[1];
+        const colName = this.resolveKeySuffix(columnSuffix);
+        if (colName === "id") {
+            // id in the JSON is a number, but we want to read it as a string as per the D1 specs
+            response[column] = course[colName].toString();
+        } else {
+            response[column] = course[colName];
+        }
+        return response;
+    }
+
     // TODO: this entire helper needs to be re-written because it assumes that NOT has a key-value pair although it
     // TODO: takes in a filter
     // Helper to return only entries in the dataset that match the NEGATION constraint
-    /* private notHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
-                      query: any): JSON[] {
-        const data: any = [];
-        const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
-        // Iterate through each data block (this corresponds to one file in the zip)
-        for (const json of currDataset["data"]) {
-            const realJson: any = json; // This is a workaround for a tslint bug
-            // Iterate through the results array within the data block
-            for (const course of realJson["result"]) {
-                if (!Object.is(course[keySuffix], query["NOT"][key])) {
-                    const response: any = {};
-                    for (const column of columns) {
-                        const columnSuffix = column.split("_")[1];
-                        const colName = this.resolveKeySuffix(columnSuffix);
-                        response[column] = course[colName];
-                    }
-                    data.push(response);
-                }
+    //  private notHelper(comparator: Comparator, currDataset: IDataset, columns: string[], key: string,
+    //                    query: any): JSON[] {
+    //     const data: any = [];
+    //     const keySuffix = this.resolveKeySuffix(key.split("_")[1]);
+    //     // Iterate through each data block (this corresponds to one file in the zip)
+    //     return this.setDifference(this.performQueryHelper(query["NOT"], ), currDataset["data"])
+    // }
+    //
+    private setDifference (courses: any[], courses2: any[]): any[] {
+        // const courses1Arr: any = [];
+        // const courses2Arr: any = [];
+        // let i: number;
+        // for (i = 0; i < courses2.length; i++) {
+        //     courses2Arr[i] = JSON.stringify(courses2[i]);
+        // }
+        // for (i = 0; i < courses.length; i++) {
+        //     courses1Arr[i] = JSON.stringify(courses[i]);
+        // }
+        // return courses2Arr.filter(function (x: string) {
+        //     return courses1Arr.has() < 0;
+        // });
+        if (courses.length === 0) {
+            return courses;
+        }
+        const result: any = [];
+        const object: any = {};
+        let value: string;
+        let i: number;
+        for (i = 0; i < courses.length; i++) {
+            object[JSON.stringify(courses[i])] = true;
+        }
+        for (i = 0; i < courses2.length; i++) {
+            value = JSON.stringify(courses2[i]);
+            if (!(value in object)) {
+                result.push(courses2[i]);
             }
         }
-        return data;
-    } */
+        return result;
+    }
 
     private intersectArray (courses: any[], courses2: any[]): any[] {
         if (courses.length === 0) {
@@ -401,8 +426,8 @@ export default class QueryController {
         }
         const result: any = [];
         const object: any = {};
-        let value;
-        let i;
+        let value: string;
+        let i: number;
         for (i = 0; i < courses2.length; i++) {
             object[JSON.stringify(courses2[i])] = true;
         }
