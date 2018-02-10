@@ -99,11 +99,13 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     const datasetsToLoad: { [id: string]: string } = {
         confusion: "./test/data/confusion.zip",    // malformed JSON in courses folder (no files + 1 folder)
         courses: "./test/data/courses.zip",        // many files + one folder
+        fakedata: "./test/data/fakedata.zip",
         missingcoursesfolder: "./test/data/missingcoursesfolder.zip", // no files + no folder
         morecourses: "./test/data/morecourses.zip",
         notazip: "./test/data/file.json",
         onefilenofolder: "./test/data/onefilenofolder.zip",
         onefileonefolder: "./test/data/onefolderonefile.zip",
+        rooms: "./test/data/rooms.zip",
     };
 
     let insightFacade: InsightFacade;
@@ -145,6 +147,18 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
 
     afterEach(function () {
         Log.test(`AfterTest: ${this.currentTest.title}`);
+    });
+
+    it("Should return something interesting", async () => {
+        const id: string = "rooms";
+        let response: any;
+        try {
+            response = await insightFacade.parseRooms(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.equal("heya");
+        }
     });
 
     it("Should add a valid dataset", async () => {
@@ -192,8 +206,25 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         }
     });
 
-    it("Should not add a valid zip that does not contain any real data", async () => {
+    it("Should not add a valid zip that has empty courses file", async () => {
         const id: string = "morecourses";
+        const expectedCode: number = 400;
+        let response: InsightResponse;
+
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response.code).to.equal(expectedCode);
+            // The body should contain {"error": "my text"}
+            // to explain what went wrong. This should also be used if the provided dataset
+            // is invalid or if it was added more than once with the same id.
+        }
+    });
+
+    it("Should not add a valid zip that does not contain any real data", async () => {
+        const id: string = "fakedata";
         const expectedCode: number = 400;
         let response: InsightResponse;
 
