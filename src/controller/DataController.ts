@@ -2,8 +2,8 @@ import fs = require("fs");
 import JSZip = require("jszip");
 import {JSZipObject} from "jszip";
 import path = require("path");
-import Log from "../Util";
 import * as parse5 from "../../node_modules/parse5/lib/index";
+import Log from "../Util";
 
 import {InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";
 
