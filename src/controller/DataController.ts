@@ -1,9 +1,10 @@
 import fs = require("fs");
 import JSZip = require("jszip");
 import {JSZipObject} from "jszip";
-import * as parse5 from "../../node_modules/parse5/lib/index";
 import path = require("path");
 import Log from "../Util";
+import * as parse5 from "../../node_modules/parse5/lib/index";
+
 import {InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";
 
 const dataFolder = "./data";
@@ -149,7 +150,7 @@ export default class DataController {
 
                             const internalData = {
                                 metadata: {id, kind: InsightDatasetKind.Courses, numRows},
-                                data: jsons
+                                data: jsons,
                             };
                             curr.datasets.push(internalData);
                             if (!fs.existsSync(dataFolder)) {
