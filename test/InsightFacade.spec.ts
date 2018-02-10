@@ -99,13 +99,13 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     const datasetsToLoad: { [id: string]: string } = {
         confusion: "./test/data/confusion.zip",    // malformed JSON in courses folder (no files + 1 folder)
         courses: "./test/data/courses.zip",        // many files + one folder
-        fakedata: "./test/data/fakedata.zip",
+        // fakedata: "./test/data/fakedata.zip",
         missingcoursesfolder: "./test/data/missingcoursesfolder.zip", // no files + no folder
         morecourses: "./test/data/morecourses.zip",
         notazip: "./test/data/file.json",
+        rooms: "./test/data/rooms.zip",
         onefilenofolder: "./test/data/onefilenofolder.zip",
         onefileonefolder: "./test/data/onefolderonefile.zip",
-        rooms: "./test/data/rooms.zip",
     };
 
     let insightFacade: InsightFacade;
@@ -153,11 +153,25 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const id: string = "rooms";
         let response: any;
         try {
-            response = await insightFacade.parseRooms(id, datasets[id], InsightDatasetKind.Rooms);
+            response = await insightFacade.parseRooms(id, datasets[id]);
         } catch (err) {
             response = err;
         } finally {
             expect(response).to.equal("heya");
+        }
+    });
+
+    it("Should parse an HTML file and extract it's building/rooms", async () => {
+        const id: string = "rooms";
+        const expectedCode: number = 204;
+        let response: any;
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response).to.equal("heya");
+            expect(response.code).to.equal(expectedCode);
         }
     });
 
