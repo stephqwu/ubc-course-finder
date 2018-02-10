@@ -1,6 +1,7 @@
 import fs = require("fs");
 import JSZip = require("jszip");
 import {JSZipObject} from "jszip";
+import * as parse5 from "parse5";
 import path = require("path");
 import Log from "../Util";
 import {InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";
@@ -28,6 +29,15 @@ export default class DataController {
                 }
             });
         }
+    }
+
+    public parseRooms(id: string, content: string, kind: InsightDatasetKind): any {
+        const isThisTheTree = parse5.parse("<div></div>") as parse5.AST.Default.Document;
+        return isThisTheTree;
+    }
+
+    public locateBuilding(addr: string) {
+        return;
     }
 
     // This method adds a new dataset with specified id and content. The content is a base64 string that we need

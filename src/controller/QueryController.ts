@@ -19,10 +19,11 @@ export interface IResponseData {
 
 export default class QueryController {
 
-    private datasets: IDataset[];
+    private courseDatasets: IDataset[];
+    private roomDatasets: IDataset[];
 
-    constructor(datasets: IDataset[]) {
-       this.datasets = datasets;
+    constructor(courseDatasets: IDataset[]) {
+       this.courseDatasets = courseDatasets;
     }
 
     // ----------------------------------- filtering by query ------------------------------------------------------
@@ -161,7 +162,7 @@ export default class QueryController {
     }
 
     private getDatasetWithID(id: string) {
-        for (const dataset of this.datasets) {
+        for (const dataset of this.courseDatasets) {
             if (dataset["metadata"]["id"] === id) {
                 return dataset;
             }
