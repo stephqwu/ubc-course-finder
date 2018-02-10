@@ -76,6 +76,6 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public parseRooms(id: string, content: string, kind: InsightDatasetKind): any {
-        return InsightFacade.controller.parseRooms(string, content, kind);
+        return InsightFacade.controller.parseRooms(id, content, kind);
     }
 }

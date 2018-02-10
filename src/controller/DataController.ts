@@ -32,7 +32,7 @@ export default class DataController {
     }
 
     public parseRooms(id: string, content: string, kind: InsightDatasetKind): any {
-        const isThisTheTree = parse5.parse("<div></div>") as parse5.AST.Default.Document;
+        // const isThisTheTree = parse5.parse("<div></div>") as parse5.AST.Default.Document;
         return isThisTheTree;
     }
 
