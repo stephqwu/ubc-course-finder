@@ -34,66 +34,79 @@ export default class DataController {
         }
     }
 
-    public parseRooms(id: string, content: string): Promise<boolean> {
-
-        // this.files = new Array();
-        this.trees = new Array();
-
-        return new Promise (function (fulfill, reject) {
+    public parseRoomsDataset(id: string, content: string): Promise<boolean> {
+        return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
-            const files: any = new Array();
-            currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
-
-                zip.forEach(function (relativePath: string, file: JSZipObject) {
-                    if (!file.dir && !file.name.includes(".DS_Store") && file.name !== "index.htm") {
-                        Log.trace(file.name);
-                        files.push(file.async("text"));
-                    }
-                    // Log.trace(this.files);
-                    Log.trace(files);
+            try {
+                currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
+                    zip.forEach(function (relativePath: string, file: JSZipObject) {
+                        if (file.name === "index.htm") {
+                            return this.parseBuildings(id, content, file);
+                        } else if (!file.dir && !file.name.includes(".DS_Store")) {
+                            return this.parseRooms(id, content, file);
+                        }
+                    });
                 });
-                // this.files = files;
-                const buildingFile = files[0];
-                // Log.trace(buildingFile);
-                try {
-                    const tree = parse5.parse(buildingFile.toString()) as parse5.AST.Default.Document;
-                    // Log.trace(tree.toString());
-                    this.trees.push(tree.childNodes[1].nodeName);
-                    Log.trace(tree.childNodes[1].nodeName);
-                    fulfill(true);
-                } catch (err) {
-                    reject(err);
-                }
-            });
+                fulfill(true);
+            } catch (err) {
+                reject(err);
+            }
         });
     }
 
-    // public parseRooms(id: string, content: string): any {
-        /*let buildingFile;
-        const trees = new Array();
-        for (const file in this.files) {
-            buildingFile = this.extractBuildingFiles(id, content);
-            Log.trace(buildingFile);
-            const tree = parse5.parse(file) as parse5.AST.Default.Document;
-            trees.push(tree);
-        }
-        return trees;
-        */
+    public parseBuildings(id: string, content: string, file: JSZipObject): Promise<boolean> {
+        return new Promise ( function (fulfill, reject) {
+           try {
+               const index = file;
+               Log.trace(index.name);
+               const tree = parse5.parse(index.toString()) as parse5.AST.Default.Document;
+               Log.trace(tree.childNodes[1].nodeName);
+               fulfill(true);
+           } catch (err) {
+               reject(err);
+           }
+        });
+    }
 
-    // }
+    public parseRooms(id: string, content: string, file: JSZipObject): Promise<boolean> {
 
-    public locateBuilding(addr: string) {
+        // this.files = new Array();
+        this.trees = new Array();
+        const files: any = new Array();
+
+        return new Promise (function (fulfill, reject) {
+
+            Log.trace(file.name);
+            files.push(file.async("text"));
+            // Log.trace(this.files);
+            Log.trace(files);
+            // this.files = files;
+            const buildingFile = files[0];
+            // Log.trace(buildingFile);
+            try {
+                const tree = parse5.parse(buildingFile.toString()) as parse5.AST.Default.Document;
+                // Log.trace(tree.toString());
+                this.trees.push(tree.childNodes[1].nodeName);
+                Log.trace(tree.childNodes[1].nodeName);
+                fulfill(true);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    public locateBuilding(addr: string): any {
         return;
     }
 
     // This method adds a new dataset with specified id and content. The content is a base64 string that we need
     // to deserialize using JSZip. The addDataset() method of InsightFacade should make use of this method.
 
-    public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<boolean> {
+    public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise <boolean> {
         // JS objects passed as queries, not JSON string (already parsed)
         // Check JS object for validity, rather than validating JSON string/file
         if (kind === InsightDatasetKind.Rooms) {
-            this.parseRooms(id, content);
+            this.parseRoomsDataset(id, content);
         } else {
 
             const curr = this;
@@ -178,7 +191,7 @@ export default class DataController {
         }
     }
 
-    public removeDataset(id: string): Promise<boolean> {
+    public removeDataset(id: string): Promise <boolean> {
         return new Promise(function (fulfill, reject) {
             try {
                 fs.unlinkSync("./data/" + id + ".json");

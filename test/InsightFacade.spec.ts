@@ -153,7 +153,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const id: string = "rooms";
         let response: any;
         try {
-            response = await insightFacade.parseRooms(id, datasets[id]);
+            response = await insightFacade.parseRoomsDataset(id, datasets[id]);
         } catch (err) {
             response = err;
         } finally {
