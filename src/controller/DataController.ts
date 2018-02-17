@@ -2,10 +2,11 @@ import fs = require("fs");
 import JSZip = require("jszip");
 import {JSZipObject} from "jszip";
 import path = require("path");
-import * as parse5 from "../../node_modules/parse5/lib/index";
+import parse5 = require("parse5");
 import Log from "../Util";
 
 import {InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFacade";
+import {isNullOrUndefined} from "util";
 
 const dataFolder = "./data";
 
@@ -17,10 +18,13 @@ export interface IDataset {
 export default class DataController {
     private datasets: IDataset[];
     // private files: any[];
-    private trees: any[];
+    private trees: any[] = new Array();
+    private buildingNames: any[];
 
     constructor() {
         this.datasets = new Array();
+        // this.trees = new Array();
+        this.buildingNames = new Array();
         // If any data files exist on disk, load datasets from those files
         const curr = this;
         if (fs.existsSync(dataFolder)) {
@@ -34,42 +38,65 @@ export default class DataController {
         }
     }
 
-    public parseRoomsDataset(id: string, content: string): Promise<boolean> {
+    public parseRoomsDataset(id: string, content: string): Promise<any> {
+        Log.trace("Log is working");
+        const curr = this;
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
             try {
                 currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
                     zip.forEach(function (relativePath: string, file: JSZipObject) {
                         if (file.name === "index.htm") {
-                            return this.parseBuildings(id, content, file);
-                        } else if (!file.dir && !file.name.includes(".DS_Store")) {
-                            return this.parseRooms(id, content, file);
+                            curr.parseBuildings(id, content, file);
+                       /* } else if (!file.dir && !file.name.includes(".DS_Store")) {
+                            return this.parseRooms(id, content, file); */
+                        } else {
+                            reject("Could not find an index.htm file");
                         }
                     });
                 });
-                fulfill(true);
+                fulfill(this.trees);
             } catch (err) {
                 reject(err);
             }
         });
     }
 
-    public parseBuildings(id: string, content: string, file: JSZipObject): Promise<boolean> {
+    public parseBuildings(id: string, content: string, file: any): Promise<any> {
+        Log.trace("Inside parseBuildings");
+        const curr = this;
         return new Promise ( function (fulfill, reject) {
            try {
-               const index = file;
-               Log.trace(index.name);
-               const tree = parse5.parse(index.toString()) as parse5.AST.Default.Document;
-               Log.trace(tree.childNodes[1].nodeName);
-               fulfill(true);
+               if (!isNullOrUndefined(file)) {
+                   // const index = file;
+                   const index = JSZip().file(file);
+                   Log.trace("INDEX: " + index);
+                   // const indexFile = zip.file(index);
+                   // Log.trace(index.name);
+                   index.async("text").then(function (data: any) {
+                       const tree = parse5.parse(data);
+                       curr.findBuildingNames(tree);
+                       curr.trees.push(tree);
+                       fulfill(curr.trees);
+                   }).catch(function (err: any) {
+                           reject(err);
+                       });
+                   // Log.trace(tree.childNodes[1].nodeName);
+                   // this.trees.push(tree);
+               }
            } catch (err) {
                reject(err);
            }
         });
     }
 
-    public parseRooms(id: string, content: string, file: JSZipObject): Promise<boolean> {
+    public findBuildingNames(tree: any): any {
+        // TODO: Walk through file tree recursively and find/extract the building names (differentiated by <td> tags)
+        // TODO: Make the parameter and return types more strict
+    }
 
+    public parseRooms(id: string, content: string, file: JSZipObject): Promise<any> {
+        // TODO: Make this method more clean and similar to parseBuildings
         // this.files = new Array();
         this.trees = new Array();
         const files: any = new Array();
@@ -88,11 +115,16 @@ export default class DataController {
                 // Log.trace(tree.toString());
                 this.trees.push(tree.childNodes[1].nodeName);
                 Log.trace(tree.childNodes[1].nodeName);
-                fulfill(true);
+                fulfill(tree);
             } catch (err) {
                 reject(err);
             }
         });
+    }
+
+    public findRoomNames(tree: any): any {
+        // TODO: Extract room names
+        // TODO: Make the parameter and return types more strict
     }
 
     public locateBuilding(addr: string): any {
