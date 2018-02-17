@@ -96,8 +96,7 @@ export default class DataController {
     }
 
     public parseRooms(id: string, content: string, file: JSZipObject): Promise<any> {
-        // TODO: Make this method more clean and similar to parseBuildings
-        // this.files = new Array();
+        const curr = this;
         this.trees = new Array();
         const files: any = new Array();
 
@@ -105,13 +104,11 @@ export default class DataController {
 
             Log.trace(file.name);
             files.push(file.async("text"));
-            // Log.trace(this.files);
             Log.trace(files);
-            // this.files = files;
             const buildingFile = files[0];
             // Log.trace(buildingFile);
             try {
-                const tree = parse5.parse(buildingFile.toString()) as parse5.AST.Default.Document;
+                const tree = parse5.parse(buildingFile);
                 // Log.trace(tree.toString());
                 this.trees.push(tree.childNodes[1].nodeName);
                 Log.trace(tree.childNodes[1].nodeName);
