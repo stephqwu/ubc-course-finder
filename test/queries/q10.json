@@ -1,0 +1,30 @@
+{
+    "title": "simple d2 test with courses",
+    "query":
+    {
+        "WHERE": {
+            "GT": { "courses_avg": 70 }
+        },
+        "OPTIONS": {
+            "COLUMNS": ["courses_title", "overallAvg"]
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": ["courses_title"],
+            "APPLY": [{
+                "overallAvg": {
+                    "AVG": "courses_avg"
+                }
+            }]
+        }
+    },
+    "response":
+    {
+        "code": 200,
+        "body": {
+            "result": [
+                { "courses_title" : "310", "overallAvg": 87.5},
+                { "courses_title" : "210", "overallAvg": 77.25}
+            ]
+        }
+    }
+}

@@ -378,18 +378,6 @@ export default class QueryController {
     }
 
     private setDifference (courses: any[], courses2: any[]): any[] {
-        // const courses1Arr: any = [];
-        // const courses2Arr: any = [];
-        // let i: number;
-        // for (i = 0; i < courses2.length; i++) {
-        //     courses2Arr[i] = JSON.stringify(courses2[i]);
-        // }
-        // for (i = 0; i < courses.length; i++) {
-        //     courses1Arr[i] = JSON.stringify(courses[i]);
-        // }
-        // return courses2Arr.filter(function (x: string) {
-        //     return courses1Arr.has() < 0;
-        // });
         if (courses.length === 0) {
             return courses;
         }
