@@ -115,6 +115,31 @@ describe("QueryController parse/validation tests", function () {
         });
         expect(isValid).to.equal(true);
     });
+
+    it ("Should return true for valid more advanced d2 query", () => {
+        const controller = new QueryController(null);
+        const isValid = controller.isValidQuery({
+            WHERE: {
+                GT: { courses_avg: 70 },
+            },
+            OPTIONS: {
+                COLUMNS: ["courses_title", "overallAvg"],
+                ORDER: {
+                    dir: "DOWN",
+                    keys: ["overallAvg"],
+                },
+            },
+            TRANSFORMATIONS: {
+                GROUP: ["courses_title"],
+                APPLY: [{
+                    overallAvg: {
+                        AVG: "courses_avg",
+                    },
+                }],
+            },
+        });
+        expect(isValid).to.equal(true);
+    });
 });
 
 describe("InsightFacade Add/Remove/List Dataset", function () {

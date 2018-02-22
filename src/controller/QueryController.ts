@@ -13,6 +13,10 @@ enum NumberKeys {
     "Avg", "Pass", "Fail", "Audit",
 }
 
+enum Token {
+    "MAX", "MIN", "AVG", "COUNT", SUM,
+}
+
 export interface IResponseData {
     data: number | string;
 }
@@ -64,8 +68,14 @@ export default class QueryController {
                 if (Object.keys(jsonQuery).length === 2) {
                     return this.isValidFilter(jsonQuery["WHERE"]) && this.isValidOptions(jsonQuery["OPTIONS"]);
                 } else {
-                    return this.isValidFilter(jsonQuery["WHERE"]) && this.isValidOptions(jsonQuery["OPTIONS"]
-                    && this.isValidTransformations(jsonQuery["TRANSFORMATIONS"]));
+                    const applyKeys = [];
+                    for (const key of jsonQuery["OPTIONS"]["COLUMNS"]) {
+                        if (!this.isValidKey(key)) {
+                            applyKeys.push(key);
+                        }
+                    }
+                    return this.isValidFilter(jsonQuery["WHERE"]) && this.isValidOptions(jsonQuery["OPTIONS"])
+                    && this.isValidTransformations(jsonQuery["TRANSFORMATIONS"], applyKeys);
                 }
             }
         } catch (err) {
@@ -146,14 +156,12 @@ export default class QueryController {
             !optionsBody.hasOwnProperty("COLUMNS")) {
             return false;
         } else {
-            let validKeysColumn = true;
             const existingColumns = [];
             for (const key of optionsBody["COLUMNS"]) {
-                validKeysColumn = validKeysColumn && this.isValidKey(key);
                 existingColumns.push(key);
             }
             if (!optionsBody.hasOwnProperty("ORDER")) {
-                return validKeysColumn;
+                return true;
             } else {
                 const orderBody = optionsBody["ORDER"];
                 if (!orderBody.hasOwnProperty("dir") || !orderBody.hasOwnProperty("keys")) {
@@ -164,15 +172,39 @@ export default class QueryController {
                 }
                 let validKeysOrder = true;
                 for (const key of orderBody["keys"]) {
-                    validKeysOrder = validKeysOrder && this.isValidKey(key) && existingColumns.includes(key);
+                    validKeysOrder = validKeysOrder && existingColumns.includes(key);
                 }
-                return validKeysColumn && validKeysOrder;
+                return validKeysOrder;
             }
         }
     }
 
-    private isValidTransformations(transformationsBody: any): boolean {
-        return false;
+    private isValidTransformations(transformationsBody: any, applyKeys: string[]): boolean {
+        if (!transformationsBody.hasOwnProperty("GROUP") || !transformationsBody.hasOwnProperty("APPLY")) {
+            return false;
+        }
+        for (const groupKey of transformationsBody["GROUP"]) {
+            if (!this.isValidKey(groupKey)) {
+                return false;
+            }
+        }
+        let count = applyKeys.length;
+        for (const applyBody of transformationsBody["APPLY"]) {
+            if (Object.keys(applyBody).length !== 1) {
+                return false;
+            } else {
+                const applyKey = Object.keys(applyBody)[0];
+                if (applyKeys.includes(applyKey)) {
+                    count = count - 1;
+                }
+                const token = Object.keys(applyBody[applyKey])[0];
+                if (!Object.values(Token).includes(token) ||
+                    !this.isValidKey(applyBody[applyKey][token])) {
+                    return false;
+                }
+            }
+        }
+        return count === 0;
     }
 
     private getQueryID(query: any): string {
