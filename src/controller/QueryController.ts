@@ -34,15 +34,22 @@ export default class QueryController {
             let order: string;
             // Order is optional so we only provide it to the helper if it is specified
             if (query["OPTIONS"].hasOwnProperty("ORDER")) {
-                order = query["OPTIONS"]["ORDER"];
+                order = query["OPTIONS"]["ORDER"]["keys"];
             } else {
                 order = null;
             }
             const columns = query["OPTIONS"]["COLUMNS"];
             const result = this.performQueryHelper(query["WHERE"], id, columns);
-            result.sort(function (a: any, b: any) {
-                return a[order] - b[order];
-            });
+            if (order !== null) {
+                result.sort(function (a: any, b: any) {
+                    for (const key of order) {
+                        if (!(a[key] - b[key] === 0)) {
+                            return a[key] - b[key];
+                        }
+                    }
+                    return 0;
+                });
+            }
             return result;
     }
 
