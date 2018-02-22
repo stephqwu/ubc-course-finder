@@ -11,7 +11,7 @@
                 "bad_column"
             ],
             "ORDER": {
-                "dir": "DOWN",
+                "dir": "UP",
                 "keys": ["courses_avg"]
             },
             "FORM": "TABLE"

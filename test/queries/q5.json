@@ -12,7 +12,7 @@
                 "courses_avg"
             ],
             "ORDER": {
-                "dir": "DOWN",
+                "dir": "UP",
                 "keys": ["courses_avg"]
             }
         }

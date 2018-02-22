@@ -34,7 +34,7 @@
                 "courses_uuid"
             ],
             "ORDER": {
-                "dir": "DOWN",
+                "dir": "UP",
                 "keys": ["courses_avg"]
             }
         }

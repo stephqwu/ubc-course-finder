@@ -11,7 +11,7 @@
                 "bad_value"
             ],
             "ORDER": {
-                "dir": "DOWN",
+                "dir": "UP",
                 "keys": ["bad_value"]
             },
             "FORM": "TABLE"
