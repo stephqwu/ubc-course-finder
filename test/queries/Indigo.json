@@ -33,7 +33,10 @@
                 "courses_audit",
                 "courses_uuid"
             ],
-            "ORDER": "courses_avg"
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["courses_avg"]
+            }
         }
     },
     "response": {

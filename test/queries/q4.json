@@ -10,7 +10,10 @@
             "COLUMNS": [
                 "bad_column"
             ],
-            "ORDER": "courses_avg",
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["courses_avg"]
+            },
             "FORM": "TABLE"
         }
     },

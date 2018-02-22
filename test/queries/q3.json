@@ -10,7 +10,10 @@
             "COLUMNS": [
                 "bad_value"
             ],
-            "ORDER": "bad_value",
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["bad_value"]
+            },
             "FORM": "TABLE"
         }
     },

@@ -39,7 +39,6 @@ export default class QueryController {
                 order = null;
             }
             const columns = query["OPTIONS"]["COLUMNS"];
-            // TODO: instead of just returning what's back from the helper, order the results first
             const result = this.performQueryHelper(query["WHERE"], id, columns);
             result.sort(function (a: any, b: any) {
                 return a[order] - b[order];
@@ -50,12 +49,17 @@ export default class QueryController {
 // ------------------------------- PARSING AND VALIDATION OF QUERY ---------------------------------------------
     public isValidQuery(jsonQuery: any): boolean {
         try {
-            // The body should have exactly 2 keys "WHERE" and "OPTIONS"
+            // The body should have 2 or 3 keys "WHERE" and "OPTIONS" are required. "TRANSFORMATIONS" is optional
             if (!jsonQuery.hasOwnProperty("WHERE") || !jsonQuery.hasOwnProperty("OPTIONS") ||
-                Object.keys(jsonQuery).length !== 2) {
+                Object.keys(jsonQuery).length > 3 || Object.keys(jsonQuery).length < 2) {
                 return false;
             } else {
-                return this.isValidFilter(jsonQuery["WHERE"]) && this.isValidOptions(jsonQuery["OPTIONS"]);
+                if (Object.keys(jsonQuery).length === 2) {
+                    return this.isValidFilter(jsonQuery["WHERE"]) && this.isValidOptions(jsonQuery["OPTIONS"]);
+                } else {
+                    return this.isValidFilter(jsonQuery["WHERE"]) && this.isValidOptions(jsonQuery["OPTIONS"]
+                    && this.isValidTransformations(jsonQuery["TRANSFORMATIONS"]));
+                }
             }
         } catch (err) {
             return false;
@@ -135,26 +139,33 @@ export default class QueryController {
             !optionsBody.hasOwnProperty("COLUMNS")) {
             return false;
         } else {
-            let validKeys = true;
-            let existingKey = false;
+            let validKeysColumn = true;
+            const existingColumns = [];
             for (const key of optionsBody["COLUMNS"]) {
-                validKeys = validKeys && this.isValidKey(key);
-                if (key === optionsBody["ORDER"]) {
-                    existingKey = true;
-                }
+                validKeysColumn = validKeysColumn && this.isValidKey(key);
+                existingColumns.push(key);
             }
             if (!optionsBody.hasOwnProperty("ORDER")) {
-                existingKey = true;
-            }
-            if (!existingKey) {
-                validKeys = false;
-            }
-            if (optionsBody.hasOwnProperty("ORDER")) {
-                return validKeys && this.isValidKey(optionsBody["ORDER"]);
+                return validKeysColumn;
             } else {
-                return validKeys;
+                const orderBody = optionsBody["ORDER"];
+                if (!orderBody.hasOwnProperty("dir") || !orderBody.hasOwnProperty("keys")) {
+                    return false;
+                }
+                if (!(orderBody["dir"] === "UP") && !(orderBody["dir"] === "DOWN")) {
+                    return false;
+                }
+                let validKeysOrder = true;
+                for (const key of orderBody["keys"]) {
+                    validKeysOrder = validKeysOrder && this.isValidKey(key) && existingColumns.includes(key);
+                }
+                return validKeysColumn && validKeysOrder;
             }
         }
+    }
+
+    private isValidTransformations(transformationsBody: any): boolean {
+        return false;
     }
 
     private getQueryID(query: any): string {

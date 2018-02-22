@@ -48,7 +48,10 @@ describe("QueryController parse/validation tests", function () {
                     "courses_id",
                     "courses_avg",
                 ],
-                ORDER: "courses_avg",
+                ORDER: {
+                    dir: "DOWN",
+                    keys: ["courses_avg"],
+                },
             },
         });
         expect(isValid).to.equal(true);
