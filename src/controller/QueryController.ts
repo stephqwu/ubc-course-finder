@@ -189,11 +189,16 @@ export default class QueryController {
             }
         }
         let count = applyKeys.length;
+        const uniqueApplyKeys: string[] = [];
         for (const applyBody of transformationsBody["APPLY"]) {
             if (Object.keys(applyBody).length !== 1) {
                 return false;
             } else {
                 const applyKey = Object.keys(applyBody)[0];
+                if (uniqueApplyKeys.includes(applyKey)) {
+                    return false;
+                }
+                uniqueApplyKeys.push(applyKey);
                 if (applyKeys.includes(applyKey)) {
                     count = count - 1;
                 }

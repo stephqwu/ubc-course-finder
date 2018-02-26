@@ -116,6 +116,33 @@ describe("QueryController parse/validation tests", function () {
         expect(isValid).to.equal(true);
     });
 
+    it ("Should return false for invalid d2 query", () => {
+        const controller = new QueryController(null);
+        const isValid = controller.isValidQuery({
+            WHERE: {
+                GT: { courses_avg: 70 },
+            },
+            OPTIONS: {
+                COLUMNS: ["courses_title", "overallAvg"],
+            },
+            TRANSFORMATIONS: {
+                GROUP: ["courses_title"],
+                APPLY: [{
+                    overallAvg: {
+                        AVG: "courses_avg",
+                    },
+                },
+                    {
+                        overallAvg: {
+                            AVG: "courses_avg",
+                        },
+                    },
+                ],
+            },
+        });
+        expect(isValid).to.equal(false);
+    });
+
     it ("Should return true for valid more advanced d2 query", () => {
         const controller = new QueryController(null);
         const isValid = controller.isValidQuery({
