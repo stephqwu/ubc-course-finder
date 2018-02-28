@@ -75,7 +75,7 @@ export default class InsightFacade implements IInsightFacade {
         });
     }
 
-    public parseRoomsDataset(id: string, content: string): any {
+    /* public parseRoomsDataset(id: string, content: string): any {
         return InsightFacade.controller.parseRoomsDataset(id, content);
-    }
+    } */
 }

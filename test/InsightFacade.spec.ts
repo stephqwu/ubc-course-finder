@@ -225,7 +225,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         Log.test(`AfterTest: ${this.currentTest.title}`);
     });
 
-    it("Should return something interesting", async () => {
+    /* it("Should return something interesting", async () => {
         const id: string = "rooms";
         let response: any;
         try {
@@ -235,7 +235,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         } finally {
             expect(response).to.equal("heya");
         }
-    });
+    }); */
 
     it("Should parse an HTML file and extract it's building/rooms", async () => {
         const id: string = "rooms";

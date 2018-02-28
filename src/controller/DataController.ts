@@ -9,6 +9,7 @@ import {InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFac
 import {isNullOrUndefined} from "util";
 
 const dataFolder = "./data";
+// const parse5 = require("parse5");
 
 export interface IDataset {
     metadata: InsightDataset;
@@ -39,7 +40,6 @@ export default class DataController {
     }
 
     public parseRoomsDataset(id: string, content: string): Promise<any> {
-        Log.trace("Log is working");
         const curr = this;
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
@@ -68,19 +68,20 @@ export default class DataController {
         return new Promise ( function (fulfill, reject) {
            try {
                if (!isNullOrUndefined(file)) {
-                   // const index = file;
-                   const index = JSZip().file(file);
+                   const index = file; // = JSZip().file(file)
                    Log.trace("INDEX: " + index);
                    // const indexFile = zip.file(index);
-                   // Log.trace(index.name);
+                   Log.trace(index.name);
                    index.async("text").then(function (data: any) {
-                       const tree = parse5.parse(data);
+                       Log.trace("Inside async");
+                       const tree: any = parse5.parse(data);
+                       Log.trace(tree.childNodes[6].tagName);
                        curr.findBuildingNames(tree);
                        curr.trees.push(tree);
                        fulfill(curr.trees);
                    }).catch(function (err: any) {
                            reject(err);
-                       });
+                   });
                    // Log.trace(tree.childNodes[1].nodeName);
                    // this.trees.push(tree);
                }
@@ -108,8 +109,7 @@ export default class DataController {
             const buildingFile = files[0];
             // Log.trace(buildingFile);
             try {
-                const tree = parse5.parse(buildingFile);
-                // Log.trace(tree.toString());
+                const tree: any = parse5.parse(buildingFile);
                 this.trees.push(tree.childNodes[1].nodeName);
                 Log.trace(tree.childNodes[1].nodeName);
                 fulfill(tree);
