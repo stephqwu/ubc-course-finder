@@ -9,7 +9,6 @@ import {InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFac
 import {isNullOrUndefined} from "util";
 
 const dataFolder = "./data";
-// const parse5 = require("parse5");
 
 export interface IDataset {
     metadata: InsightDataset;
@@ -68,22 +67,23 @@ export default class DataController {
         return new Promise ( function (fulfill, reject) {
            try {
                if (!isNullOrUndefined(file)) {
-                   const index = file; // = JSZip().file(file)
+                   const index = file;
                    Log.trace("INDEX: " + index);
-                   // const indexFile = zip.file(index);
                    Log.trace(index.name);
                    index.async("text").then(function (data: any) {
                        Log.trace("Inside async");
                        const tree: any = parse5.parse(data);
-                       Log.trace(tree.childNodes[6].tagName);
                        curr.findBuildingNames(tree);
-                       curr.trees.push(tree);
-                       fulfill(curr.trees);
+                       Log.trace("Return from findBuildingNames");
+                       /*if (isNullOrUndefined(curr)) {
+                           reject("seems like curr (this) is undefined");
+                       } else {
+                           curr.trees.push(tree);
+                           fulfill(curr.trees);
+                       }*/
                    }).catch(function (err: any) {
                            reject(err);
                    });
-                   // Log.trace(tree.childNodes[1].nodeName);
-                   // this.trees.push(tree);
                }
            } catch (err) {
                reject(err);
@@ -94,6 +94,50 @@ export default class DataController {
     public findBuildingNames(tree: any): any {
         // TODO: Walk through file tree recursively and find/extract the building names (differentiated by <td> tags)
         // TODO: Make the parameter and return types more strict
+        const html = tree.childNodes[6];
+        const body = html.childNodes[3];
+        const tbody = this.findNode(body, "tbody");
+        for (let i = 0; i < tbody.childNodes.length; i++) {
+            let inner: any;
+            // Log.trace("In loop");
+            if (tbody.childNodes[i].tagName === "tr") {
+                inner = tbody.childNodes[i].childNodes;
+                if (!isNullOrUndefined(inner)) {
+                    Log.trace("In inner");
+                    for (let j = 0; j < inner.length; j++) {
+                        Log.trace("In inner loop");
+                        if (!isNullOrUndefined(inner[j].attrs)) {
+                            // Log.trace("inner attrs");
+                            if (inner[j].attrs[0].value === "views-field views-field-field-building-code") {
+                                Log.trace("hit");
+                                Log.trace(inner[j].childNodes[0].value);
+                                this.buildingNames.push(inner[j].childNodes[0].value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public findNode(node: any, tagName: string) { // attr: any, visited: boolean) {
+        if (node.tagName === tagName) {
+            return node;
+        } else if (node.childNodes) {
+            return this.findInChildren(node.childNodes, tagName);
+        } else {
+            return null;
+        }
+    }
+
+    public findInChildren(nodes: any[], tagName: string) {
+        for (const node of nodes) {
+            const theNode: any = this.findNode(node, tagName);
+            if (theNode !== null) {
+                return theNode;
+            }
+        }
+        return null;
     }
 
     public parseRooms(id: string, content: string, file: JSZipObject): Promise<any> {
@@ -122,6 +166,11 @@ export default class DataController {
     public findRoomNames(tree: any): any {
         // TODO: Extract room names
         // TODO: Make the parameter and return types more strict
+        const html = tree.childNodes[6];
+        const body = html.childNodes[3];
+        Log.trace(body.tagName);
+        const table = this.findNode(body, "table");
+        Log.trace(table.tagName);
     }
 
     public locateBuilding(addr: string): any {
