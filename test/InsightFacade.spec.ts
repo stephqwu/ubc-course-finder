@@ -246,7 +246,6 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         } catch (err) {
             response = err;
         } finally {
-            expect(response).to.equal("heya");
             expect(response.code).to.equal(expectedCode);
         }
     });
