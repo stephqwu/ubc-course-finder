@@ -17,14 +17,14 @@ export interface IDataset {
 
 export default class DataController {
     private datasets: IDataset[];
-    // private files: any[];
-    private trees: any[] = new Array();
-    private buildingNames: any[];
+    // private buildingNames: any[];
+    private roomNames: any[];
+    private rooms: any[];
 
     constructor() {
         this.datasets = new Array();
-        // this.trees = new Array();
-        this.buildingNames = new Array();
+        this.roomNames = new Array();
+        this.rooms = new Array();
         // If any data files exist on disk, load datasets from those files
         const curr = this;
         if (fs.existsSync(dataFolder)) {
@@ -46,88 +46,127 @@ export default class DataController {
                 currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
                     zip.forEach(function (relativePath: string, file: JSZipObject) {
                         if (file.name === "index.htm") {
-                            curr.parseBuildings(id, content, file);
-                       /* } else if (!file.dir && !file.name.includes(".DS_Store")) {
-                            return this.parseRooms(id, content, file); */
+                            // curr.parseBuildings(id, content, file);
+                            if (!isNullOrUndefined(file)) {
+                                const index = file;
+                                index.async("text").then(function (data: any) {
+                                    const tree: any = parse5.parse(data);
+                                    curr.findRoomNames(tree, content);
+                                    // TODO: Figure out why curr.roomNames is empty here
+                                    Log.trace(curr.roomNames.length.toString());
+                                }).catch(function (err: any) {
+                                    reject(err);
+                                });
+                            }
+                        /*} else if (!file.dir && !file.name.includes(".DS_Store")) {
+                            curr.parseRooms(id, content, file); */
                         } else {
                             reject("Could not find an index.htm file");
                         }
                     });
+                }).catch(function (err: any) {
+                    reject(err);
                 });
-                fulfill(this.trees);
+                fulfill("Hooray we add");
             } catch (err) {
                 reject(err);
             }
         });
     }
 
-    public parseBuildings(id: string, content: string, file: any): Promise<any> {
-        Log.trace("Inside parseBuildings");
-        const curr = this;
-        return new Promise ( function (fulfill, reject) {
-           try {
-               if (!isNullOrUndefined(file)) {
-                   const index = file;
-                   Log.trace("INDEX: " + index);
-                   Log.trace(index.name);
-                   index.async("text").then(function (data: any) {
-                       Log.trace("Inside async");
-                       const tree: any = parse5.parse(data);
-                       curr.findBuildingNames(tree);
-                       Log.trace("Return from findBuildingNames");
-                       /*if (isNullOrUndefined(curr)) {
-                           reject("seems like curr (this) is undefined");
-                       } else {
-                           curr.trees.push(tree);
-                           fulfill(curr.trees);
-                       }*/
-                   }).catch(function (err: any) {
-                           reject(err);
-                   });
-               }
-           } catch (err) {
-               reject(err);
-           }
-        });
-    }
-
-    public findBuildingNames(tree: any): any {
-        // TODO: Walk through file tree recursively and find/extract the building names (differentiated by <td> tags)
-        // TODO: Make the parameter and return types more strict
+    public findRoomNames(tree: any, content: string): any {
         const html = tree.childNodes[6];
         const body = html.childNodes[3];
         const tbody = this.findNode(body, "tbody");
-        for (let i = 0; i < tbody.childNodes.length; i++) {
-            let inner: any;
-            // Log.trace("In loop");
-            if (tbody.childNodes[i].tagName === "tr") {
-                inner = tbody.childNodes[i].childNodes;
-                if (!isNullOrUndefined(inner)) {
-                    Log.trace("In inner");
-                    for (let j = 0; j < inner.length; j++) {
-                        Log.trace("In inner loop");
-                        if (!isNullOrUndefined(inner[j].attrs)) {
-                            // Log.trace("inner attrs");
-                            if (inner[j].attrs[0].value === "views-field views-field-field-building-code") {
-                                Log.trace("hit");
-                                Log.trace(inner[j].childNodes[0].value);
-                                this.buildingNames.push(inner[j].childNodes[0].value);
+        for (const tr of tbody.childNodes) {
+                let tableRows: any;
+                // Log.trace("In loop");
+                if (tr.tagName === "tr") {
+                    tableRows = tr.childNodes;
+                    if (!isNullOrUndefined(tableRows)) {
+                        // Log.trace("In inner");
+                        let building;
+                        for (const td of tableRows) {
+                            // Log.trace("In inner loop");
+                            if (!isNullOrUndefined(td.attrs)) {
+                                // Log.trace("inner attrs");
+                                let link;
+                                if (td.attrs[0].value === "views-field views-field-field-building-code") {
+                                    building = td.childNodes[0].value;
+                                } else if (td.attrs[0].value === "views-field views-field-title") {
+                                    link = td.childNodes[1].attrs[0].value;
+                                    this.findBuildingRooms(building, link, content);
+                                }
                             }
                         }
                     }
                 }
-            }
+                // TODO: Figure out why curr.roomNames is empty here
+                // Log.trace(this.roomNames.length.toString());
         }
     }
 
+    public findBuildingRooms(building: any, link: any, content: string): any {
+        const curr = this;
+        return new Promise(function (fulfill, reject) {
+            const currZip = new JSZip();
+            try {
+                currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
+                    zip.forEach(function (relativePath: string, file: JSZipObject) {
+                        if ("./" + relativePath === link) {
+                            if (!isNullOrUndefined(file)) {
+                                const index = file;
+                                index.async("text").then(function (data: any) {
+                                        const tree: any = parse5.parse(data);
+                                        const html = tree.childNodes[6];
+                                        const body = html.childNodes[3];
+                                        const tbody = curr.findNode(body, "tbody");
+                                        let inner;
+                                        const attr = "views-field views-field-field-room-number";
+                                        for (const tr of tbody.childNodes) {
+                                            if (tr.tagName === "tr" && tr !== null) {
+                                                inner = tr.childNodes;
+                                                if (!isNullOrUndefined(inner)) {
+                                                    for (const td of inner) {
+                                                        if (!isNullOrUndefined(td.attrs)) {
+                                                            let room;
+                                                            if (td.attrs[0].value === attr && td.childNodes[1] !== null
+                                                                && td !== null) {
+                                                                room = td.childNodes[1].childNodes[0].value;
+                                                                curr.roomNames.push(building + room);
+                                                                Log.trace(building + room);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            // TODO: Figure out why curr.roomNames is empty here
+                                            // Log.trace(curr.roomNames.length.toString());
+                                            // this.roomNames = curr.roomNames;
+                                        }
+                                }).catch(function (err: any) {
+                                    reject(err);
+                                });
+                            }
+                        }
+                    });
+                }).catch(function (err: any) {
+                    reject(err);
+                });
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     public findNode(node: any, tagName: string) { // attr: any, visited: boolean) {
-        if (node.tagName === tagName) {
-            return node;
-        } else if (node.childNodes) {
-            return this.findInChildren(node.childNodes, tagName);
-        } else {
-            return null;
-        }
+            if (node.tagName === tagName) {
+                return node;
+            } else if (node.childNodes) {
+                return this.findInChildren(node.childNodes, tagName);
+            } else {
+                return null;
+            }
     }
 
     public findInChildren(nodes: any[], tagName: string) {
@@ -140,39 +179,6 @@ export default class DataController {
         return null;
     }
 
-    public parseRooms(id: string, content: string, file: JSZipObject): Promise<any> {
-        const curr = this;
-        this.trees = new Array();
-        const files: any = new Array();
-
-        return new Promise (function (fulfill, reject) {
-
-            Log.trace(file.name);
-            files.push(file.async("text"));
-            Log.trace(files);
-            const buildingFile = files[0];
-            // Log.trace(buildingFile);
-            try {
-                const tree: any = parse5.parse(buildingFile);
-                this.trees.push(tree.childNodes[1].nodeName);
-                Log.trace(tree.childNodes[1].nodeName);
-                fulfill(tree);
-            } catch (err) {
-                reject(err);
-            }
-        });
-    }
-
-    public findRoomNames(tree: any): any {
-        // TODO: Extract room names
-        // TODO: Make the parameter and return types more strict
-        const html = tree.childNodes[6];
-        const body = html.childNodes[3];
-        Log.trace(body.tagName);
-        const table = this.findNode(body, "table");
-        Log.trace(table.tagName);
-    }
-
     public locateBuilding(addr: string): any {
         return;
     }
@@ -183,13 +189,36 @@ export default class DataController {
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise <boolean> {
         // JS objects passed as queries, not JSON string (already parsed)
         // Check JS object for validity, rather than validating JSON string/file
-        if (kind === InsightDatasetKind.Rooms) {
-            this.parseRoomsDataset(id, content);
-        } else {
+        const curr = this;
 
-            const curr = this;
-
-            return new Promise(function (fulfill, reject) {
+        return new Promise(function (fulfill, reject) {
+            if (kind === InsightDatasetKind.Rooms) {
+                curr.parseRoomsDataset(id, content);
+                const internalData = {
+                    // TODO: Figure out why curr.roomNames is empty here
+                    metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.roomNames.length + 5},
+                    data: "where's all the stuff",
+                };
+                if (!fs.existsSync(dataFolder)) {
+                    fs.mkdirSync(dataFolder);
+                }
+                for (const room in curr.roomNames) {
+                    internalData.data = room;
+                    curr.rooms.push(internalData);
+                }
+                Log.trace(curr.rooms[5]);
+                // TODO: Make added rooms data well-formed
+                fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData),
+                    function (err: any) {
+                        if (err) {
+                            Log.trace(err);
+                            reject(err);
+                        } else {
+                            // Log.trace("add was successful!");
+                            fulfill(true);
+                        }
+                    });
+            } else {
 
                 // If a dataset with the same ID already exists, we reject
                 for (const dataset of curr.datasets) {
@@ -265,8 +294,8 @@ export default class DataController {
                 }).catch(function (err) {
                     reject(err);
                 });
-            });
-        }
+            }
+        });
     }
 
     public removeDataset(id: string): Promise <boolean> {
