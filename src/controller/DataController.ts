@@ -17,12 +17,10 @@ export interface IDataset {
 
 export default class DataController {
     private datasets: IDataset[];
-    private roomNames: any[];
     private rooms: any[];
 
     constructor() {
         this.datasets = new Array();
-        this.roomNames = new Array();
         this.rooms = new Array();
         // If any data files exist on disk, load datasets from those files
         const curr = this;
@@ -50,10 +48,6 @@ export default class DataController {
                                 index.async("text").then(function (data: any) {
                                     const tree: any = parse5.parse(data);
                                     curr.findRoomNames(tree, content);
-
-                                    // TODO: Figure out why curr.roomNames is empty here
-                                    Log.trace(curr.roomNames.length.toString());
-
                                 }).catch(function (err: any) {
                                     reject(err);
                                 });
@@ -100,14 +94,12 @@ export default class DataController {
                         this.findBuildingRooms(buildingCode, buildingName, addr, link, content);
                     }
                 }
-                // TODO: Figure out why curr.roomNames is empty here
-                // Log.trace(this.roomNames.length.toString());
         }
     }
 
     public createRoomObject(buildingCode: string, buildingName: string, roomNumber: string, roomName: any, addr: any,
                             lat: any, lon: any, seats: any, type: any, furniture: any, href: any): any {
-        const roomObject = {
+        const obj = {
             rooms_fullname: "",
             rooms_shortname: "",
             rooms_number: "",
@@ -120,6 +112,18 @@ export default class DataController {
             rooms_furniture: "",
             rooms_href: "",
         };
+        obj.rooms_fullname = buildingName;
+        obj.rooms_shortname = buildingCode;
+        obj.rooms_number = roomNumber;
+        obj.rooms_name = roomName;
+        obj.rooms_address = addr;
+        obj.rooms_lat = lat;
+        obj.rooms_lon = lon;
+        obj.rooms_seats = seats;
+        obj.rooms_type = type;
+        obj.rooms_furniture = furniture;
+        obj.rooms_href = href;
+        return obj;
     }
 
     public findBuildingRooms(buildingCode: any, buildingName: any, addr: any, link: any, content: string): any {
@@ -150,12 +154,15 @@ export default class DataController {
                                                     let seats: string;
                                                     let type: string;
                                                     let furniture: string;
+                                                    let href: string;
                                                     for (const td of inner) {
                                                         if (!isNullOrUndefined(td.attrs)) {
                                                             const attr = td.attrs[0].value;
                                                             if (attr === rnAttr) {
                                                                 roomNumber = td.childNodes[1].childNodes[0].value;
                                                                 roomName = buildingCode + roomNumber;
+                                                                href = td.childNodes[1].attrs.value;
+                                                                Log.trace(href);
                                                             } else if (attr === rcAttr) {
                                                                 seats = td.childNodes[0].value;
                                                             } else if (attr === rfAttr) {
@@ -164,8 +171,11 @@ export default class DataController {
                                                                 type = td.childNodes[0].value;
                                                             }
                                                         }
+                                                        const latlon = curr.getLatLon(addr);
+                                                        const lat = 0;
+                                                        const lon = 1;
                                                     }
-                                                    Log.trace(roomNumber + roomName + seats + type + furniture);
+                                                    // Log.trace(roomNumber + roomName + seats + type + furniture);
                                                     /* const room = curr.createRoomObject(buildingCode, buildingName,
                                                         roomNumber, roomName, addr, lat, lon, seats, type, furniture,
                                                         href);
@@ -174,9 +184,6 @@ export default class DataController {
                                                 }
                                             }
                                         }
-                                        // TODO: Figure out why curr.roomNames is empty here
-                                        Log.trace(curr.roomNames.length.toString());
-                                        // this.roomNames = curr.roomNames;
                                 }).catch(function (err: any) {
                                     reject(err);
                                 });
@@ -225,20 +232,19 @@ export default class DataController {
             if (kind === InsightDatasetKind.Rooms) {
                 curr.parseRoomsDataset(id, content);
                 const internalData = {
-
-                    // TODO: Figure out why curr.roomNames is empty here
-                    metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.roomNames.length + 5},
-
-                    data: "where's all the stuff",
+                    metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.rooms.length + 5},
+                    data: "all the objects in rooms",
                 };
                 if (!fs.existsSync(dataFolder)) {
                     fs.mkdirSync(dataFolder);
                 }
-                for (const room in curr.roomNames) {
+                for (const room in curr.rooms) {
                     internalData.data = room;
                     curr.rooms.push(internalData);
                 }
+                // TODO: Figure out why curr.rooms is empty here
                 Log.trace(curr.rooms[5]);
+                Log.trace(curr.rooms.length.toString());
 
                 // TODO: Make added rooms data well-formed
                 fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData),
