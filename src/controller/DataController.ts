@@ -81,18 +81,23 @@ export default class DataController {
                 if (tr.tagName === "tr") {
                     tableRows = tr.childNodes;
                     if (!isNullOrUndefined(tableRows)) {
-                        let building;
+                        let buildingCode;
+                        let addr;
+                        let link;
+                        let buildingName;
                         for (const td of tableRows) {
                             if (!isNullOrUndefined(td.attrs)) {
-                                let link;
                                 if (td.attrs[0].value === "views-field views-field-field-building-code") {
-                                    building = td.childNodes[0].value;
+                                    buildingCode = td.childNodes[0].value;
+                                } else if (td.attrs[0].value === "views-field views-field-field-building-address") {
+                                    addr = td.childNodes[0].value;
                                 } else if (td.attrs[0].value === "views-field views-field-title") {
                                     link = td.childNodes[1].attrs[0].value;
-                                    this.findBuildingRooms(building, link, content);
+                                    buildingName = td.childNodes[1].childNodes[0].value;
                                 }
                             }
                         }
+                        this.findBuildingRooms(buildingCode, buildingName, addr, link, content);
                     }
                 }
                 // TODO: Figure out why curr.roomNames is empty here
@@ -100,12 +105,28 @@ export default class DataController {
         }
     }
 
-    public findBuildingRooms(building: any, link: any, content: string): any {
+    public createRoomObject(buildingCode: string, buildingName: string, roomNumber: string, roomName: any, addr: any,
+                            lat: any, lon: any, seats: any, type: any, furniture: any, href: any): any {
+        const roomObject = {
+            rooms_fullname: "",
+            rooms_shortname: "",
+            rooms_number: "",
+            rooms_name: "",
+            rooms_address: "",
+            rooms_lat: 0,
+            rooms_lon: 0,
+            rooms_seats: 0,
+            rooms_type: "",
+            rooms_furniture: "",
+            rooms_href: "",
+        };
+    }
+
+    public findBuildingRooms(buildingCode: any, buildingName: any, addr: any, link: any, content: string): any {
         const curr = this;
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
-            try {
-                currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
+            currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
                     zip.forEach(function (relativePath: string, file: JSZipObject) {
                         if ("./" + relativePath === link) {
                             if (!isNullOrUndefined(file)) {
@@ -116,28 +137,46 @@ export default class DataController {
                                         const body = html.childNodes[3];
                                         const tbody = curr.findNode(body, "tbody");
                                         let inner;
-                                        const attr = "views-field views-field-field-room-number";
+                                        const rnAttr = "views-field views-field-field-room-number";
+                                        const rcAttr = "views-field views-field-field-room-capacity";
+                                        const rfAttr = "views-field views-field-field-room-furniture";
+                                        const rtAttr = "views-field views-field-field-room-type";
                                         for (const tr of tbody.childNodes) {
                                             if (tr.tagName === "tr" && tr !== null) {
                                                 inner = tr.childNodes;
                                                 if (!isNullOrUndefined(inner)) {
+                                                    let roomNumber: string;
+                                                    let roomName: string;
+                                                    let seats: string;
+                                                    let type: string;
+                                                    let furniture: string;
                                                     for (const td of inner) {
                                                         if (!isNullOrUndefined(td.attrs)) {
-                                                            let room;
-                                                            if (td.attrs[0].value === attr && td.childNodes[1] !== null
-                                                                && td !== null) {
-                                                                room = td.childNodes[1].childNodes[0].value;
-                                                                curr.roomNames.push(building + room);
-                                                                Log.trace(building + room);
+                                                            const attr = td.attrs[0].value;
+                                                            if (attr === rnAttr) {
+                                                                roomNumber = td.childNodes[1].childNodes[0].value;
+                                                                roomName = buildingCode + roomNumber;
+                                                            } else if (attr === rcAttr) {
+                                                                seats = td.childNodes[0].value;
+                                                            } else if (attr === rfAttr) {
+                                                                furniture = td.childNodes[0].value;
+                                                            } else if (attr === rtAttr) {
+                                                                type = td.childNodes[0].value;
                                                             }
                                                         }
                                                     }
+                                                    Log.trace(roomNumber + roomName + seats + type + furniture);
+                                                    /* const room = curr.createRoomObject(buildingCode, buildingName,
+                                                        roomNumber, roomName, addr, lat, lon, seats, type, furniture,
+                                                        href);
+                                                    curr.rooms.push(room); */
+                                                    // Log.trace(buildingCode + room + buildingName + addr);
                                                 }
                                             }
-                                            // TODO: Figure out why curr.roomNames is empty here
-                                            // Log.trace(curr.roomNames.length.toString());
-                                            // this.roomNames = curr.roomNames;
                                         }
+                                        // TODO: Figure out why curr.roomNames is empty here
+                                        Log.trace(curr.roomNames.length.toString());
+                                        // this.roomNames = curr.roomNames;
                                 }).catch(function (err: any) {
                                     reject(err);
                                 });
@@ -147,9 +186,6 @@ export default class DataController {
                 }).catch(function (err: any) {
                     reject(err);
                 });
-            } catch (err) {
-                reject(err);
-            }
         });
     }
 
@@ -173,7 +209,7 @@ export default class DataController {
         return null;
     }
 
-    public locateBuilding(addr: string): any {
+    public getLatLon(addr: string): any {
         return;
     }
 
