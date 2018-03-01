@@ -17,7 +17,6 @@ export interface IDataset {
 
 export default class DataController {
     private datasets: IDataset[];
-    // private buildingNames: any[];
     private roomNames: any[];
     private rooms: any[];
 
@@ -46,20 +45,19 @@ export default class DataController {
                 currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
                     zip.forEach(function (relativePath: string, file: JSZipObject) {
                         if (file.name === "index.htm") {
-                            // curr.parseBuildings(id, content, file);
                             if (!isNullOrUndefined(file)) {
                                 const index = file;
                                 index.async("text").then(function (data: any) {
                                     const tree: any = parse5.parse(data);
                                     curr.findRoomNames(tree, content);
+
                                     // TODO: Figure out why curr.roomNames is empty here
                                     Log.trace(curr.roomNames.length.toString());
+
                                 }).catch(function (err: any) {
                                     reject(err);
                                 });
                             }
-                        /*} else if (!file.dir && !file.name.includes(".DS_Store")) {
-                            curr.parseRooms(id, content, file); */
                         } else {
                             reject("Could not find an index.htm file");
                         }
@@ -80,16 +78,12 @@ export default class DataController {
         const tbody = this.findNode(body, "tbody");
         for (const tr of tbody.childNodes) {
                 let tableRows: any;
-                // Log.trace("In loop");
                 if (tr.tagName === "tr") {
                     tableRows = tr.childNodes;
                     if (!isNullOrUndefined(tableRows)) {
-                        // Log.trace("In inner");
                         let building;
                         for (const td of tableRows) {
-                            // Log.trace("In inner loop");
                             if (!isNullOrUndefined(td.attrs)) {
-                                // Log.trace("inner attrs");
                                 let link;
                                 if (td.attrs[0].value === "views-field views-field-field-building-code") {
                                     building = td.childNodes[0].value;
@@ -195,8 +189,10 @@ export default class DataController {
             if (kind === InsightDatasetKind.Rooms) {
                 curr.parseRoomsDataset(id, content);
                 const internalData = {
+
                     // TODO: Figure out why curr.roomNames is empty here
                     metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.roomNames.length + 5},
+
                     data: "where's all the stuff",
                 };
                 if (!fs.existsSync(dataFolder)) {
@@ -207,6 +203,7 @@ export default class DataController {
                     curr.rooms.push(internalData);
                 }
                 Log.trace(curr.rooms[5]);
+
                 // TODO: Make added rooms data well-formed
                 fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData),
                     function (err: any) {
