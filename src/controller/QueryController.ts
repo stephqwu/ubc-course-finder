@@ -1,4 +1,4 @@
-
+import Decimal from "decimal.js";
 import {IDataset} from "./DataController";
 
 enum Comparator {
@@ -43,7 +43,28 @@ export default class QueryController {
                 order = null;
             }
             const columns = query["OPTIONS"]["COLUMNS"];
-            const result = this.performQueryHelper(query["WHERE"], id, columns);
+            let result: JSON[];
+            if (!query.hasOwnProperty("TRANSFORMATIONS")) {
+                result = this.performQueryHelper(query["WHERE"], id, columns);
+            } else {
+                const keyColumns = [];
+                const applyColumns = [];
+                for (const applyBody of query["TRANSFORMATIONS"]["APPLY"]) {
+                    keyColumns.push(applyBody[Object.keys(applyBody)[0]]
+                        [Object.keys(applyBody[Object.keys(applyBody)[0]])[0]]);
+                }
+                for (const groupKey of query["TRANSFORMATIONS"]["GROUP"]) {
+                    keyColumns.push(groupKey);
+                }
+                for (const key of columns) {
+                    if (!key.includes("_")) {
+                        applyColumns.push(key);
+                    }
+                }
+                result = this.performQueryHelper(query["WHERE"], id, keyColumns);
+                result = this.performTransformations(query["TRANSFORMATIONS"], id, applyColumns, result);
+            }
+
             if (order !== null) {
                 result.sort(function (a: any, b: any) {
                     for (const key of order) {
@@ -210,6 +231,66 @@ export default class QueryController {
             }
         }
         return count === 0;
+    }
+
+    private performTransformations(transformationsBody: any, id: string, columns: string[],
+                                   queryResult: any[]): JSON[] {
+        const groupKeys = [];
+        for (const groupKey of transformationsBody["GROUP"]) {
+            groupKeys.push(groupKey);
+        }
+        const groups: any = {};
+        // Form the groups by checking the equality of the keys listed in "GROUP"
+        for (const row of queryResult) {
+            let groupID = "";
+            for (const groupKey of groupKeys) {
+                groupID = groupID.concat(row[groupKey]).concat(",");
+            }
+            if (groups.hasOwnProperty(groupID)) {
+                groups[groupID]["ROWS"].push(row);
+            } else {
+                groups[groupID] = {};
+                groups[groupID]["ROWS"] = [];
+                groups[groupID]["ROWS"].push(row);
+            }
+        }
+        // Perform the transformations
+        for (const applyBody of transformationsBody["APPLY"]) {
+            const applyString = Object.keys(applyBody)[0];
+            if (columns.includes(applyString)) {
+                // Handle AVG case
+                if (Object.keys(applyBody[applyString])[0] === "AVG") {
+                    const columnToAvg = applyBody[applyString][Object.keys(applyBody[applyString])[0]];
+                    for (const key of Object.keys(groups)) {
+                        const group = groups[key];
+                        let sum: Decimal = new Decimal(0);
+                        for (const row of group["ROWS"]) {
+                            const currNum: Decimal = new Decimal(row[columnToAvg]);
+                            sum = currNum.add(sum);
+                        }
+                        const numRows = group["ROWS"].length;
+                        const avg = Number(sum) / numRows;
+                        group[applyString] = Number(avg.toFixed(2));
+                    }
+                }
+            }
+        }
+
+        const result: any[] = [];
+        for (const key of Object.keys(groups)) {
+            const group = groups[key];
+            const row: any = {};
+            for (const groupKey of groupKeys) {
+                row[groupKey] = group["ROWS"][0][groupKey];
+            }
+            for (const transformationCol of Object.keys(group)) {
+                if (transformationCol !== "ROWS") {
+                    row[transformationCol] = group[transformationCol];
+                }
+            }
+            result.push(row);
+        }
+        return result;
     }
 
     private getQueryID(query: any): string {
