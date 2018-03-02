@@ -161,7 +161,7 @@ export default class DataController {
                                                             if (attr === rnAttr) {
                                                                 roomNumber = td.childNodes[1].childNodes[0].value;
                                                                 roomName = buildingCode + roomNumber;
-                                                                href = td.childNodes[1].attrs.value;
+                                                                href = td.childNodes[1].attrs[0].value;
                                                                 Log.trace(href);
                                                             } else if (attr === rcAttr) {
                                                                 seats = td.childNodes[0].value;
