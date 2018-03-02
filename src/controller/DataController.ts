@@ -145,42 +145,44 @@ export default class DataController {
                                         const rcAttr = "views-field views-field-field-room-capacity";
                                         const rfAttr = "views-field views-field-field-room-furniture";
                                         const rtAttr = "views-field views-field-field-room-type";
-                                        for (const tr of tbody.childNodes) {
-                                            if (tr.tagName === "tr" && tr !== null) {
-                                                inner = tr.childNodes;
-                                                if (!isNullOrUndefined(inner)) {
-                                                    let roomNumber: string;
-                                                    let roomName: string;
-                                                    let seats: string;
-                                                    let type: string;
-                                                    let furniture: string;
-                                                    let href: string;
-                                                    for (const td of inner) {
-                                                        if (!isNullOrUndefined(td.attrs)) {
-                                                            const attr = td.attrs[0].value;
-                                                            if (attr === rnAttr) {
-                                                                roomNumber = td.childNodes[1].childNodes[0].value;
-                                                                roomName = buildingCode + roomNumber;
-                                                                href = td.childNodes[1].attrs[0].value;
-                                                                Log.trace(href);
-                                                            } else if (attr === rcAttr) {
-                                                                seats = td.childNodes[0].value;
-                                                            } else if (attr === rfAttr) {
-                                                                furniture = td.childNodes[0].value;
-                                                            } else if (attr === rtAttr) {
-                                                                type = td.childNodes[0].value;
+                                        if (!isNullOrUndefined(tbody)) {
+                                            for (const tr of tbody.childNodes) {
+                                                if (tr.tagName === "tr" && tr !== null) {
+                                                    inner = tr.childNodes;
+                                                    if (!isNullOrUndefined(inner)) {
+                                                        let roomNumber: string;
+                                                        let roomName: string;
+                                                        let seats: string;
+                                                        let type: string;
+                                                        let furniture: string;
+                                                        let href: string;
+                                                        for (const td of inner) {
+                                                            if (!isNullOrUndefined(td.attrs)) {
+                                                                const attr = td.attrs[0].value;
+                                                                if (attr === rnAttr) {
+                                                                    roomNumber = td.childNodes[1].childNodes[0].value;
+                                                                    roomName = buildingCode + roomNumber;
+                                                                    href = td.childNodes[1].attrs[0].value;
+                                                                    // Log.trace(href);
+                                                                } else if (attr === rcAttr) {
+                                                                    seats = td.childNodes[0].value;
+                                                                } else if (attr === rfAttr) {
+                                                                    furniture = td.childNodes[0].value;
+                                                                } else if (attr === rtAttr) {
+                                                                    type = td.childNodes[0].value;
+                                                                }
                                                             }
+                                                            const latlon = curr.getLatLon(addr);
                                                         }
-                                                        const latlon = curr.getLatLon(addr);
+                                                        // Log.trace(roomNumber + roomName + seats + type + furniture);
                                                         const lat = 0;
                                                         const lon = 1;
+                                                        const room = curr.createRoomObject(buildingCode, buildingName,
+                                                            roomNumber, roomName, addr, lat, lon, seats, type, furniture,
+                                                            href);
+                                                        curr.rooms.push(room);
+                                                        // Log.trace(buildingCode + room + buildingName + addr);
                                                     }
-                                                    // Log.trace(roomNumber + roomName + seats + type + furniture);
-                                                    /* const room = curr.createRoomObject(buildingCode, buildingName,
-                                                        roomNumber, roomName, addr, lat, lon, seats, type, furniture,
-                                                        href);
-                                                    curr.rooms.push(room); */
-                                                    // Log.trace(buildingCode + room + buildingName + addr);
                                                 }
                                             }
                                         }
