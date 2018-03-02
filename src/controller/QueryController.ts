@@ -258,19 +258,43 @@ export default class QueryController {
         for (const applyBody of transformationsBody["APPLY"]) {
             const applyString = Object.keys(applyBody)[0];
             if (columns.includes(applyString)) {
-                // Handle AVG case
-                if (Object.keys(applyBody[applyString])[0] === "AVG") {
-                    const columnToAvg = applyBody[applyString][Object.keys(applyBody[applyString])[0]];
-                    for (const key of Object.keys(groups)) {
-                        const group = groups[key];
-                        let sum: Decimal = new Decimal(0);
-                        for (const row of group["ROWS"]) {
-                            const currNum: Decimal = new Decimal(row[columnToAvg]);
-                            sum = currNum.add(sum);
+                const columnToCalc = applyBody[applyString][Object.keys(applyBody[applyString])[0]];
+                for (const key of Object.keys(groups)) {
+                    const group = groups[key];
+                    const applyToken = Object.keys(applyBody[applyString])[0];
+                    const numRows = group["ROWS"].length;
+                    // If the token is COUNT, we don't need to iterate the rows. We just need the number of rows
+                    if (applyToken === "COUNT") {
+                        group[applyString] = numRows;
+                    } else {
+                        if (isNaN(group["ROWS"][0][columnToCalc])) {
+                            throw new Error("MAX/MIN/SUM/AVG only works on numerical columns");
                         }
-                        const numRows = group["ROWS"].length;
-                        const avg = Number(sum) / numRows;
-                        group[applyString] = Number(avg.toFixed(2));
+                        // If the token is not COUNT, we need to iterate the rows
+                        let sum: Decimal = new Decimal(0);
+                        let min = group["ROWS"][0][columnToCalc];
+                        let max = group["ROWS"][0][columnToCalc];
+                        for (const row of group["ROWS"]) {
+                            const currNum = row[columnToCalc];
+                            const currNumDec: Decimal = new Decimal(currNum);
+                            sum = currNumDec.add(sum);
+                            if (currNum < min) {
+                                min = currNum;
+                            }
+                            if (currNum > max) {
+                                max = currNum;
+                            }
+                        }
+                        if (applyToken === "AVG") {
+                            const avg = Number(sum) / numRows;
+                            group[applyString] = Number(avg.toFixed(2));
+                        } else if (applyToken === "SUM") {
+                            group[applyString] = Number(sum.toFixed(2));
+                        } else if (applyToken === "MIN") {
+                            group[applyString] = min;
+                        } else if (applyToken === "MAX") {
+                            group[applyString] = max;
+                        }
                     }
                 }
             }
