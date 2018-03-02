@@ -178,8 +178,8 @@ export default class DataController {
                                                         const lat = 0;
                                                         const lon = 1;
                                                         const room = curr.createRoomObject(buildingCode, buildingName,
-                                                            roomNumber, roomName, addr, lat, lon, seats, type, furniture,
-                                                            href);
+                                                            roomNumber, roomName, addr, lat, lon, seats, type,
+                                                            furniture, href);
                                                         curr.rooms.push(room);
                                                         // Log.trace(buildingCode + room + buildingName + addr);
                                                     }
