@@ -1,4 +1,5 @@
 import fs = require("fs");
+import http = require("http");
 import JSZip = require("jszip");
 import {JSZipObject} from "jszip";
 import path = require("path");
@@ -67,10 +68,12 @@ export default class DataController {
     }
 
     public findRoomNames(tree: any, content: string): any {
-        const html = tree.childNodes[6];
-        const body = html.childNodes[3];
-        const tbody = this.findNode(body, "tbody");
-        for (const tr of tbody.childNodes) {
+        curr = this;
+        return new Promise(function(fulfill, reject) {
+            const html = tree.childNodes[6];
+            const body = html.childNodes[3];
+            const tbody = this.findNode(body, "tbody");
+            for (const tr of tbody.childNodes) {
                 let tableRows: any;
                 if (tr.tagName === "tr") {
                     tableRows = tr.childNodes;
@@ -85,16 +88,18 @@ export default class DataController {
                                     buildingCode = td.childNodes[0].value;
                                 } else if (td.attrs[0].value === "views-field views-field-field-building-address") {
                                     addr = td.childNodes[0].value;
+                                    addr = addr.trim();
                                 } else if (td.attrs[0].value === "views-field views-field-title") {
                                     link = td.childNodes[1].attrs[0].value;
                                     buildingName = td.childNodes[1].childNodes[0].value;
                                 }
                             }
                         }
-                        this.findBuildingRooms(buildingCode, buildingName, addr, link, content);
+                        curr.findBuildingRooms(buildingCode, buildingName, addr, link, content);
                     }
                 }
-        }
+            }
+        });
     }
 
     public createRoomObject(buildingCode: string, buildingName: string, roomNumber: string, roomName: any, addr: any,
@@ -172,14 +177,20 @@ export default class DataController {
                                                                     type = td.childNodes[0].value;
                                                                 }
                                                             }
-                                                            const latlon = curr.getLatLon(addr);
                                                         }
                                                         // Log.trace(roomNumber + roomName + seats + type + furniture);
-                                                        const lat = 0;
-                                                        const lon = 1;
+                                                        let lat;
+                                                        let lon;
+                                                        curr.getLatLon(addr).then(function (result: any) {
+                                                            lat = result.lat;
+                                                            lon = result.lon;
+                                                            Log.trace("LAT: " + lat);
+                                                        });
+                                                        // const lon = curr.getLon(addr);
+                                                        // Log.trace("LON: " + lon);
                                                         const room = curr.createRoomObject(buildingCode, buildingName,
-                                                            roomNumber, roomName, addr, lat, lon, seats, type, furniture,
-                                                            href);
+                                                            roomNumber, roomName, addr, lat, lon, seats, type,
+                                                            furniture, href);
                                                         curr.rooms.push(room);
                                                         // Log.trace(buildingCode + room + buildingName + addr);
                                                     }
@@ -219,7 +230,60 @@ export default class DataController {
     }
 
     public getLatLon(addr: string): any {
-        return;
+        return new Promise(function (fulfill, reject) {
+        this.getGeoResponse(addr).then(function (result: any) {
+            // Log.trace(result.lat);
+            fulfill(result);
+        }).catch(function (err: any) {
+            reject(err);
+        });
+        });
+    }
+
+    public getGeoResponse(address: string): any {
+        return new Promise(function (fulfill, reject) {
+            const encodedAddress = encodeURI(address);
+            http.get("http://skaha.cs.ubc.ca:11316/api/v1/team77/" + encodedAddress, (res: any) => {
+                const {statusCode} = res;
+                const contentType = res.headers["content-type"];
+
+                let error;
+                if (statusCode !== 200) {
+                    error = new Error("Request Failed.\n" +
+                        "Status Code: ${statusCode}");
+                } else if (!/^application\/json/.test(contentType)) {
+                    error = new Error("Invalid content-type.\n" +
+                        "Expected application/json but received ${contentType}");
+                }
+                if (error) {
+                    Log.trace("ERROR: " + error.message);
+                    // consume response data to free up memory
+                    res.resume();
+                    return;
+                }
+
+                res.setEncoding("utf8");
+                let rawData = "";
+                res.on("data", (chunk: any) => {
+                    rawData += chunk;
+                });
+                res.on("end", () => {
+                    try {
+                        const parsedData = JSON.parse(rawData);
+                        Log.trace("PARSED DATA: " + parsedData);
+                        if (parsedData.hasOwnProperty("lat")) {
+                            fulfill(parsedData);
+                        } else {
+                            reject(parsedData);
+                        }
+                    } catch (e) {
+                        Log.trace(e.message);
+                    }
+                });
+            }).on("error", (e: any) => {
+                Log.trace(`Got error: ${e.message}`);
+            });
+        });
     }
 
     // This method adds a new dataset with specified id and content. The content is a base64 string that we need
