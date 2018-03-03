@@ -23,7 +23,6 @@ export default class DataController {
     constructor() {
         this.datasets = new Array();
         this.rooms = new Array();
-        // If any data files exist on disk, load datasets from those files
         const curr = this;
         if (fs.existsSync(dataFolder)) {
             fs.readdirSync(dataFolder).forEach(function (file, index) {
@@ -37,18 +36,26 @@ export default class DataController {
     }
 
     public parseRoomsDataset(id: string, content: string): Promise<any> {
+
+        // method to parse a rooms dataset
         const curr = this;
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
             try {
                 currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
                     zip.forEach(function (relativePath: string, file: JSZipObject) {
+
+                        // finds the index.htm file with all the building names
                         if (file.name === "index.htm") {
                             if (!isNullOrUndefined(file)) {
                                 const index = file;
                                 index.async("text").then(function (data: any) {
+
+                                    // parse the index.htm file to an AST
                                     const tree: any = parse5.parse(data);
-                                    curr.findRoomNames(tree, content);
+
+                                    // helper to find info related to each building in the file
+                                    curr.findBuildingInfo(tree, content);
                                 }).catch(function (err: any) {
                                     reject(err);
                                 });
@@ -67,12 +74,18 @@ export default class DataController {
         });
     }
 
-    public findRoomNames(tree: any, content: string): any {
+    public findBuildingInfo(tree: any, content: string): any {
+
+        // helper to find info related to each building in the file
         const curr = this;
-        return new Promise(function(fulfill, reject) {
+        return new Promise(function (fulfill, reject) {
             const html = tree.childNodes[6];
             const body = html.childNodes[3];
+
+            // helper to find and return node with specific tag
             const tbody = curr.findNode(body, "tbody");
+
+            // gets each building's buildingCode, addr, buildingName, and links to rooms
             for (const tr of tbody.childNodes) {
                 let tableRows: any;
                 if (tr.tagName === "tr") {
@@ -94,7 +107,8 @@ export default class DataController {
                                 }
                             }
                         }
-                        curr.findBuildingRooms(buildingCode, buildingName, addr, link, content);
+                        // helper to find each building's rooms and each room's details
+                        curr.findBuildingRoomsAndInfo(buildingCode, buildingName, addr, link, content);
                     }
                 }
             }
@@ -130,12 +144,15 @@ export default class DataController {
         return obj;
     }
 
-    public findBuildingRooms(buildingCode: any, buildingName: any, addr: any, link: any, content: string): any {
+    public findBuildingRoomsAndInfo(buildingCode: any, buildingName: any, addr: any, link: any, content: string): any {
+        // method to find each building's rooms and each room's details
         const curr = this;
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
             currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
                     zip.forEach(function (relativePath: string, file: JSZipObject) {
+
+                        // goes to each room file from links in index.htm
                         if ("./" + relativePath === link) {
                             if (!isNullOrUndefined(file)) {
                                 const index = file;
@@ -143,6 +160,8 @@ export default class DataController {
                                         const tree: any = parse5.parse(data);
                                         const html = tree.childNodes[6];
                                         const body = html.childNodes[3];
+
+                                        // helper to find and return node with specific tag
                                         const tbody = curr.findNode(body, "tbody");
                                         let inner;
                                         const rnAttr = "views-field views-field-field-room-number";
@@ -150,6 +169,8 @@ export default class DataController {
                                         const rfAttr = "views-field views-field-field-room-furniture";
                                         const rtAttr = "views-field views-field-field-room-type";
                                         if (!isNullOrUndefined(tbody)) {
+
+                                            // gets each room's number, capacity, type, furniture, and external link
                                             for (const tr of tbody.childNodes) {
                                                 if (tr.tagName === "tr" && tr !== null) {
                                                     inner = tr.childNodes;
@@ -164,30 +185,37 @@ export default class DataController {
                                                             if (!isNullOrUndefined(td.attrs)) {
                                                                 const attr = td.attrs[0].value;
                                                                 if (attr === rnAttr) {
-                                                                    roomNumber = td.childNodes[1].childNodes[0].value;
+                                                                    roomNumber = td.childNodes[1].childNodes[0].value
+                                                                        .trim();
                                                                     roomName = buildingCode + roomNumber;
                                                                     href = td.childNodes[1].attrs[0].value;
                                                                     // Log.trace(href);
                                                                 } else if (attr === rcAttr) {
-                                                                    seats = td.childNodes[0].value;
+                                                                    seats = td.childNodes[0].value.trim();
                                                                 } else if (attr === rfAttr) {
-                                                                    furniture = td.childNodes[0].value;
+                                                                    furniture = td.childNodes[0].value.trim();
                                                                 } else if (attr === rtAttr) {
-                                                                    type = td.childNodes[0].value;
+                                                                    type = td.childNodes[0].value.trim();
                                                                 }
                                                             }
                                                         }
                                                         // Log.trace(roomNumber + roomName + seats + type + furniture);
                                                         let lat;
                                                         let lon;
-                                                        curr.getLatLon(addr).then(function (result: any) {
+
+                                                        // helper to get geoResponse object
+                                                        curr.getGeoResponse(addr).then(function (result: any) {
                                                             lat = result.lat;
                                                             lon = result.lon;
                                                             Log.trace("LAT: " + lat);
-                                                            Log.trace("LON: " + lat);
+                                                            Log.trace("LON: " + lon);
+
+                                                            // helper to create the room object
                                                             const room = curr.createRoomObject(buildingCode,
                                                                 buildingName, roomNumber, roomName, addr, lat, lon,
                                                                 seats, type, furniture, href);
+
+                                                            // TODO: have room push properly
                                                             curr.rooms.push(room);
                                                         });
                                                     }
@@ -226,21 +254,12 @@ export default class DataController {
         return null;
     }
 
-    public getLatLon(addr: string): any {
-        const curr = this;
-        return new Promise(function (fulfill, reject) {
-        curr.getGeoResponse(addr).then(function (result: any) {
-            // Log.trace(result.lat);
-            fulfill(result);
-        }).catch(function (err: any) {
-            reject(err);
-        });
-        });
-    }
-
     public getGeoResponse(address: string): any {
+
+        // gets the geoResponse object for each URI encoded address
         return new Promise(function (fulfill, reject) {
             const encodedAddress = encodeURI(address);
+
             http.get("http://skaha.cs.ubc.ca:11316/api/v1/team77/" + encodedAddress, (res: any) => {
                 const {statusCode} = res;
                 const contentType = res.headers["content-type"];
@@ -291,26 +310,30 @@ export default class DataController {
         // JS objects passed as queries, not JSON string (already parsed)
         // Check JS object for validity, rather than validating JSON string/file
         const curr = this;
+        if (!fs.existsSync(dataFolder)) {
+            fs.mkdirSync(dataFolder);
+        }
 
         return new Promise(function (fulfill, reject) {
+
             if (kind === InsightDatasetKind.Rooms) {
+                // Go to parseRoomsDataset
                 curr.parseRoomsDataset(id, content);
-                const internalData = {
-                    metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.rooms.length + 5},
-                    data: "all the objects in rooms",
-                };
-                if (!fs.existsSync(dataFolder)) {
-                    fs.mkdirSync(dataFolder);
-                }
+
+                const roomsObjects = [];
                 for (const room in curr.rooms) {
-                    internalData.data = room;
-                    curr.rooms.push(internalData);
+                    roomsObjects.push(room);
                 }
-                // TODO: Figure out why curr.rooms is empty here
+                // TODO: make rooms[5] not undefined
                 Log.trace(curr.rooms[5]);
+                // TODO: make rooms.length not 0
                 Log.trace(curr.rooms.length.toString());
 
-                // TODO: Make added rooms data well-formed
+                const internalData = {
+                    metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.rooms.length},
+                    data: roomsObjects,
+                };
+                // TODO: have internalData and the json file be well-formed
                 fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData),
                     function (err: any) {
                         if (err) {
@@ -376,9 +399,6 @@ export default class DataController {
                                 data: jsons,
                             };
                             curr.datasets.push(internalData);
-                            if (!fs.existsSync(dataFolder)) {
-                                fs.mkdirSync(dataFolder);
-                            }
 
                             fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData), function (err: any) {
                                 if (err) {
