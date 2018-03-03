@@ -318,32 +318,34 @@ export default class DataController {
 
             if (kind === InsightDatasetKind.Rooms) {
                 // Go to parseRoomsDataset
-                curr.parseRoomsDataset(id, content);
+                curr.parseRoomsDataset(id, content).then(function () {
+                    const roomsObjects = [];
+                    for (const room in curr.rooms) {
+                        roomsObjects.push(room);
+                    }
+                    // TODO: make rooms[5] not undefined
+                    Log.trace(curr.rooms[5]);
+                    // TODO: make rooms.length not 0
+                    Log.trace(curr.rooms.length.toString());
 
-                const roomsObjects = [];
-                for (const room in curr.rooms) {
-                    roomsObjects.push(room);
-                }
-                // TODO: make rooms[5] not undefined
-                Log.trace(curr.rooms[5]);
-                // TODO: make rooms.length not 0
-                Log.trace(curr.rooms.length.toString());
-
-                const internalData = {
-                    metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.rooms.length},
-                    data: roomsObjects,
-                };
-                // TODO: have internalData and the json file be well-formed
-                fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData),
-                    function (err: any) {
-                        if (err) {
-                            Log.trace(err);
-                            reject(err);
-                        } else {
-                            // Log.trace("add was successful!");
-                            fulfill(true);
-                        }
-                    });
+                    const internalData = {
+                        metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.rooms.length},
+                        data: roomsObjects,
+                    };
+                    // TODO: have internalData and the json file be well-formed
+                    fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData),
+                        function (err: any) {
+                            if (err) {
+                                Log.trace(err);
+                                reject(err);
+                            } else {
+                                // Log.trace("add was successful!");
+                                fulfill(true);
+                            }
+                        });
+                }).catch(function (err) {
+                    reject(err);
+                });
             } else {
 
                 // If a dataset with the same ID already exists, we reject
