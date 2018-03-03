@@ -68,11 +68,11 @@ export default class DataController {
     }
 
     public findRoomNames(tree: any, content: string): any {
-        curr = this;
+        const curr = this;
         return new Promise(function(fulfill, reject) {
             const html = tree.childNodes[6];
             const body = html.childNodes[3];
-            const tbody = this.findNode(body, "tbody");
+            const tbody = curr.findNode(body, "tbody");
             for (const tr of tbody.childNodes) {
                 let tableRows: any;
                 if (tr.tagName === "tr") {
@@ -85,13 +85,12 @@ export default class DataController {
                         for (const td of tableRows) {
                             if (!isNullOrUndefined(td.attrs)) {
                                 if (td.attrs[0].value === "views-field views-field-field-building-code") {
-                                    buildingCode = td.childNodes[0].value;
+                                    buildingCode = td.childNodes[0].value.trim();
                                 } else if (td.attrs[0].value === "views-field views-field-field-building-address") {
-                                    addr = td.childNodes[0].value;
-                                    addr = addr.trim();
+                                    addr = td.childNodes[0].value.trim();
                                 } else if (td.attrs[0].value === "views-field views-field-title") {
                                     link = td.childNodes[1].attrs[0].value;
-                                    buildingName = td.childNodes[1].childNodes[0].value;
+                                    buildingName = td.childNodes[1].childNodes[0].value.trim();
                                 }
                             }
                         }
@@ -185,14 +184,12 @@ export default class DataController {
                                                             lat = result.lat;
                                                             lon = result.lon;
                                                             Log.trace("LAT: " + lat);
+                                                            Log.trace("LON: " + lat);
+                                                            const room = curr.createRoomObject(buildingCode,
+                                                                buildingName, roomNumber, roomName, addr, lat, lon,
+                                                                seats, type, furniture, href);
+                                                            curr.rooms.push(room);
                                                         });
-                                                        // const lon = curr.getLon(addr);
-                                                        // Log.trace("LON: " + lon);
-                                                        const room = curr.createRoomObject(buildingCode, buildingName,
-                                                            roomNumber, roomName, addr, lat, lon, seats, type,
-                                                            furniture, href);
-                                                        curr.rooms.push(room);
-                                                        // Log.trace(buildingCode + room + buildingName + addr);
                                                     }
                                                 }
                                             }
@@ -230,8 +227,9 @@ export default class DataController {
     }
 
     public getLatLon(addr: string): any {
+        const curr = this;
         return new Promise(function (fulfill, reject) {
-        this.getGeoResponse(addr).then(function (result: any) {
+        curr.getGeoResponse(addr).then(function (result: any) {
             // Log.trace(result.lat);
             fulfill(result);
         }).catch(function (err: any) {
@@ -270,7 +268,7 @@ export default class DataController {
                 res.on("end", () => {
                     try {
                         const parsedData = JSON.parse(rawData);
-                        Log.trace("PARSED DATA: " + parsedData);
+                        // Log.trace("PARSED DATA: " + parsedData);
                         if (parsedData.hasOwnProperty("lat")) {
                             fulfill(parsedData);
                         } else {
