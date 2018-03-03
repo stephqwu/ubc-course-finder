@@ -114,8 +114,8 @@ export default class DataController {
                             }
                         }
                         // helper to find each building's rooms and each room's details
-                        promises.push(curr.findBuildingRoomsAndInfo(buildingCode, buildingName, addr, link, content, i)
-                        );
+                        promises.push(curr.findBuildingRoomsAndInfo(buildingCode, buildingName, addr, link, content, i,
+                        ));
                     }
                 }
             }
@@ -354,7 +354,7 @@ export default class DataController {
                 // Go to parseRoomsDataset
                 curr.parseRoomsDataset(id, content).then(function () {
                     const roomsObjects = [];
-                    for (const room in curr.rooms) {
+                    for (const room of curr.rooms) {
                         roomsObjects.push(room);
                     }
                     // TODO: make rooms[5] not undefined
