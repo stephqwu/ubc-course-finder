@@ -66,9 +66,10 @@ export default class DataController {
                             const tree: any = parse5.parse(data);
 
                             // helper to find info related to each building in the file
-                            curr.findBuildingInfo(tree, content);
+                            curr.findBuildingInfo(tree, content).then(function () {
+                                fulfill("Hooray we add");
+                            });
                         }
-                        fulfill("Hooray we add");
                     });
                 }).catch(function (err: any) {
                     reject(err);
@@ -89,7 +90,7 @@ export default class DataController {
 
             // helper to find and return node with specific tag
             const tbody = curr.findNode(body, "tbody");
-
+            const promises: Array<Promise<any>> = new Array();
             // gets each building's buildingCode, addr, buildingName, and links to rooms
             for (const tr of tbody.childNodes) {
                 let tableRows: any;
@@ -113,10 +114,15 @@ export default class DataController {
                             }
                         }
                         // helper to find each building's rooms and each room's details
-                        curr.findBuildingRoomsAndInfo(buildingCode, buildingName, addr, link, content);
+                        promises.push(curr.findBuildingRoomsAndInfo(buildingCode, buildingName, addr, link, content));
                     }
                 }
             }
+            Promise.all(promises).then(function () {
+                fulfill();
+            }).catch(function (err) {
+                reject(err);
+            });
         });
     }
 
