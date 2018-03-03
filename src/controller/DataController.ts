@@ -41,33 +41,38 @@ export default class DataController {
         const curr = this;
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
+            const promises: Array<Promise<string>> = new Array();
             try {
                 currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
+                    let found = false;
                     zip.forEach(function (relativePath: string, file: JSZipObject) {
 
                         // finds the index.htm file with all the building names
                         if (file.name === "index.htm") {
+                            found = true;
                             if (!isNullOrUndefined(file)) {
                                 const index = file;
-                                index.async("text").then(function (data: any) {
-
-                                    // parse the index.htm file to an AST
-                                    const tree: any = parse5.parse(data);
-
-                                    // helper to find info related to each building in the file
-                                    curr.findBuildingInfo(tree, content);
-                                }).catch(function (err: any) {
-                                    reject(err);
-                                });
+                                promises.push(index.async("text"));
                             }
-                        } else {
-                            reject("Could not find an index.htm file");
                         }
+                    });
+                    if (!found) {
+                        reject("no index.htm found");
+                    }
+                    Promise.all(promises).then(function (datas: any[]) {
+
+                        for (const data of datas) {
+                            // parse the index.htm file to an AST
+                            const tree: any = parse5.parse(data);
+
+                            // helper to find info related to each building in the file
+                            curr.findBuildingInfo(tree, content);
+                        }
+                        fulfill("Hooray we add");
                     });
                 }).catch(function (err: any) {
                     reject(err);
                 });
-                fulfill("Hooray we add");
             } catch (err) {
                 reject(err);
             }
