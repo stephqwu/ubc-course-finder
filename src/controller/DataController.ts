@@ -161,87 +161,88 @@ export default class DataController {
         return new Promise(function (fulfill, reject) {
             const currZip = new JSZip();
             currZip.loadAsync(content, {base64: true}).then(function (zip: JSZip) {
-                    zip.forEach(function (relativePath: string, file: JSZipObject) {
+                const promises: Array<Promise<any>> = new Array();
+                zip.forEach(function (relativePath: string, file: JSZipObject) {
 
-                        // goes to each room file from links in index.htm
-                        if ("./" + relativePath === link) {
-                            if (!isNullOrUndefined(file)) {
-                                const index = file;
-                                index.async("text").then(function (data: any) {
-                                        const tree: any = parse5.parse(data);
-                                        const html = tree.childNodes[6];
-                                        const body = html.childNodes[3];
+                    // goes to each room file from links in index.htm
+                    if ("./" + relativePath === link) {
+                        if (!isNullOrUndefined(file)) {
+                            const index = file;
+                            promises.push(index.async("text"));
+                        }
+                    }
+                });
+                Promise.all(promises).then(function (datas: any[]) {
+                    for (const data of datas) {
+                        const tree: any = parse5.parse(data);
+                        const html = tree.childNodes[6];
+                        const body = html.childNodes[3];
 
-                                        // helper to find and return node with specific tag
-                                        const tbody = curr.findNode(body, "tbody");
-                                        let inner;
-                                        const rnAttr = "views-field views-field-field-room-number";
-                                        const rcAttr = "views-field views-field-field-room-capacity";
-                                        const rfAttr = "views-field views-field-field-room-furniture";
-                                        const rtAttr = "views-field views-field-field-room-type";
-                                        if (!isNullOrUndefined(tbody)) {
+                        // helper to find and return node with specific tag
+                        const tbody = curr.findNode(body, "tbody");
+                        let inner;
+                        const rnAttr = "views-field views-field-field-room-number";
+                        const rcAttr = "views-field views-field-field-room-capacity";
+                        const rfAttr = "views-field views-field-field-room-furniture";
+                        const rtAttr = "views-field views-field-field-room-type";
+                        if (!isNullOrUndefined(tbody)) {
 
-                                            // gets each room's number, capacity, type, furniture, and external link
-                                            for (const tr of tbody.childNodes) {
-                                                if (tr.tagName === "tr" && tr !== null) {
-                                                    inner = tr.childNodes;
-                                                    if (!isNullOrUndefined(inner)) {
-                                                        let roomNumber: string;
-                                                        let roomName: string;
-                                                        let seats: string;
-                                                        let type: string;
-                                                        let furniture: string;
-                                                        let href: string;
-                                                        for (const td of inner) {
-                                                            if (!isNullOrUndefined(td.attrs)) {
-                                                                const attr = td.attrs[0].value;
-                                                                if (attr === rnAttr) {
-                                                                    roomNumber = td.childNodes[1].childNodes[0].value
-                                                                        .trim();
-                                                                    roomName = buildingCode + roomNumber;
-                                                                    href = td.childNodes[1].attrs[0].value;
-                                                                    // Log.trace(href);
-                                                                } else if (attr === rcAttr) {
-                                                                    seats = td.childNodes[0].value.trim();
-                                                                } else if (attr === rfAttr) {
-                                                                    furniture = td.childNodes[0].value.trim();
-                                                                } else if (attr === rtAttr) {
-                                                                    type = td.childNodes[0].value.trim();
-                                                                }
-                                                            }
-                                                        }
-                                                        // Log.trace(roomNumber + roomName + seats + type + furniture);
-                                                        let lat;
-                                                        let lon;
-
-                                                        // helper to get geoResponse object
-                                                        curr.getGeoResponse(addr).then(function (result: any) {
-                                                            lat = result.lat;
-                                                            lon = result.lon;
-                                                            Log.trace("LAT: " + lat);
-                                                            Log.trace("LON: " + lon);
-
-                                                            // helper to create the room object
-                                                            const room = curr.createRoomObject(buildingCode,
-                                                                buildingName, roomNumber, roomName, addr, lat, lon,
-                                                                seats, type, furniture, href);
-
-                                                            // TODO: have room push properly
-                                                            curr.rooms.push(room);
-                                                        });
-                                                    }
+                            // gets each room's number, capacity, type, furniture, and external link
+                            for (const tr of tbody.childNodes) {
+                                if (tr.tagName === "tr" && tr !== null) {
+                                    inner = tr.childNodes;
+                                    if (!isNullOrUndefined(inner)) {
+                                        let roomNumber: string;
+                                        let roomName: string;
+                                        let seats: string;
+                                        let type: string;
+                                        let furniture: string;
+                                        let href: string;
+                                        for (const td of inner) {
+                                            if (!isNullOrUndefined(td.attrs)) {
+                                                const attr = td.attrs[0].value;
+                                                if (attr === rnAttr) {
+                                                    roomNumber = td.childNodes[1].childNodes[0].value
+                                                        .trim();
+                                                    roomName = buildingCode + roomNumber;
+                                                    href = td.childNodes[1].attrs[0].value;
+                                                    // Log.trace(href);
+                                                } else if (attr === rcAttr) {
+                                                    seats = td.childNodes[0].value.trim();
+                                                } else if (attr === rfAttr) {
+                                                    furniture = td.childNodes[0].value.trim();
+                                                } else if (attr === rtAttr) {
+                                                    type = td.childNodes[0].value.trim();
                                                 }
                                             }
                                         }
-                                }).catch(function (err: any) {
-                                    reject(err);
-                                });
+                                        // Log.trace(roomNumber + roomName + seats + type + furniture);
+                                        let lat;
+                                        let lon;
+
+                                        // helper to get geoResponse object
+                                        curr.getGeoResponse(addr).then(function (result: any) {
+                                            lat = result.lat;
+                                            lon = result.lon;
+
+                                            // helper to create the room object
+                                            const room = curr.createRoomObject(buildingCode,
+                                                buildingName, roomNumber, roomName, addr, lat, lon,
+                                                seats, type, furniture, href);
+
+                                            // TODO: have room push properly
+                                            curr.rooms.push(room);
+                                        });
+                                    }
+                                }
                             }
                         }
-                    });
-                }).catch(function (err: any) {
-                    reject(err);
+                    }
+                    fulfill();
                 });
+            }).catch(function (err: any) {
+                reject(err);
+            });
         });
     }
 
