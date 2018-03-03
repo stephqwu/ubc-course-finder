@@ -263,14 +263,20 @@ export default class QueryController {
                     const group = groups[key];
                     const applyToken = Object.keys(applyBody[applyString])[0];
                     const numRows = group["ROWS"].length;
-                    // If the token is COUNT, we don't need to iterate the rows. We just need the number of rows
+                    // COUNT token is a bit different from the other 4 tokens so handle separately
                     if (applyToken === "COUNT") {
-                        group[applyString] = numRows;
+                        const uniques: any[] = [];
+                        for (const row of group["ROWS"]) {
+                            if (!uniques.includes(row[columnToCalc])) {
+                                uniques.push(row[columnToCalc]);
+                            }
+                        }
+                        group[applyString] = uniques.length;
                     } else {
                         if (isNaN(group["ROWS"][0][columnToCalc])) {
                             throw new Error("MAX/MIN/SUM/AVG only works on numerical columns");
                         }
-                        // If the token is not COUNT, we need to iterate the rows
+                        // SUM, AVG, MAX/MIN are similar so handle them together
                         let sum: Decimal = new Decimal(0);
                         let min = group["ROWS"][0][columnToCalc];
                         let max = group["ROWS"][0][columnToCalc];
