@@ -36,7 +36,7 @@ export default class DataController {
     }
 
     public parseRoomsDataset(id: string, content: string): Promise<any> {
-
+        const i = 0;
         // method to parse a rooms dataset
         const curr = this;
         return new Promise(function (fulfill, reject) {
@@ -66,7 +66,8 @@ export default class DataController {
                             const tree: any = parse5.parse(data);
 
                             // helper to find info related to each building in the file
-                            curr.findBuildingInfo(tree, content).then(function () {
+                            curr.findBuildingInfo(tree, content, i).then(function () {
+                                Log.trace("Returning from findBuildingInfo");
                                 fulfill("Hooray we add");
                             });
                         }
@@ -80,8 +81,7 @@ export default class DataController {
         });
     }
 
-    public findBuildingInfo(tree: any, content: string): any {
-
+    public findBuildingInfo(tree: any, content: string, i: number): any {
         // helper to find info related to each building in the file
         const curr = this;
         return new Promise(function (fulfill, reject) {
@@ -114,7 +114,8 @@ export default class DataController {
                             }
                         }
                         // helper to find each building's rooms and each room's details
-                        promises.push(curr.findBuildingRoomsAndInfo(buildingCode, buildingName, addr, link, content));
+                        promises.push(curr.findBuildingRoomsAndInfo(buildingCode, buildingName, addr, link, content, i)
+                        );
                     }
                 }
             }
@@ -155,7 +156,8 @@ export default class DataController {
         return obj;
     }
 
-    public findBuildingRoomsAndInfo(buildingCode: any, buildingName: any, addr: any, link: any, content: string): any {
+    public findBuildingRoomsAndInfo(buildingCode: any, buildingName: any, addr: any, link: any, content: string,
+                                    i: number): any {
         // method to find each building's rooms and each room's details
         const curr = this;
         return new Promise(function (fulfill, reject) {
@@ -204,9 +206,8 @@ export default class DataController {
                                                 if (attr === rnAttr) {
                                                     roomNumber = td.childNodes[1].childNodes[0].value
                                                         .trim();
-                                                    roomName = buildingCode + roomNumber;
+                                                    roomName = buildingCode + " " + roomNumber;
                                                     href = td.childNodes[1].attrs[0].value;
-                                                    // Log.trace(href);
                                                 } else if (attr === rcAttr) {
                                                     seats = td.childNodes[0].value.trim();
                                                 } else if (attr === rfAttr) {
@@ -215,15 +216,36 @@ export default class DataController {
                                                     type = td.childNodes[0].value.trim();
                                                 }
                                             }
+
                                         }
-                                        // Log.trace(roomNumber + roomName + seats + type + furniture);
                                         let lat;
+                                        let lon;
+
+                                        curr.getGeoResponse(addr).then(function (result: any) {
+                                            lat = result.lat;
+                                            lon = result.lon;
+                                            Log.trace(lon);
+                                            i++;
+                                            // helper to create the room object
+                                        }).then(function (res: any) {
+                                                Log.trace(i.toString());
+                                        });
+                                        const room = curr.createRoomObject(buildingCode,
+                                            buildingName, roomNumber, roomName, addr, lat, lon,
+                                            seats, type, furniture, href);
+                                        curr.rooms.push(room);
+                                        Log.trace(room.rooms_name);
+                                        // Log.trace(room.buildingName);
+                                        // Log.trace(room.lon);
+                                        // Log.trace(roomNumber + roomName + seats + type + furniture);
+                                        /*let lat;
                                         let lon;
 
                                         // helper to get geoResponse object
                                         curr.getGeoResponse(addr).then(function (result: any) {
                                             lat = result.lat;
                                             lon = result.lon;
+                                            Log.trace(lon);
 
                                             // helper to create the room object
                                             const room = curr.createRoomObject(buildingCode,
@@ -232,7 +254,7 @@ export default class DataController {
 
                                             // TODO: have room push properly
                                             curr.rooms.push(room);
-                                        });
+                                        });*/
                                     }
                                 }
                             }
@@ -336,7 +358,7 @@ export default class DataController {
                         roomsObjects.push(room);
                     }
                     // TODO: make rooms[5] not undefined
-                    Log.trace(curr.rooms[5]);
+                    Log.trace(curr.rooms[5].rooms_fullname);
                     // TODO: make rooms.length not 0
                     Log.trace(curr.rooms.length.toString());
 
