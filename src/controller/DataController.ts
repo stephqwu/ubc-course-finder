@@ -23,19 +23,19 @@ export interface IRoomDataset {
 }
 
 export default class DataController {
-    private datasets: IDataset[];
+    private courseDatasets: IDataset[];
     private rooms: any[];
     private roomDatasets: IRoomDataset[];
 
     constructor() {
-        this.datasets = new Array();
+        this.courseDatasets = new Array();
         this.rooms = new Array();
         this.roomDatasets = new Array();
         const curr = this;
         if (fs.existsSync(dataFolder)) {
             fs.readdirSync(dataFolder).forEach(function (file, index) {
                 try {
-                    curr.datasets.push(JSON.parse(fs.readFileSync(path.join(dataFolder, file), "utf-8")));
+                    curr.courseDatasets.push(JSON.parse(fs.readFileSync(path.join(dataFolder, file), "utf-8")));
                 } catch (err) {
                     Log.trace(err);
                 }
@@ -148,29 +148,29 @@ export default class DataController {
     public createRoomObject(buildingCode: string, buildingName: string, roomNumber: string, roomName: any, addr: any,
                             lat: any, lon: any, seats: any, type: any, furniture: any, href: any): any {
         const obj = {
-            rooms_fullname: "",
-            rooms_shortname: "",
-            rooms_number: "",
-            rooms_name: "",
-            rooms_address: "",
-            rooms_lat: 0,
-            rooms_lon: 0,
-            rooms_seats: 0,
-            rooms_type: "",
-            rooms_furniture: "",
-            rooms_href: "",
+            fullname: "",
+            shortname: "",
+            number: "",
+            name: "",
+            address: "",
+            lat: 0,
+            lon: 0,
+            seats: 0,
+            type: "",
+            furniture: "",
+            href: "",
         };
-        obj.rooms_fullname = buildingName;
-        obj.rooms_shortname = buildingCode;
-        obj.rooms_number = roomNumber;
-        obj.rooms_name = roomName;
-        obj.rooms_address = addr;
-        obj.rooms_lat = lat;
-        obj.rooms_lon = lon;
-        obj.rooms_seats = seats;
-        obj.rooms_type = type;
-        obj.rooms_furniture = furniture;
-        obj.rooms_href = href;
+        obj.fullname = buildingName;
+        obj.shortname = buildingCode;
+        obj.number = roomNumber;
+        obj.name = roomName;
+        obj.address = addr;
+        obj.lat = lat;
+        obj.lon = lon;
+        obj.seats = Number(seats);
+        obj.type = type;
+        obj.furniture = furniture;
+        obj.href = href;
         return obj;
     }
 
@@ -237,7 +237,7 @@ export default class DataController {
                                     if (!isNullOrUndefined(inner)) {
                                         let roomNumber: string;
                                         let roomName: string;
-                                        let seats: string;
+                                        let seats: number;
                                         let type: string;
                                         let furniture: string;
                                         let href: string;
@@ -441,7 +441,7 @@ export default class DataController {
             } else {
 
                 // If a dataset with the same ID already exists, we reject
-                for (const dataset of curr.datasets) {
+                for (const dataset of curr.courseDatasets) {
                     if (dataset["metadata"]["id"] === id) {
                         reject(false);
                     }
@@ -492,7 +492,7 @@ export default class DataController {
                                 metadata: {id, kind: InsightDatasetKind.Courses, numRows},
                                 data: jsons,
                             };
-                            curr.datasets.push(internalData);
+                            curr.courseDatasets.push(internalData);
 
                             fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData), function (err: any) {
                                 if (err) {
@@ -526,7 +526,11 @@ export default class DataController {
         });
     }
 
-    public getDatasets(): IDataset[] {
-        return this.datasets;
+    public getCourseDatasets(): IDataset[] {
+        return this.courseDatasets;
+    }
+
+    public getRoomDatasets(): IDataset[] {
+        return this.roomDatasets;
     }
 }

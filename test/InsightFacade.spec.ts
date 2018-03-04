@@ -17,7 +17,7 @@ export interface ITestQuery {
 
 describe("QueryController parse/validation tests", function () {
     it ("Should return true for valid query", () => {
-        const controller = new QueryController(null);
+        const controller = new QueryController(null, null);
         const isValid = controller.isValidQuery({
             WHERE: {
                 OR: [
@@ -58,7 +58,7 @@ describe("QueryController parse/validation tests", function () {
     });
 
     it ("Should return false for invalid query", () => {
-        const controller = new QueryController(null);
+        const controller = new QueryController(null, null);
         const isValid = controller.isValidQuery({
             WHERE: {
                 OR: [
@@ -96,7 +96,7 @@ describe("QueryController parse/validation tests", function () {
     });
 
     it ("Should return true for valid d2 query", () => {
-        const controller = new QueryController(null);
+        const controller = new QueryController(null, null);
         const isValid = controller.isValidQuery({
             WHERE: {
                 GT: { courses_avg: 70 },
@@ -117,7 +117,7 @@ describe("QueryController parse/validation tests", function () {
     });
 
     it ("Should return false for invalid d2 query", () => {
-        const controller = new QueryController(null);
+        const controller = new QueryController(null, null);
         const isValid = controller.isValidQuery({
             WHERE: {
                 GT: { courses_avg: 70 },
@@ -144,7 +144,7 @@ describe("QueryController parse/validation tests", function () {
     });
 
     it ("Should return true for valid more advanced d2 query", () => {
-        const controller = new QueryController(null);
+        const controller = new QueryController(null, null);
         const isValid = controller.isValidQuery({
             WHERE: {
                 GT: { courses_avg: 70 },

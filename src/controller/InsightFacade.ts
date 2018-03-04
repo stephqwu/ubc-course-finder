@@ -46,7 +46,8 @@ export default class InsightFacade implements IInsightFacade {
 
     public performQuery(query: any): Promise <InsightResponse> {
 
-        const controller: QueryController = new QueryController(InsightFacade.controller.getDatasets());
+        const controller: QueryController = new QueryController(InsightFacade.controller.getCourseDatasets(),
+            InsightFacade.controller.getRoomDatasets());
         let response: any = null;
         // TODO: build what should go in the result response body
         return new Promise(function (fulfill, reject) {
@@ -66,7 +67,8 @@ export default class InsightFacade implements IInsightFacade {
 
     public listDatasets(): Promise<InsightResponse> {
         return new Promise(function (fulfill) {
-            const datasets: IDataset[] = InsightFacade.controller.getDatasets();
+            const datasets: IDataset[] = InsightFacade.controller.getCourseDatasets().
+            concat(InsightFacade.controller.getRoomDatasets());
             const result: InsightDataset[] = [];
             for (const dataset of datasets) {
                 result.push(dataset["metadata"]);
