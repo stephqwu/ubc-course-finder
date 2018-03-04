@@ -252,7 +252,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
 
     it("Should reject adding this roomsDataset with the same name", async () => {
         const id: string = "rooms";
-        const expectedCode: number = 204;
+        const expectedCode: number = 400;
         let response: any;
         try {
             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);

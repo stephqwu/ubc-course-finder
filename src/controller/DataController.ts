@@ -374,19 +374,21 @@ export default class DataController {
             if (kind === InsightDatasetKind.Rooms) {
                 // Go to parseRoomsDataset
                 curr.parseRoomsDataset(id, content).then(function () {
-                    const roomsObjects = [];
+                    /* let roomsObjects = [];
                     for (const room of curr.rooms) {
                         roomsObjects.push(room);
-                    }
+                        curr.rooms.pop();
+                    }*/
                     Log.trace(curr.rooms[5].rooms_lat);
                     Log.trace(curr.rooms[5].rooms_lon);
                     Log.trace(curr.rooms.length.toString());
 
                     const internalData: IRoomDataset = {
                         metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.rooms.length},
-                        data: roomsObjects,
+                        data: curr.rooms,
                     };
                     curr.roomDatasets.push(internalData);
+                    curr.rooms.splice(0, curr.rooms.length);
                     Log.trace(internalData.metadata.numRows.toString());
                     for (const dataset of curr.roomDatasets) {
                         if (dataset["metadata"]["id"] === id) {
