@@ -192,6 +192,29 @@ export default class DataController {
                         }
                     }
                 });
+                let lat: any;
+                let lon: any;
+
+                /*async function pleaseWork() {
+                    const result = await curr.getGeoResponse(addr);
+                    lat = result.lat;
+                    lon = result.lon;
+                    const room = curr.createRoomObject(buildingCode,
+                        buildingName, roomNumber, roomName, addr, lat, lon,
+                        seats, type, furniture, href);
+                    curr.rooms.push(room);
+                }
+
+                pleaseWork();*/
+                async function wait() {
+                    const result = await curr.getGeoResponse(addr).catch((err: any) => {
+                        Log.trace(err);
+                    });
+                    lat = result.lat;
+                    lon = result.lon;
+                }
+
+                wait().then(function() {
                 Promise.all(promises).then(function (datas: any[]) {
                     for (const data of datas) {
                         const tree: any = parse5.parse(data);
@@ -236,22 +259,22 @@ export default class DataController {
                                             }
 
                                         }
-                                        let lat;
-                                        let lon;
 
-                                        curr.getGeoResponse(addr).then(function (result: any) {
-                                            lat = result.lat;
-                                            lon = result.lon;
-                                            // Log.trace(lon);
-                                            i++;
-                                            // helper to create the room object
-                                        }).then(function (res: any) {
-                                               // Log.trace(i.toString());
-                                        });
+
                                         const room = curr.createRoomObject(buildingCode,
-                                            buildingName, roomNumber, roomName, addr, 49, 120,
+                                            buildingName, roomNumber, roomName, addr, lat, lon,
                                             seats, type, furniture, href);
                                         curr.rooms.push(room);
+
+                                        /*curr.getGeoResponse(addr).then(function (result: any) {
+                                            lat = result.lat;
+                                            lon = result.lon;
+                                            // helper to create the room object
+                                        }).then(function (res: any) {
+
+                                               // Log.trace(i.toString());
+                                        });*/
+
                                         // Log.trace(room.rooms_name);
                                         // Log.trace(room.buildingName);
                                         // Log.trace(room.lon);
@@ -269,8 +292,6 @@ export default class DataController {
                                             const room = curr.createRoomObject(buildingCode,
                                                 buildingName, roomNumber, roomName, addr, lat, lon,
                                                 seats, type, furniture, href);
-
-                                            // TODO: have room push properly
                                             curr.rooms.push(room);
                                         });*/
                                     }
@@ -278,7 +299,10 @@ export default class DataController {
                             }
                         }
                     }
-                    fulfill();
+                }).catch(function (err: any) {
+                    reject(err);
+                });
+                fulfill();
                 });
             }).catch(function (err: any) {
                 reject(err);

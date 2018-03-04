@@ -278,7 +278,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
 
     it("Should reject adding this roomsDataset with null id", async () => {
         const id: string = null;
-        const expectedCode: number = 400;
+        const expectedCode: number = 400
         let response: any;
         try {
             response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
