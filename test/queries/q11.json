@@ -1,0 +1,42 @@
+{
+    "title": "simple d2 test with rooms",
+    "query":
+    {
+        "WHERE": {
+            "GT": {
+                "courses_year": 1900
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "avgGrade"
+            ],
+            "ORDER": {
+                "dir": "UP",
+                "keys": [
+                    "avgGrade",
+                    "courses_dept"
+                ]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "courses_dept"
+            ],
+            "APPLY": [
+                {
+                    "avgGrade": {
+                        "AVG": "courses_avg"
+                    }
+                }
+            ]
+        }
+    },
+    "response":
+    {
+        "code": 200,
+        "body": {"result":[{"courses_dept":"vant","avgGrade":67.88},{"courses_dept":"rmst","avgGrade":69.93},{"courses_dept":"wrds","avgGrade":70.28},{"courses_dept":"busi","avgGrade":70.71},{"courses_dept":"math","avgGrade":70.74},{"courses_dept":"psyc","avgGrade":71.63},{"courses_dept":"phil","avgGrade":71.93},{"courses_dept":"astu","avgGrade":71.95},{"courses_dept":"fmst","avgGrade":72.5},{"courses_dept":"japn","avgGrade":72.94},{"courses_dept":"arcl","avgGrade":73.09},{"courses_dept":"geob","avgGrade":73.25},{"courses_dept":"laso","avgGrade":73.52},{"courses_dept":"fren","avgGrade":73.6},{"courses_dept":"chem","avgGrade":73.71},{"courses_dept":"engl","avgGrade":73.71},{"courses_dept":"hist","avgGrade":73.73},{"courses_dept":"span","avgGrade":73.8},{"courses_dept":"poli","avgGrade":73.94},{"courses_dept":"ital","avgGrade":74.04},{"courses_dept":"nest","avgGrade":74.04},{"courses_dept":"clst","avgGrade":74.15},{"courses_dept":"geog","avgGrade":74.42},{"courses_dept":"asia","avgGrade":74.48},{"courses_dept":"fopr","avgGrade":74.49},{"courses_dept":"latn","avgGrade":74.52},{"courses_dept":"mdvl","avgGrade":74.89},{"courses_dept":"scie","avgGrade":75.08},{"courses_dept":"stat","avgGrade":75.15},{"courses_dept":"biol","avgGrade":75.33},{"courses_dept":"elec","avgGrade":75.43},{"courses_dept":"last","avgGrade":75.47},{"courses_dept":"wood","avgGrade":75.6},{"courses_dept":"fist","avgGrade":75.72},{"courses_dept":"econ","avgGrade":75.73},{"courses_dept":"soci","avgGrade":75.8},{"courses_dept":"clch","avgGrade":75.84},{"courses_dept":"korn","avgGrade":76.07},{"courses_dept":"law","avgGrade":76.07},{"courses_dept":"mtrl","avgGrade":76.1},{"courses_dept":"comm","avgGrade":76.11},{"courses_dept":"astr","avgGrade":76.17},{"courses_dept":"itst","avgGrade":76.26},{"courses_dept":"chin","avgGrade":76.35},{"courses_dept":"apsc","avgGrade":76.54},{"courses_dept":"relg","avgGrade":76.63},{"courses_dept":"visa","avgGrade":76.69},{"courses_dept":"fre","avgGrade":76.85},{"courses_dept":"lled","avgGrade":76.9},{"courses_dept":"asic","avgGrade":76.92},{"courses_dept":"bala","avgGrade":76.95},{"courses_dept":"cogs","avgGrade":76.97},{"courses_dept":"cpsc","avgGrade":77.06},{"courses_dept":"anth","avgGrade":77.46},{"courses_dept":"coec","avgGrade":77.57},{"courses_dept":"fnis","avgGrade":77.57},{"courses_dept":"eosc","avgGrade":77.64},{"courses_dept":"rgla","avgGrade":77.64},{"courses_dept":"apbi","avgGrade":77.69},{"courses_dept":"cpen","avgGrade":77.74},{"courses_dept":"hebr","avgGrade":77.74},{"courses_dept":"arth","avgGrade":77.75},{"courses_dept":"bioc","avgGrade":77.75},{"courses_dept":"phys","avgGrade":77.75},{"courses_dept":"fhis","avgGrade":77.76},{"courses_dept":"cons","avgGrade":77.88},{"courses_dept":"frst","avgGrade":78.02},{"courses_dept":"fnh","avgGrade":78.06},{"courses_dept":"urst","avgGrade":78.08},{"courses_dept":"lfs","avgGrade":78.24},{"courses_dept":"enph","avgGrade":78.38},{"courses_dept":"kin","avgGrade":78.51},{"courses_dept":"cnrs","avgGrade":78.57},{"courses_dept":"ling","avgGrade":78.69},{"courses_dept":"mech","avgGrade":78.73},{"courses_dept":"chbe","avgGrade":78.94},{"courses_dept":"grek","avgGrade":78.97},{"courses_dept":"cohr","avgGrade":79.07},{"courses_dept":"micb","avgGrade":79.21},{"courses_dept":"grsj","avgGrade":79.48},{"courses_dept":"germ","avgGrade":79.55},{"courses_dept":"cens","avgGrade":79.59},{"courses_dept":"civl","avgGrade":79.66},{"courses_dept":"igen","avgGrade":79.86},{"courses_dept":"port","avgGrade":79.99},{"courses_dept":"iar","avgGrade":80},{"courses_dept":"musc","avgGrade":80},{"courses_dept":"mine","avgGrade":80.05},{"courses_dept":"arbc","avgGrade":80.08},{"courses_dept":"baac","avgGrade":80.23},{"courses_dept":"ursy","avgGrade":80.36},{"courses_dept":"ends","avgGrade":80.61},{"courses_dept":"appp","avgGrade":80.7},{"courses_dept":"punj","avgGrade":80.81},{"courses_dept":"caps","avgGrade":80.86},{"courses_dept":"fnel","avgGrade":80.96},{"courses_dept":"scan","avgGrade":81.11},{"courses_dept":"basc","avgGrade":81.13},{"courses_dept":"dhyg","avgGrade":81.13},{"courses_dept":"atsc","avgGrade":81.26},{"courses_dept":"pols","avgGrade":81.3},{"courses_dept":"bahr","avgGrade":81.33},{"courses_dept":"phar","avgGrade":81.33},{"courses_dept":"arch","avgGrade":81.38},{"courses_dept":"bapa","avgGrade":81.46},{"courses_dept":"envr","avgGrade":81.49},{"courses_dept":"ufor","avgGrade":81.51},{"courses_dept":"russ","avgGrade":81.55},{"courses_dept":"isci","avgGrade":81.57},{"courses_dept":"swed","avgGrade":81.57},{"courses_dept":"food","avgGrade":81.66},{"courses_dept":"bama","avgGrade":81.87},{"courses_dept":"ba","avgGrade":82.01},{"courses_dept":"pers","avgGrade":82.08},{"courses_dept":"fipr","avgGrade":82.16},{"courses_dept":"surg","avgGrade":82.17},{"courses_dept":"babs","avgGrade":82.38},{"courses_dept":"soil","avgGrade":82.38},{"courses_dept":"baen","avgGrade":82.44},{"courses_dept":"spha","avgGrade":82.5},{"courses_dept":"larc","avgGrade":82.55},{"courses_dept":"cics","avgGrade":82.56},{"courses_dept":"basm","avgGrade":82.6},{"courses_dept":"bafi","avgGrade":82.62},{"courses_dept":"baul","avgGrade":82.67},{"courses_dept":"bams","avgGrade":82.75},{"courses_dept":"thtr","avgGrade":82.75},{"courses_dept":"adhe","avgGrade":82.85},{"courses_dept":"bait","avgGrade":83.12},{"courses_dept":"phrm","avgGrade":83.13},{"courses_dept":"path","avgGrade":83.33},{"courses_dept":"dani","avgGrade":83.57},{"courses_dept":"crwr","avgGrade":83.69},{"courses_dept":"rmes","avgGrade":83.9},{"courses_dept":"iwme","avgGrade":84},{"courses_dept":"nrsc","avgGrade":84.06},{"courses_dept":"nurs","avgGrade":84.2},{"courses_dept":"dent","avgGrade":84.23},{"courses_dept":"medg","avgGrade":84.25},{"courses_dept":"mrne","avgGrade":84.41},{"courses_dept":"hinu","avgGrade":84.43},{"courses_dept":"arst","avgGrade":84.48},{"courses_dept":"educ","avgGrade":84.5},{"courses_dept":"ceen","avgGrade":84.62},{"courses_dept":"name","avgGrade":84.63},{"courses_dept":"libr","avgGrade":84.68},{"courses_dept":"jrnl","avgGrade":84.85},{"courses_dept":"bmeg","avgGrade":84.86},{"courses_dept":"gpp","avgGrade":84.89},{"courses_dept":"anat","avgGrade":84.9},{"courses_dept":"gbpr","avgGrade":84.9},{"courses_dept":"pcth","avgGrade":84.9},{"courses_dept":"sowk","avgGrade":84.9},{"courses_dept":"eced","avgGrade":84.92},{"courses_dept":"sans","avgGrade":84.92},{"courses_dept":"udes","avgGrade":84.98},{"courses_dept":"libe","avgGrade":85.06},{"courses_dept":"rsot","avgGrade":85.27},{"courses_dept":"obst","avgGrade":85.35},{"courses_dept":"info","avgGrade":85.4},{"courses_dept":"eece","avgGrade":85.42},{"courses_dept":"ccst","avgGrade":85.72},{"courses_dept":"audi","avgGrade":85.87},{"courses_dept":"rhsc","avgGrade":85.91},{"courses_dept":"hgse","avgGrade":86.22},{"courses_dept":"cnto","avgGrade":86.23},{"courses_dept":"spph","avgGrade":86.37},{"courses_dept":"hunu","avgGrade":86.47},{"courses_dept":"lais","avgGrade":86.52},{"courses_dept":"phth","avgGrade":86.59},{"courses_dept":"cnps","avgGrade":86.68},{"courses_dept":"midw","avgGrade":86.89},{"courses_dept":"sts","avgGrade":87.25},{"courses_dept":"bota","avgGrade":87.4},{"courses_dept":"medi","avgGrade":87.4},{"courses_dept":"plan","avgGrade":87.58},{"courses_dept":"edst","avgGrade":87.62},{"courses_dept":"fish","avgGrade":87.64},{"courses_dept":"gsat","avgGrade":87.82},{"courses_dept":"edcp","avgGrade":88.48},{"courses_dept":"chil","avgGrade":88.58},{"courses_dept":"zool","avgGrade":88.9},{"courses_dept":"etec","avgGrade":89.02},{"courses_dept":"cell","avgGrade":89.14},{"courses_dept":"onco","avgGrade":89.82},{"courses_dept":"biof","avgGrade":89.88},{"courses_dept":"epse","avgGrade":89.95},{"courses_dept":"aanb","avgGrade":91.14}]}
+    }
+}
+

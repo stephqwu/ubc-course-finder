@@ -364,8 +364,10 @@ export default class QueryController {
             return "Audit";
         } else if (keySuffix === "uuid") {
             return "id";
+        } else if (keySuffix === "year") {
+            return "Year";
         } else {
-            throw Error("That is not a pre-defined column name");
+            throw Error("That is not a pre-defined column name: " + keySuffix);
         }
     }
 
@@ -386,7 +388,7 @@ export default class QueryController {
             throw new Error("Key type" + keySuffix + "cannot be used with MCOMPARATORs");
         } */
         if (dataKind === "courses" && keySuffix !== "Avg" && keySuffix !== "Pass" && keySuffix !== "Fail" &&
-            keySuffix !== "Audit") {
+            keySuffix !== "Audit" && keySuffix !== "Year") {
             throw new Error("Key type " + keySuffix + " cannot be used with MCOMPARATORs");
         }
         if (dataKind === "lat" && keySuffix !== "lon" && keySuffix !== "seats") {
@@ -398,22 +400,26 @@ export default class QueryController {
                 const realJson: any = json; // This is a workaround for a tslint bug
                 // Iterate through the results array within the data block
                 for (const course of realJson["result"]) {
-                    if (typeof course[keySuffix] !== "number") {
-                        throw Error("Value " + course[keySuffix] + "is not a number");
+                    const section = course["Section"];
+                    let num;
+                    if (section === "overall" && keySuffix === "Year") {
+                        num = 1900;
+                    } else {
+                        num = Number(course[keySuffix]);
                     }
-                    if (comparator === Comparator.GT && course[keySuffix] > query["GT"][key]) {
+                    if (comparator === Comparator.GT && num > query["GT"][key]) {
                         let response: any = {};
                         for (const column of columns) {
                             response = this.extractFromDataset(column, course, response, dataKind);
                         }
                         data.push(response);
-                    } else if (comparator === Comparator.LT && course[keySuffix] < query["LT"][key]) {
+                    } else if (comparator === Comparator.LT && num < query["LT"][key]) {
                         let response: any = {};
                         for (const column of columns) {
                             response = this.extractFromDataset(column, course, response, dataKind);
                         }
                         data.push(response);
-                    } else if (comparator === Comparator.EQ && course[keySuffix] === query["EQ"][key]) {
+                    } else if (comparator === Comparator.EQ && num === query["EQ"][key]) {
                         let response: any = {};
                         for (const column of columns) {
                             response = this.extractFromDataset(column, course, response, dataKind);
