@@ -29,6 +29,7 @@ export default class DataController {
     constructor() {
         this.datasets = new Array();
         this.rooms = new Array();
+        this.roomDatasets = new Array();
         const curr = this;
         if (fs.existsSync(dataFolder)) {
             fs.readdirSync(dataFolder).forEach(function (file, index) {
