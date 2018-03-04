@@ -388,7 +388,7 @@ export default class DataController {
                         data: curr.rooms,
                     };
                     curr.roomDatasets.push(internalData);
-                    curr.rooms.splice(0, curr.rooms.length);
+
                     Log.trace(internalData.metadata.numRows.toString());
                     for (const dataset of curr.roomDatasets) {
                         if (dataset["metadata"]["id"] === id) {
@@ -410,7 +410,8 @@ export default class DataController {
                                 // Log.trace("add was successful!");
                                 fulfill(true);
                             }
-                        });
+                    });
+                    curr.rooms.splice(0, curr.rooms.length);
                 }).catch(function (err) {
                     reject(err);
                 });
