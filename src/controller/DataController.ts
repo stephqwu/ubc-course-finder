@@ -10,6 +10,7 @@ import {InsightDataset, InsightDatasetKind, InsightResponse} from "./IInsightFac
 import {isNullOrUndefined} from "util";
 
 const dataFolder = "./data";
+const roomsDataFolder = "./rooms";
 
 export interface IDataset {
     metadata: InsightDataset;
@@ -35,6 +36,16 @@ export default class DataController {
             fs.readdirSync(dataFolder).forEach(function (file, index) {
                 try {
                     curr.datasets.push(JSON.parse(fs.readFileSync(path.join(dataFolder, file), "utf-8")));
+                } catch (err) {
+                    Log.trace(err);
+                }
+            });
+        }
+        if (fs.existsSync(roomsDataFolder)) {
+            fs.readdirSync(roomsDataFolder).forEach(function (file, index) {
+                try {
+                    curr.roomDatasets.push(JSON.parse(fs.readFileSync(path.join(roomsDataFolder, file),
+                        "utf-8")));
                 } catch (err) {
                     Log.trace(err);
                 }
@@ -231,17 +242,17 @@ export default class DataController {
                                         curr.getGeoResponse(addr).then(function (result: any) {
                                             lat = result.lat;
                                             lon = result.lon;
-                                            Log.trace(lon);
+                                            // Log.trace(lon);
                                             i++;
                                             // helper to create the room object
                                         }).then(function (res: any) {
-                                                Log.trace(i.toString());
+                                               // Log.trace(i.toString());
                                         });
                                         const room = curr.createRoomObject(buildingCode,
                                             buildingName, roomNumber, roomName, addr, 49, 120,
                                             seats, type, furniture, href);
                                         curr.rooms.push(room);
-                                        Log.trace(room.rooms_name);
+                                        // Log.trace(room.rooms_name);
                                         // Log.trace(room.buildingName);
                                         // Log.trace(room.lon);
                                         // Log.trace(roomNumber + roomName + seats + type + furniture);
@@ -354,6 +365,9 @@ export default class DataController {
         if (!fs.existsSync(dataFolder)) {
             fs.mkdirSync(dataFolder);
         }
+        if (!fs.existsSync(roomsDataFolder)) {
+            fs.mkdirSync(roomsDataFolder);
+        }
 
         return new Promise(function (fulfill, reject) {
 
@@ -364,9 +378,8 @@ export default class DataController {
                     for (const room of curr.rooms) {
                         roomsObjects.push(room);
                     }
-                    // TODO: make rooms[5] not undefined
-                    Log.trace(curr.rooms[5].rooms_fullname);
-                    // TODO: make rooms.length not 0
+                    Log.trace(curr.rooms[5].rooms_lat);
+                    Log.trace(curr.rooms[5].rooms_lon);
                     Log.trace(curr.rooms.length.toString());
 
                     const internalData: IRoomDataset = {
@@ -374,8 +387,19 @@ export default class DataController {
                         data: roomsObjects,
                     };
                     curr.roomDatasets.push(internalData);
-                    // TODO: have internalData and the json file be well-formed
-                    fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData),
+                    Log.trace(internalData.metadata.numRows.toString());
+                    for (const dataset of curr.roomDatasets) {
+                        if (dataset["metadata"]["id"] === id) {
+                            reject(false);
+                        }
+                    }
+
+                    if (id === null) { // what if id is a key that does not exist in datasetsToLoad?
+                        reject(false);
+                        return;
+                    }
+
+                    fs.writeFile("./rooms/" + id + ".json", JSON.stringify(internalData),
                         function (err: any) {
                             if (err) {
                                 Log.trace(err);

@@ -250,6 +250,58 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         }
     });
 
+    it("Should reject adding this roomsDataset with the same name", async () => {
+        const id: string = "rooms";
+        const expectedCode: number = 204;
+        let response: any;
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response.code).to.equal(expectedCode);
+        }
+    });
+
+    it("Should reject adding this roomsDataset with the same id", async () => {
+        const id: string = "rooms";
+        const expectedCode: number = 400;
+        let response: any;
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response.code).to.equal(expectedCode);
+        }
+    });
+
+    it("Should reject adding this roomsDataset with null id", async () => {
+        const id: string = null;
+        const expectedCode: number = 400;
+        let response: any;
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response.code).to.equal(expectedCode);
+        }
+    });
+
+    it("Should reject adding this roomsDataset with empty id", async () => {
+        const id: string = "";
+        const expectedCode: number = 400;
+        let response: any;
+        try {
+            response = await insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response.code).to.equal(expectedCode);
+        }
+    });
+
     it("Should add a valid dataset", async () => {
         const id: string = "courses";
         const expectedCode: number = 204;
