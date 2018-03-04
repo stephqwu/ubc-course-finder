@@ -14,7 +14,7 @@ enum NumberKeys {
 }
 
 enum Token {
-    "MAX", "MIN", "AVG", "COUNT", SUM,
+    "MAX", "MIN", "AVG", "COUNT", "SUM",
 }
 
 export interface IResponseData {

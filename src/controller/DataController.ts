@@ -54,6 +54,7 @@ export default class DataController {
     }
 
     public parseRoomsDataset(id: string, content: string): Promise<any> {
+        Log.trace("parseRoomsDataset called");
         const i = 0;
         // method to parse a rooms dataset
         const curr = this;
@@ -79,16 +80,20 @@ export default class DataController {
                     }
                     Promise.all(promises).then(function (datas: any[]) {
 
+                        const buildingInfoPromises: Array<Promise<any>> = new Array();
                         for (const data of datas) {
                             // parse the index.htm file to an AST
                             const tree: any = parse5.parse(data);
 
                             // helper to find info related to each building in the file
-                            curr.findBuildingInfo(tree, content, i).then(function () {
-                                Log.trace("Returning from findBuildingInfo");
-                                fulfill("Hooray we add");
-                            });
+                            buildingInfoPromises.push(curr.findBuildingInfo(tree, content, i));
+                            // curr.findBuildingInfo(tree, content, i).then(function () {
+                            //     Log.trace("Returning from findBuildingInfo");
+                            // });
                         }
+                        Promise.all(buildingInfoPromises).then(function () {
+                            fulfill();
+                        });
                     });
                 }).catch(function (err: any) {
                     reject(err);
@@ -264,44 +269,15 @@ export default class DataController {
                                             buildingName, roomNumber, roomName, addr, lat, lon,
                                             seats, type, furniture, href);
                                         curr.rooms.push(room);
-
-                                        /*curr.getGeoResponse(addr).then(function (result: any) {
-                                            lat = result.lat;
-                                            lon = result.lon;
-                                            // helper to create the room object
-                                        }).then(function (res: any) {
-
-                                               // Log.trace(i.toString());
-                                        });*/
-
-                                        // Log.trace(room.rooms_name);
-                                        // Log.trace(room.buildingName);
-                                        // Log.trace(room.lon);
-                                        // Log.trace(roomNumber + roomName + seats + type + furniture);
-                                        /*let lat;
-                                        let lon;
-
-                                        // helper to get geoResponse object
-                                        curr.getGeoResponse(addr).then(function (result: any) {
-                                            lat = result.lat;
-                                            lon = result.lon;
-                                            Log.trace(lon);
-
-                                            // helper to create the room object
-                                            const room = curr.createRoomObject(buildingCode,
-                                                buildingName, roomNumber, roomName, addr, lat, lon,
-                                                seats, type, furniture, href);
-                                            curr.rooms.push(room);
-                                        });*/
                                     }
                                 }
                             }
                         }
                     }
+                    fulfill();
                 }).catch(function (err: any) {
                     reject(err);
                 });
-                fulfill();
                 });
             }).catch(function (err: any) {
                 reject(err);
@@ -395,13 +371,24 @@ export default class DataController {
         return new Promise(function (fulfill, reject) {
 
             if (kind === InsightDatasetKind.Rooms) {
+
                 for (const dataset of curr.roomDatasets) {
                     if (dataset["metadata"]["id"] === id) {
+                        Log.trace("rejecting room");
                         reject(false);
+                        return;
                     }
                 }
+                if (id === null || id === "") { // what if id is a key that does not exist in datasetsToLoad?
+                    Log.trace("rejecting room");
+                    reject(false);
+                    return;
+                }
+
+                Log.trace("adding room");
                 // Go to parseRoomsDataset
                 curr.parseRoomsDataset(id, content).then(function () {
+                    Log.trace("parse room fulfilled");
                     /* let roomsObjects = [];
                     for (const room of curr.rooms) {
                         roomsObjects.push(room);
@@ -411,30 +398,19 @@ export default class DataController {
                     Log.trace(curr.rooms[5].rooms_lon);
                     Log.trace(curr.rooms.length.toString());
 
+                    const roomsCopy = curr.rooms.slice();
                     const internalData: IRoomDataset = {
                         metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.rooms.length},
-                        data: curr.rooms,
+                        data: roomsCopy, // we need to feed a copy of the object because
+                                         // curr.rooms is spliced later
                     };
                     curr.roomDatasets.push(internalData);
 
                     Log.trace(internalData.metadata.numRows.toString());
 
-                    if (id === null) { // what if id is a key that does not exist in datasetsToLoad?
-                        reject(false);
-                        return;
-                    }
-
-                    fs.writeFile("./rooms/" + id + ".json", JSON.stringify(internalData),
-                        function (err: any) {
-                            if (err) {
-                                Log.trace(err);
-                                reject(err);
-                            } else {
-                                // Log.trace("add was successful!");
-                                fulfill(true);
-                            }
-                    });
+                    fs.writeFileSync("./rooms/" + id + ".json", JSON.stringify(internalData));
                     curr.rooms.splice(0, curr.rooms.length);
+                    fulfill();
                 }).catch(function (err) {
                     reject(err);
                 });
@@ -444,12 +420,14 @@ export default class DataController {
                 for (const dataset of curr.courseDatasets) {
                     if (dataset["metadata"]["id"] === id) {
                         reject(false);
+                        return;
                     }
                 }
 
                 const currZip = new JSZip();
 
-                if (id === null) { // what if id is a key that does not exist in datasetsToLoad? (InsightFacade.spec.ts)
+                // what if id is a key that does not exist in datasetsToLoad? (InsightFacade.spec.ts)
+                if (id === null || id === "") {
                     reject(false);
                     return;
                 }
@@ -494,16 +472,8 @@ export default class DataController {
                             };
                             curr.courseDatasets.push(internalData);
 
-                            fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData), function (err: any) {
-                                if (err) {
-                                    Log.trace(err);
-                                    reject(err);
-                                } else {
-                                    Log.trace("add was successful!");
-                                    fulfill(true);
-                                }
-                            });
-
+                            fs.writeFileSync("./data/" + id + ".json", JSON.stringify(internalData));
+                            fulfill();
                         } else {
                             reject();
                         }
