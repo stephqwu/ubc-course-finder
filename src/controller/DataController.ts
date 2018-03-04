@@ -252,7 +252,7 @@ export default class DataController {
                                                 if (attr === rnAttr) {
                                                     roomNumber = td.childNodes[1].childNodes[0].value
                                                         .trim();
-                                                    roomName = buildingCode + " " + roomNumber;
+                                                    roomName = buildingCode + "_" + roomNumber;
                                                     href = td.childNodes[1].attrs[0].value;
                                                 } else if (attr === rcAttr) {
                                                     seats = td.childNodes[0].value.trim();
