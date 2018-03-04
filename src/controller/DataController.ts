@@ -214,7 +214,7 @@ export default class DataController {
                     lon = result.lon;
                 }
 
-                wait().then(function() {
+                wait().then(function () {
                 Promise.all(promises).then(function (datas: any[]) {
                     for (const data of datas) {
                         const tree: any = parse5.parse(data);
@@ -259,7 +259,6 @@ export default class DataController {
                                             }
 
                                         }
-
 
                                         const room = curr.createRoomObject(buildingCode,
                                             buildingName, roomNumber, roomName, addr, lat, lon,
@@ -396,6 +395,11 @@ export default class DataController {
         return new Promise(function (fulfill, reject) {
 
             if (kind === InsightDatasetKind.Rooms) {
+                for (const dataset of curr.roomDatasets) {
+                    if (dataset["metadata"]["id"] === id) {
+                        reject(false);
+                    }
+                }
                 // Go to parseRoomsDataset
                 curr.parseRoomsDataset(id, content).then(function () {
                     /* let roomsObjects = [];
@@ -414,11 +418,6 @@ export default class DataController {
                     curr.roomDatasets.push(internalData);
 
                     Log.trace(internalData.metadata.numRows.toString());
-                    for (const dataset of curr.roomDatasets) {
-                        if (dataset["metadata"]["id"] === id) {
-                            reject(false);
-                        }
-                    }
 
                     if (id === null) { // what if id is a key that does not exist in datasetsToLoad?
                         reject(false);
