@@ -16,9 +16,15 @@ export interface IDataset {
     data: JSON[];
 }
 
+export interface IRoomDataset {
+    metadata: InsightDataset;
+    data: JSON[];
+}
+
 export default class DataController {
     private datasets: IDataset[];
     private rooms: any[];
+    private roomDatasets: IRoomDataset[];
 
     constructor() {
         this.datasets = new Array();
@@ -231,7 +237,7 @@ export default class DataController {
                                                 Log.trace(i.toString());
                                         });
                                         const room = curr.createRoomObject(buildingCode,
-                                            buildingName, roomNumber, roomName, addr, lat, lon,
+                                            buildingName, roomNumber, roomName, addr, 49, 120,
                                             seats, type, furniture, href);
                                         curr.rooms.push(room);
                                         Log.trace(room.rooms_name);
@@ -362,10 +368,11 @@ export default class DataController {
                     // TODO: make rooms.length not 0
                     Log.trace(curr.rooms.length.toString());
 
-                    const internalData = {
+                    const internalData: IRoomDataset = {
                         metadata: {id, kind: InsightDatasetKind.Rooms, numRows: curr.rooms.length},
                         data: roomsObjects,
                     };
+                    curr.roomDatasets.push(internalData);
                     // TODO: have internalData and the json file be well-formed
                     fs.writeFile("./data/" + id + ".json", JSON.stringify(internalData),
                         function (err: any) {
