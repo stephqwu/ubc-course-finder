@@ -44,7 +44,7 @@ export default class QueryController {
                     order = query["OPTIONS"]["ORDER"]["keys"];
                     orderDir = query["OPTIONS"]["ORDER"]["dir"];
                 } else {
-                    order = [query["OPTIONS"]["ORDER"]["keys"]];
+                    order = [query["OPTIONS"]["ORDER"]];
                     orderDir = "UP";
                 }
             } else {
@@ -505,7 +505,7 @@ export default class QueryController {
             // Get the union of the 1 or more subsets
             let result = this.performQueryHelper(query["OR"][0], id, columns);
             for (let i = 1; i < query["OR"].length; i++) {
-                result = result.concat(this.performQueryHelper(query["OR"][i], id, columns));
+                result = this.orArray(result, this.performQueryHelper(query["OR"][i], id, columns));
             }
             const set = new Set(result);
             return Array.from(set);
@@ -700,6 +700,29 @@ export default class QueryController {
             if (!(value in object)) {
                 result.push(courses2[i]);
             }
+        }
+        return result;
+    }
+
+    private orArray (courses: any[], courses2: any[]): any[] {
+        const result: any = [];
+        let i: number;
+        for (i = 0; i < courses2.length; i++) {
+            result.push(JSON.stringify(courses2[i]));
+        }
+        for (i = 0; i < courses.length; i++) {
+            result.push(JSON.stringify(courses[i]));
+        }
+        let j: number;
+        for (i = 0; i < result.length; i++) {
+            for (j = i + 1; j < result.length; j++) {
+                if (result[i] === result[j]) {
+                    result.splice(j--, 1);
+                }
+            }
+        }
+        for (i = 0; i < result.length; i++) {
+            result[i] = JSON.parse(result[i]);
         }
         return result;
     }
