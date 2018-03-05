@@ -27,73 +27,96 @@ export default class QueryController {
     private roomDatasets: IDataset[];
 
     constructor(courseDatasets: IDataset[], roomDatasets: IRoomDataset[]) {
-       this.courseDatasets = courseDatasets;
-       this.roomDatasets = roomDatasets;
+        this.courseDatasets = courseDatasets;
+        this.roomDatasets = roomDatasets;
     }
 
     // ----------------------------------- filtering by query ------------------------------------------------------
 
     // Searches through the relevant dataset and returns only the rows/columns that match the constraints in query
     public performQuery(query: any): JSON[] {
-            const id: string = this.getQueryID(query);
-            let order: string[];
-            let orderDir: string;
-            // Order is optional so we only provide it to the helper if it is specified
-            if (query["OPTIONS"].hasOwnProperty("ORDER")) {
-                if (Object.keys(query["OPTIONS"]["ORDER"]).length === 2) {
-                    order = query["OPTIONS"]["ORDER"]["keys"];
-                    orderDir = query["OPTIONS"]["ORDER"]["dir"];
-                } else {
-                    order = [query["OPTIONS"]["ORDER"]];
-                    orderDir = "UP";
-                }
+        const id: string = this.getQueryID(query);
+        const currDataset = this.getDatasetWithID(id);
+        const dataKind = currDataset["metadata"]["kind"];
+        let order: string[];
+        let orderDir: string;
+        // Order is optional so we only provide it to the helper if it is specified
+        if (query["OPTIONS"].hasOwnProperty("ORDER")) {
+            if (Object.keys(query["OPTIONS"]["ORDER"]).length === 2) {
+                order = query["OPTIONS"]["ORDER"]["keys"];
+                orderDir = query["OPTIONS"]["ORDER"]["dir"];
             } else {
-                order = null;
+                order = [query["OPTIONS"]["ORDER"]];
+                orderDir = "UP";
             }
-            const columns = query["OPTIONS"]["COLUMNS"];
-            let result: JSON[];
-            if (!query.hasOwnProperty("TRANSFORMATIONS")) {
-                result = this.performQueryHelper(query["WHERE"], id, columns);
-            } else {
-                const keyColumns = [];
-                const applyColumns = [];
-                for (const applyBody of query["TRANSFORMATIONS"]["APPLY"]) {
-                    keyColumns.push(applyBody[Object.keys(applyBody)[0]]
-                        [Object.keys(applyBody[Object.keys(applyBody)[0]])[0]]);
-                }
-                for (const groupKey of query["TRANSFORMATIONS"]["GROUP"]) {
-                    keyColumns.push(groupKey);
-                }
-                for (const key of columns) {
-                    if (!key.includes("_")) {
-                        applyColumns.push(key);
-                    }
-                }
-                result = this.performQueryHelper(query["WHERE"], id, keyColumns);
-                result = this.performTransformations(query["TRANSFORMATIONS"], id, applyColumns, result);
+        } else {
+            order = null;
+        }
+        const columns = query["OPTIONS"]["COLUMNS"];
+        // We always need a uniquely identifying column in order for AND and OR to determine if two records are truly
+        // the same
+        let idColAdded = false;
+        let idToDelete;
+        if (dataKind === "courses" && !columns.includes(id + "_uuid")) {
+            columns.push(id + "_uuid");
+            idColAdded = true;
+            idToDelete = id + "_uuid";
+        } else if (dataKind === "rooms" && !columns.includes(id + "_name")) {
+            columns.push(id + "_name");
+            idColAdded = true;
+            idToDelete = id + "_name";
+        }
+        let result: JSON[];
+        if (!query.hasOwnProperty("TRANSFORMATIONS")) {
+            result = this.performQueryHelper(query["WHERE"], id, columns);
+        } else {
+            const keyColumns = [];
+            const applyColumns = [];
+            for (const applyBody of query["TRANSFORMATIONS"]["APPLY"]) {
+                keyColumns.push(applyBody[Object.keys(applyBody)[0]]
+                    [Object.keys(applyBody[Object.keys(applyBody)[0]])[0]]);
             }
+            for (const groupKey of query["TRANSFORMATIONS"]["GROUP"]) {
+                keyColumns.push(groupKey);
+            }
+            for (const key of columns) {
+                if (!key.includes("_")) {
+                    applyColumns.push(key);
+                }
+            }
+            result = this.performQueryHelper(query["WHERE"], id, keyColumns);
+            result = this.performTransformations(query["TRANSFORMATIONS"], id, applyColumns, result);
+        }
 
-            if (order !== null) {
-                result.sort(function (a: any, b: any) {
-                    for (const key of order) {
-                        if (a[key] > b[key]) {
-                            if (orderDir === "UP") {
-                                return 1;
-                            } else {
-                                return -1;
-                            }
-                        } else if (a[key] < b[key]) {
-                            if (orderDir === "UP") {
-                                return -1;
-                            } else {
-                                return 1;
-                            }
+        if (order !== null) {
+            result.sort(function (a: any, b: any) {
+                for (const key of order) {
+                    if (a[key] > b[key]) {
+                        if (orderDir === "UP") {
+                            return 1;
+                        } else {
+                            return -1;
+                        }
+                    } else if (a[key] < b[key]) {
+                        if (orderDir === "UP") {
+                            return -1;
+                        } else {
+                            return 1;
                         }
                     }
-                    return 0;
-                });
+                }
+                return 0;
+            });
+        }
+        // Remove the uniquely identifying column if the user didn't ask for it
+        if (idColAdded) {
+            for (const row of result) {
+                const realRow: any = row;
+                delete realRow[idToDelete];
             }
-            return result;
+        }
+
+        return result;
     }
 
 // ------------------------------- PARSING AND VALIDATION OF QUERY ---------------------------------------------
@@ -114,7 +137,7 @@ export default class QueryController {
                         }
                     }
                     return this.isValidFilter(jsonQuery["WHERE"]) && this.isValidOptions(jsonQuery["OPTIONS"])
-                    && this.isValidTransformations(jsonQuery["TRANSFORMATIONS"], applyKeys);
+                        && this.isValidTransformations(jsonQuery["TRANSFORMATIONS"], applyKeys);
                 }
             }
         } catch (err) {
@@ -606,20 +629,20 @@ export default class QueryController {
             } else {
                 const currDataColumns: any[] = [];
                 for (const room of currDataset["data"]) {
-                const realRoom: any = room; // This is a workaround for a tslint bug
-                // Iterate through the results array within the data block
-                let response: any = {};
-                for (const column of columns) {
-                    response = this.extractFromDataset(column, realRoom, response, dataKind);
-                }
-                currDataColumns.push(response);
+                    const realRoom: any = room; // This is a workaround for a tslint bug
+                    // Iterate through the results array within the data block
+                    let response: any = {};
+                    for (const column of columns) {
+                        response = this.extractFromDataset(column, realRoom, response, dataKind);
+                    }
+                    currDataColumns.push(response);
                 }
                 return currDataColumns;
             }
         }
-   /* } catch (err) {
-        Log.trace(err);
-    } */
+        /* } catch (err) {
+             Log.trace(err);
+         } */
     }
 
     // Helper to return only entries in the dataset that match the SCOMPARISON constraint

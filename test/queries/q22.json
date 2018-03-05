@@ -1,0 +1,50 @@
+{
+    "title": "AND test",
+    "query": {
+        "WHERE": {
+            "AND": [
+                {
+                    "EQ": {
+                        "courses_avg": 97.09
+                    }
+                },
+                {
+                    "EQ": {
+                        "courses_avg": 97.09
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": {
+                "dir": "UP",
+                "keys": ["courses_avg"]
+            }
+        }
+    },
+    "response": {
+        "code": 200,
+        "body": {"result": [
+            {
+                "courses_avg": 97.09,
+                "courses_dept": "epse"
+            },
+            {
+                "courses_avg": 97.09,
+                "courses_dept": "epse"
+            },
+            {
+                "courses_avg": 97.09,
+                "courses_dept": "math"
+            },
+            {
+                "courses_avg": 97.09,
+                "courses_dept": "math"
+            }
+        ]}
+    }
+}
