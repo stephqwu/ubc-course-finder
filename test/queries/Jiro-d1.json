@@ -1,0 +1,23 @@
+{
+    "title": "Invalid ORDER should result in 400",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "courses_avg":97
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_id"
+        }
+    },
+    "response": {
+        "code": 400,
+        "body": {
+            "error": "no"
+        }
+    }
+}
