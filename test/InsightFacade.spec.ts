@@ -508,6 +508,34 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
             expect(response.code).to.equal(expectedCode);
         }
     });
+
+    it("Should remove the rooms dataset", async () => { // the dataset is there right
+        const id: string = "rooms";
+        const expectedCode: number = 204;
+        let response: InsightResponse;
+
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response.code).to.equal(expectedCode);
+        }
+    });
+
+    it("Should reject this remove request", async () => {
+        const id: string = "rooms";
+        const expectedCode: number = 404;
+        let response: InsightResponse;
+
+        try {
+            response = await insightFacade.removeDataset(id);
+        } catch (err) {
+            response = err;
+        } finally {
+            expect(response.code).to.equal(expectedCode);
+        }
+    });
 });
 
 // This test suite dynamically generates tests from the JSON files in test/queries.
