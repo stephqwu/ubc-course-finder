@@ -37,9 +37,16 @@ export default class QueryController {
     public performQuery(query: any): JSON[] {
             const id: string = this.getQueryID(query);
             let order: string[];
+            let orderDir: string;
             // Order is optional so we only provide it to the helper if it is specified
             if (query["OPTIONS"].hasOwnProperty("ORDER")) {
-                order = query["OPTIONS"]["ORDER"]["keys"];
+                if (Object.keys(query["OPTIONS"]["ORDER"]).length === 2) {
+                    order = query["OPTIONS"]["ORDER"]["keys"];
+                    orderDir = query["OPTIONS"]["ORDER"]["dir"];
+                } else {
+                    order = [query["OPTIONS"]["ORDER"]["keys"]];
+                    orderDir = "UP";
+                }
             } else {
                 order = null;
             }
@@ -70,9 +77,17 @@ export default class QueryController {
                 result.sort(function (a: any, b: any) {
                     for (const key of order) {
                         if (a[key] > b[key]) {
-                            return 1;
+                            if (orderDir === "UP") {
+                                return 1;
+                            } else {
+                                return -1;
+                            }
                         } else if (a[key] < b[key]) {
-                            return -1;
+                            if (orderDir === "UP") {
+                                return -1;
+                            } else {
+                                return 1;
+                            }
                         }
                     }
                     return 0;
@@ -190,17 +205,21 @@ export default class QueryController {
                 return true;
             } else {
                 const orderBody = optionsBody["ORDER"];
-                if (!orderBody.hasOwnProperty("dir") || !orderBody.hasOwnProperty("keys")) {
-                    return false;
+                if (Object.keys(orderBody).length === 2) {
+                    if (!orderBody.hasOwnProperty("dir") || !orderBody.hasOwnProperty("keys")) {
+                        return false;
+                    }
+                    if (!(orderBody["dir"] === "UP") && !(orderBody["dir"] === "DOWN")) {
+                        return false;
+                    }
+                    let validKeysOrder = true;
+                    for (const key of orderBody["keys"]) {
+                        validKeysOrder = validKeysOrder && existingColumns.includes(key);
+                    }
+                    return validKeysOrder;
+                } else {
+                    return existingColumns.includes(orderBody);
                 }
-                if (!(orderBody["dir"] === "UP") && !(orderBody["dir"] === "DOWN")) {
-                    return false;
-                }
-                let validKeysOrder = true;
-                for (const key of orderBody["keys"]) {
-                    validKeysOrder = validKeysOrder && existingColumns.includes(key);
-                }
-                return validKeysOrder;
             }
         }
     }
