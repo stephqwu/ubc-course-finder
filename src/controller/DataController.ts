@@ -491,7 +491,11 @@ export default class DataController {
                 fs.unlinkSync("./data/" + id + ".json");
                 return fulfill();
             } catch (err) {
-                return reject();
+                try {
+                    fs.unlinkSync("./rooms/" + id + ".json");
+                } catch (err) {
+                    return reject();
+                }
             }
         });
     }
