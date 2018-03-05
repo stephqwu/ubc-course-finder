@@ -1,0 +1,60 @@
+{
+    "title": "room test with NOT",
+    "query":
+    {
+        "WHERE": {
+            "AND": [
+                {
+                    "GT": {
+                        "rooms_seats": 100
+                    }
+                },
+                {
+                    "NOT":
+                    {
+                        "IS": {
+                            "rooms_shortname":"DMP"
+                        }
+                    }
+
+                },
+                {
+                    "LT": {
+                        "rooms_seats": 200
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_shortname",
+                "avgSeats"
+            ],
+            "ORDER": {
+                "dir": "UP",
+                "keys": [
+                    "avgSeats",
+                    "rooms_shortname"
+                ]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "rooms_shortname"
+            ],
+            "APPLY": [
+                {
+                    "avgSeats": {
+                        "AVG": "rooms_seats"
+                    }
+                }
+            ]
+        }
+    },
+    "response":
+    {
+        "code": 200,
+        "body": {"result":[{"rooms_shortname":"WESB","avgSeats":102},{"rooms_shortname":"MATX","avgSeats":106},{"rooms_shortname":"CHEM","avgSeats":114},{"rooms_shortname":"LSC","avgSeats":125},{"rooms_shortname":"MCLD","avgSeats":129.5},{"rooms_shortname":"IBLC","avgSeats":133},{"rooms_shortname":"WOOD","avgSeats":135.25},{"rooms_shortname":"BUCH","avgSeats":138},{"rooms_shortname":"AERL","avgSeats":144},{"rooms_shortname":"ESB","avgSeats":150},{"rooms_shortname":"HENN","avgSeats":152.5},{"rooms_shortname":"FRDM","avgSeats":160},{"rooms_shortname":"PHRM","avgSeats":167},{"rooms_shortname":"LSK","avgSeats":183},{"rooms_shortname":"SWNG","avgSeats":188.75}]}
+    }
+}
+

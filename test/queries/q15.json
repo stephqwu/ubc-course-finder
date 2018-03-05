@@ -1,0 +1,61 @@
+{
+    "title":"duplicate apply keys",
+    "query":{
+        "WHERE": {
+            "AND": [
+                {
+                    "IS": {
+                        "courses_dept": "cpsc"
+                    }
+                },
+                {
+                    "GT": {
+                        "courses_year": 1900
+                    }
+                }
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_title",
+                "offerings"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": [
+                    "offerings",
+                    "courses_dept",
+                    "courses_id"
+                ]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "courses_dept",
+                "courses_id",
+                "courses_title"
+            ],
+            "APPLY": [
+                {
+                    "offerings": {
+                        "COUNT": "courses_uuid"
+                    }
+                },
+                {
+                    "offerings": {
+                        "COUNT": "courses_year"
+                    }
+                }
+            ]
+        }
+    },
+    "response":{
+        "code":400,
+        "body": {
+            "result": [
+            ]
+        }
+    }
+}

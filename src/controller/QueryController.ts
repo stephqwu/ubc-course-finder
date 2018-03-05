@@ -162,6 +162,8 @@ export default class QueryController {
                     return isKey;
                 }
             }
+        } else if (Object.keys(jsonBody).length === 0) {
+            return true;
         } else {
             // The filter doesn't match any keywords in our EBNF, so return false
             return false;
@@ -527,21 +529,65 @@ export default class QueryController {
             if (currDataset === null) {
                 throw new Error("Dataset with id: " + id + " does not exist");
             }
-            const currDataColumns: any[] = [];
-            for (const json of currDataset["data"]) {
-                const realJson: any = json; // This is a workaround for a tslint bug
-                // Iterate through the results array within the data block
-                for (const course of realJson["result"]) {
+            if (dataKind === "courses") {
+                const currDataColumns: any[] = [];
+                for (const json of currDataset["data"]) {
+                    const realJson: any = json; // This is a workaround for a tslint bug
+                    // Iterate through the results array within the data block
+                    for (const course of realJson["result"]) {
+                        let response: any = {};
+                        for (const column of columns) {
+                            response = this.extractFromDataset(column, course, response, dataKind);
+                        }
+                        currDataColumns.push(response);
+                    }
+                }
+                const setDiff = this.setDifference(this.performQueryHelper(query["NOT"], id, columns),
+                    currDataColumns);
+                return setDiff;
+            } else {
+                const currDataColumns: any[] = [];
+                for (const room of currDataset["data"]) {
+                    const realRoom: any = room; // This is a workaround for a tslint bug
+                    // Iterate through the results array within the data block
                     let response: any = {};
                     for (const column of columns) {
-                        response = this.extractFromDataset(column, course, response, dataKind);
+                        response = this.extractFromDataset(column, realRoom, response, dataKind);
                     }
                     currDataColumns.push(response);
                 }
+                const setDiff = this.setDifference(this.performQueryHelper(query["NOT"], id, columns),
+                    currDataColumns);
+                return setDiff;
             }
-            const blah = this.setDifference(this.performQueryHelper(query["NOT"], id, columns),
-                currDataColumns);
-            return blah;
+        } else if (Object.keys(query).length === 0) {
+            if (dataKind === "courses") {
+                const currDataColumns: any[] = [];
+                for (const json of currDataset["data"]) {
+                    const realJson: any = json; // This is a workaround for a tslint bug
+                    // Iterate through the results array within the data block
+                    for (const course of realJson["result"]) {
+                        let response: any = {};
+                        for (const column of columns) {
+                            response = this.extractFromDataset(column, course, response, dataKind);
+                        }
+                        currDataColumns.push(response);
+                    }
+                }
+                return currDataColumns;
+            } else {
+                const currDataColumns: any[] = [];
+                for (const room of currDataset["data"]) {
+                const realRoom: any = room; // This is a workaround for a tslint bug
+                // Iterate through the results array within the data block
+                let response: any = {};
+                for (const column of columns) {
+                    response = this.extractFromDataset(column, realRoom, response, dataKind);
+                }
+                currDataColumns.push(response);
+                }
+                return currDataColumns;
+            }
         }
    /* } catch (err) {
         Log.trace(err);
