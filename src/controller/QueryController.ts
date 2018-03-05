@@ -69,8 +69,10 @@ export default class QueryController {
             if (order !== null) {
                 result.sort(function (a: any, b: any) {
                     for (const key of order) {
-                        if (!(a[key] - b[key] === 0)) {
-                            return a[key] - b[key];
+                        if (a[key] > b[key]) {
+                            return 1;
+                        } else if (a[key] < b[key]) {
+                            return -1;
                         }
                     }
                     return 0;
@@ -346,7 +348,14 @@ export default class QueryController {
 
     private resolveKeySuffix(keySuffix: string, kind: string) {
         if (kind === "rooms") {
-            return keySuffix;
+            if (keySuffix === "fullname" || keySuffix === "shortname" || keySuffix === "number" ||
+                keySuffix === "name" || keySuffix === "address" || keySuffix === "lat" || keySuffix === "lon" ||
+                keySuffix === "seats" || keySuffix === "type" || keySuffix === "furniture" ||
+                keySuffix === "href") {
+                return keySuffix;
+            } else {
+                throw Error("That is not a pre-defined column name: " + keySuffix);
+            }
         }
         if (keySuffix === "dept") {
             return "Subject";

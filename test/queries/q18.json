@@ -1,0 +1,25 @@
+{
+    "title": "room test sort by URL",
+    "query":
+    {
+        "WHERE": {
+            "GT": {
+                "rooms_seats": 300
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_href"
+            ],
+            "ORDER": {
+                "dir": "UP",
+                "keys": ["rooms_href"]
+            }
+        }
+    },
+    "response":
+    {
+        "code": 200,
+        "body": {"result":[{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/CIRS-1250"},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/ESB-1013"},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/HEBB-100"},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/LSC-1001"},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/LSC-1002"},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/OSBO-A"},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/WESB-100"},{"rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/WOOD-2"}]}
+    }
+}
