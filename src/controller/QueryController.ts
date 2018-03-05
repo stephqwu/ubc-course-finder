@@ -36,7 +36,7 @@ export default class QueryController {
     // Searches through the relevant dataset and returns only the rows/columns that match the constraints in query
     public performQuery(query: any): JSON[] {
             const id: string = this.getQueryID(query);
-            let order: string;
+            let order: string[];
             // Order is optional so we only provide it to the helper if it is specified
             if (query["OPTIONS"].hasOwnProperty("ORDER")) {
                 order = query["OPTIONS"]["ORDER"]["keys"];
