@@ -6,6 +6,7 @@ import fs = require("fs");
 import restify = require("restify");
 import Log from "../Util";
 import {InsightResponse} from "../controller/IInsightFacade";
+import InsightFacade from "../controller/InsightFacade";
 
 /**
  * This configures the REST endpoints for the server.
@@ -14,10 +15,12 @@ export default class Server {
 
     private port: number;
     private rest: restify.Server;
+    private static insightFacade: InsightFacade;
 
     constructor(port: number) {
         Log.info("Server::<init>( " + port + " )");
         this.port = port;
+        Server.insightFacade = new InsightFacade();
     }
 
     /**
@@ -65,6 +68,13 @@ export default class Server {
                 that.rest.get("/echo/:msg", Server.echo);
 
                 // NOTE: your endpoints should go here
+                that.rest.put("/dataset/:id/:kind", Server.putDataset);
+
+                that.rest.del("/dataset/:id", Server.deleteDataset);
+
+                that.rest.post("/query", Server.postQuery);
+
+                that.rest.get("/datasets", Server.getDatasets);
 
                 // This must be the last endpoint!
                 that.rest.get("/.*", Server.getStatic);
@@ -129,6 +139,57 @@ export default class Server {
             res.end();
             return next();
         });
+    }
+
+    private static putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
+        const buffer = req.params.body;
+        const file = buffer.toString("base64");
+        Server.insightFacade.addDataset(req.params.id, file, req.params.kind)
+            .then(function (response: any) {
+                res.send(response["code"], response["body"]);
+                return next();
+            })
+            .catch(function (err: any) {
+                res.send(err["code"], err["body"]);
+                return next();
+            });
+    }
+
+    private static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
+        Server.insightFacade.removeDataset(req.params.id)
+            .then(function (response: any) {
+                res.send(response["code"], response["body"]);
+                return next();
+            })
+            .catch(function (err: any) {
+                res.send(err["code"], err["body"]);
+                return next();
+            });
+    }
+
+    private static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
+        const query = req.params;
+        Server.insightFacade.performQuery(query)
+            .then(function (response: any) {
+                res.send(response["code"], response["body"]);
+                return next();
+            })
+            .catch(function (err: any) {
+                res.send(err["code"], err["body"]);
+                return next();
+            });
+    }
+
+    private static getDatasets(req: restify.Request, res: restify.Response, next: restify.Next) {
+        Server.insightFacade.listDatasets()
+            .then(function (response: any) {
+                res.send(response["code"], response["body"]);
+                return next();
+            })
+            .catch(function (err: any) {
+                res.send(err["code"], err["body"]);
+                return next();
+            });
     }
 
 }
