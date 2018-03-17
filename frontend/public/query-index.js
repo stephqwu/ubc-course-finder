@@ -9,10 +9,3 @@
  */
 
 // TODO: implement!
-
-// CampusExplorer.renderResult(CampusExplorer.sendQuery(CampusExplorer.buildQuery()))
-var button = document.getElementById("submit-button");
-button.addEventListener("click", function () {
-    console.log("woo");
-    CampusExplorer.renderResult(CampusExplorer.sendQuery(CampusExplorer.buildQuery()));
-});
