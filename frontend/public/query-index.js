@@ -9,3 +9,8 @@
  */
 
 // TODO: implement!
+
+var button = document.getElementById("submit-button");
+button.addEventListener("click", function () {
+    CampusExplorer.renderResult(CampusExplorer.sendQuery(CampusExplorer.buildQuery()));
+});
