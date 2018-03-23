@@ -86,6 +86,15 @@ export default class QueryController {
             }
             result = this.performQueryHelper(query["WHERE"], id, keyColumns);
             result = this.performTransformations(query["TRANSFORMATIONS"], id, applyColumns, result);
+            // Clean up any columns that were added for intermediate steps
+            for (const row of result) {
+                const realRow: any = row;
+                for (const col of Object.keys(row)) {
+                    if (!columns.includes(col)) {
+                        delete realRow[col];
+                    }
+                }
+            }
         }
 
         if (order !== null) {
@@ -371,7 +380,11 @@ export default class QueryController {
     }
 
     private getQueryID(query: any): string {
-        return query["OPTIONS"]["COLUMNS"][0].split("_")[0];
+        if (query.hasOwnProperty("TRANSFORMATIONS")) {
+            return query["TRANSFORMATIONS"]["GROUP"][0].split("_")[0];
+        } else {
+            return query["OPTIONS"]["COLUMNS"][0].split("_")[0];
+        }
     }
 
     private getDatasetWithID(id: string) {
