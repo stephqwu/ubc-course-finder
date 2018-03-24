@@ -32,11 +32,11 @@ CampusExplorer.buildQuery = function() {
     /*======== BUILDING APPLY (under TRANSFORMATIONS) ========*/
 
     var tforms = document.getElementsByClassName("control-group transformation");
-    if (tforms) {
-        query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
-    }
 
     for (var tform of tforms) {
+        if (tform) {
+             query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
+        }
         var obj = {};
         var innerobj = {};
         var key = "";
@@ -110,11 +110,19 @@ CampusExplorer.buildQuery = function() {
 
             var obj = {};
             var innerobj = {};
+            var comp = "";
 
             for (var option of condition.children[1].querySelector("select").children) {
 
+                var raw = condition.children[3].querySelector("input").value;
+                var numeric = parseInt(raw);
+
                 if (option.getAttribute("selected")) {
-                    innerobj["courses_" + option.value] = condition.children[3].querySelector("input").value;
+                    if (numeric !== numeric || comp === "IS") {
+                        innerobj["courses_" + option.value] = raw;
+                    } else {
+                        innerobj["courses_" + option.value] = numeric;
+                    }
                 }
             }
 
@@ -122,6 +130,8 @@ CampusExplorer.buildQuery = function() {
 
                 if (option.getAttribute("selected")) {
                     obj[option.value] = innerobj;
+                    comp = option.value;
+                    // console.log(comp);
                 }
             }
             /* push with logic */
@@ -148,8 +158,15 @@ CampusExplorer.buildQuery = function() {
         if (condition) {
             for (var option of condition.children[1].querySelector("select").children) {
 
+                var raw = condition.children[3].querySelector("input").value;
+                var numeric = parseInt(raw);
+
                 if (option.getAttribute("selected")) {
-                    innerobj["courses_" + option.value] = condition.children[3].querySelector("input").value;
+                    if (numeric !== numeric || comp === "IS") {
+                        innerobj["courses_" + option.value] = raw;
+                    } else {
+                        innerobj["courses_" + option.value] = numeric;
+                    }
                 }
             }
 

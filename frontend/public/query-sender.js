@@ -9,6 +9,8 @@ CampusExplorer.sendQuery = function(query) {
 
     return new Promise(function(fulfill, reject) {
 
+        console.log(query);
+
         try {
             var request = new XMLHttpRequest();
 
@@ -27,11 +29,13 @@ CampusExplorer.sendQuery = function(query) {
 
             request.open("POST", "/query");
             request.send(query);
+            console.log(query);
 
             // console.log("CampusExplorer.sendQuery not implemented yet.");
 
         } catch (err) {
             console.log(err);
+            console.log(query);
             reject(err);
         }
 
