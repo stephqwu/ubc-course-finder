@@ -483,7 +483,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // it("Should remove the courses dataset");
     it("Should remove the courses dataset", async () => { // the dataset is there right
         const id: string = "courses";
-        const expectedCode: number = 204;
+        const expectedCode: number = 200;
         let response: InsightResponse;
 
         try {
@@ -511,7 +511,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
 
     it("Should remove the rooms dataset", async () => { // the dataset is there right
         const id: string = "rooms";
-        const expectedCode: number = 204;
+        const expectedCode: number = 200;
         let response: InsightResponse;
 
         try {

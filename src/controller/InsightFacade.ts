@@ -37,7 +37,7 @@ export default class InsightFacade implements IInsightFacade {
     public removeDataset(id: string): Promise<InsightResponse> {
         return new Promise(function (fulfill, reject) {
             InsightFacade.controller.removeDataset(id).then(function (result: boolean) {
-                fulfill({code: 204, body: {result: "It's gone!"}});
+                fulfill({code: 200, body: {result: "It's gone!"}});
             }).catch(function (err: Error) {
                 reject({code: 400, body: {error: "Could not find zip file"}});
             });
