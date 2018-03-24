@@ -59,8 +59,15 @@ CampusExplorer.buildQuery = function() {
                 innerobj[key] = "courses_" + option.value;
             }
         }
-        obj[tform.children[0].querySelector("input").value] = innerobj;
-        query.OPTIONS.COLUMNS.push(tform.children[0].querySelector("input").value);
+        var key = tform.children[0].querySelector("input").value;
+        obj[key] = innerobj;
+        query.OPTIONS.COLUMNS.push(key); // move down
+        /* var boxes = document.querySelector("div.control.transformation input[data-key='" + key + "']");
+        for (var box in boxes) {
+            if (box.checked) {
+                query.OPTIONS.COLUMNS.push(key);
+            }
+        } */
         query.TRANSFORMATIONS.APPLY.push(obj);
     }
 
@@ -131,6 +138,7 @@ CampusExplorer.buildQuery = function() {
 
                 if (option.getAttribute("selected")) {
                     obj[option.value] = innerobj;
+                    console.log(obj);
                     comp = option.value;
                 }
             }
@@ -175,6 +183,7 @@ CampusExplorer.buildQuery = function() {
 
                 if (option.getAttribute("selected")) {
                     obj[option.value] = innerobj;
+                    console.log(obj);
                     comp = option.value;
                 }
             }

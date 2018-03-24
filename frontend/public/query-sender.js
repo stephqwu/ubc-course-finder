@@ -12,9 +12,9 @@ CampusExplorer.sendQuery = function(query) {
         console.log(query);
 
         try {
-            var request = new XMLHttpRequest();
+            request = new XMLHttpRequest();
 
-            request.onload = function () {
+            /* request.onload = function () {
 
                 var result = request.response;
                 console.log(result);
@@ -25,11 +25,38 @@ CampusExplorer.sendQuery = function(query) {
                     reject(result.body)
                 }
 
-            };
+            }; */
 
-            request.open("POST", "/query");
-            request.send(query);
-            console.log(query);
+            request.open("POST", "/query", true);
+            request.setRequestHeader("Content-type", "application/json");
+            request.onreadystatechange = function () {
+
+                var result = request.response;
+
+                if (request.readyState == 4 && request.status == 200) {
+                    fulfill(result.body);
+                } else {
+                    reject(result.body);
+                }
+
+                console.log(result);
+
+                /*var result = request.response;
+                // var json = JSON.parse(result);
+                // console.log(json);
+                console.log(result);
+
+                if (result.code == 200) {
+                    fulfill(result.body)
+                } else {
+                    reject(result.body)
+                }*/
+            };
+            var data = JSON.stringify(query);
+            //var json = JSON.parse(query);
+            // console.log(query.toString());
+            request.send(data);
+            // console.log(data);
 
             // console.log("CampusExplorer.sendQuery not implemented yet.");
 
