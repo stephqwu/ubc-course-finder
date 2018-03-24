@@ -7,10 +7,7 @@
  */
 CampusExplorer.buildQuery = function() {
 
-    let query = {"WHERE": {}, "OPTIONS": {"COLUMNS": [], "ORDER": {"dir": "UP", "keys": []}}, "TRANSFORMATIONS": {"GROUP": []}};
-
-    // query.OPTIONS = {COLUMNS: []};
-
+    let query = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
     let suffixes = ["audit", "avg", "dept", "fail", "id", "instructor", "pass", "title", "uuid", "year"];
 
     for (var i = 0; i < suffixes.length; i++) {
@@ -18,22 +15,65 @@ CampusExplorer.buildQuery = function() {
         var column = document.getElementById("courses-columns-field-"+ suffixes[i]);
         var group = document.getElementById("courses-groups-field-"+ suffixes[i]);
 
+        /*======== BUILDING COLUMNS ========*/
+
         if (column.checked === true) {
             query.OPTIONS.COLUMNS.push("courses_"+ suffixes[i]);
         }
 
+        /*======== BUILDING GROUPS (under TRANSFORMATIONS) ========*/
+
         if (group.checked === true) {
+            query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
             query.TRANSFORMATIONS.GROUP.push("courses_" + suffixes[i]);
         }
     }
 
-    /* get the options from the */
-    var options = document.getElementsByTagName("option");
+    /*======== BUILDING APPLY (under TRANSFORMATIONS) ========*/
 
-    for (var i = 0; i < options.length; i++) {
+    var tforms = document.getElementsByClassName("control-group transformation");
+    if (tforms) {
+        query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
+    }
 
-        if (options[i].selected === true) {
-            query.OPTIONS.ORDER.keys.push("courses_" + options[i].value);
+    for (var tform of tforms) {
+        var obj = {};
+        var innerobj = {};
+        var key = "";
+
+        console.log(tform.children[0].querySelector("input").value);
+        console.log(tform.children[1].querySelector("select").children);
+        console.log(tform.children[2].querySelector("select").children);
+
+        for (var option of tform.children[1].querySelector("select").children) {
+
+            if (option.getAttribute("selected")) {
+                key = option.value;
+                console.log(key);
+            }
+        }
+
+        for (var option of tform.children[2].querySelector("select").children) {
+
+            if (option.getAttribute("selected")) {
+                innerobj[key] = "courses_" + option.value;
+            }
+        }
+        obj[tform.children[0].querySelector("input").value] = innerobj;
+        query.TRANSFORMATIONS.APPLY.push(obj);
+    }
+
+    /*======== BUILDING ORDER ========*/
+
+    var div = document.getElementsByClassName("control order fields");
+    var fields = div[0].children[0].children;
+
+    for (var field of fields) {
+
+        /* When multiple keys are selected, which key should we order by? */
+        if (field.selected === true) {
+            query.OPTIONS.ORDER = {"dir": "UP", "keys": []};
+            query.OPTIONS.ORDER.keys.push("courses_" + field.value);
         }
     }
 
@@ -41,17 +81,93 @@ CampusExplorer.buildQuery = function() {
         query.OPTIONS.ORDER.dir = "DOWN";
     }
 
-    // var logic = document.getElementsByTagName("INPUT");
-    // console.log(logic);
+    /*======== START BUILDING CONDITIONS ========*/
 
     var conditions = document.getElementsByClassName("control-group condition");
-
     console.log(conditions);
 
-    console.log(conditions.item(0));
+    if (conditions.length > 1) {
+        /* Include logic array */
+        var word = "";
 
+        if (document.getElementById("courses-conditiontype-all").checked) {
+            query.WHERE["AND"] = [];
+            word = "AND";
+        } else if (document.getElementById("courses-conditiontype-any").checked) {
+            query.WHERE["OR"] = [];
+            word = "OR";
+        } else {
+            query.WHERE["NOT"] = {"OR": []};
+            word = "NOT";
+        }
+
+        for (var condition of conditions) {
+
+            // console.log("NEW CONDITION: " + condition);
+            // console.log("CONDITION.CHILDREN: " + condition.children);
+            // console.log("OPTION CHILD: " + condition.children[2].querySelector("option"));
+            // console.log(condition.children[2].querySelector("select"));
+
+            var obj = {};
+            var innerobj = {};
+
+            for (var option of condition.children[1].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    innerobj["courses_" + option.value] = condition.children[3].querySelector("input").value;
+                }
+            }
+
+            for (var option of condition.children[2].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    obj[option.value] = innerobj;
+                }
+            }
+            /* push with logic */
+            if (word === "NOT") {
+                if (condition.children[0].querySelector("input").checked) {
+                    query.WHERE[word].OR.push({"NOT": obj});
+                } else {
+                    query.WHERE[word].OR.push(obj);
+                }
+            } else {
+                if (condition.children[0].querySelector("input").checked) {
+                    query.WHERE[word].push({"NOT": obj});
+                } else {
+                    query.WHERE[word].push(obj);
+                }
+            }
+        }
+    } else if (conditions !== undefined) {
+        /* lone query condition */
+        var condition = conditions[0];
+        var obj = {};
+        var innerobj = {};
+
+        if (condition) {
+            for (var option of condition.children[1].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    innerobj["courses_" + option.value] = condition.children[3].querySelector("input").value;
+                }
+            }
+
+            for (var option of condition.children[2].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    obj[option.value] = innerobj;
+                }
+            }
+
+            if (condition.children[0].querySelector("input").checked) {
+                query.WHERE = {"NOT": obj};
+            } else {
+                query.WHERE = obj;
+            }
+        }
+    }
     console.log(query);
-
     return query;
 };
 
@@ -66,6 +182,13 @@ CampusExplorer.buildQuery = function() {
     }
 }; */
 
+/* let radios = ["any", "all", "none"];
+
+ for (var radio of radios) {
+     if (document.getElementById("courses-conditiontype-" + radio).checked && ) {
+         query.WHERE[]
+     }
+ } */
 // CampusExplorer.
 
 /*var columns = document.getElementsByTagName("input")
@@ -81,3 +204,5 @@ CampusExplorer.buildQuery = function() {
     console.log("CampusExplorer.buildQuery not implemented yet.");
     console.log(options);
     console.log(options[0]);*/
+
+
