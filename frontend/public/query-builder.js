@@ -123,8 +123,8 @@ CampusExplorer.buildQuery = function() {
         /* When multiple keys are selected, which key should we order by? */
         if (field.selected === true) {
             query.OPTIONS.ORDER = {"dir": "UP", "keys": []};
-            if (document.getElementsByClassName("nav-item tab active").value = "Rooms") {
-                innerobjA[key] = "rooms_" + option.value;
+            if (document.getElementsByClassName("nav-item tab active").value === "Rooms") {
+                innerobjA[key] = "rooms_" + field.value;
             } else {
                 query.OPTIONS.ORDER.keys.push("courses_" + field.value);
             }
