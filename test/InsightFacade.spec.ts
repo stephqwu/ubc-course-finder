@@ -497,7 +497,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
 
     it("Should reject this remove request", async () => {
         const id: string = "morecourses";
-        const expectedCode: number = 404;
+        const expectedCode: number = 400;
         let response: InsightResponse;
 
         try {
@@ -525,7 +525,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
 
     it("Should reject this remove request", async () => {
         const id: string = "rooms";
-        const expectedCode: number = 404;
+        const expectedCode: number = 400;
         let response: InsightResponse;
 
         try {

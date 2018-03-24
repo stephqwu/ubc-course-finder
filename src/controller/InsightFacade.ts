@@ -39,7 +39,7 @@ export default class InsightFacade implements IInsightFacade {
             InsightFacade.controller.removeDataset(id).then(function (result: boolean) {
                 fulfill({code: 204, body: {result: "It's gone!"}});
             }).catch(function (err: Error) {
-                reject({code: 404, body: {error: "Could not find zip file"}});
+                reject({code: 400, body: {error: "Could not find zip file"}});
             });
         });
     }
