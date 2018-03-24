@@ -124,7 +124,7 @@ CampusExplorer.buildQuery = function() {
         if (field.selected === true) {
             query.OPTIONS.ORDER = {"dir": "UP", "keys": []};
             if (document.getElementsByClassName("nav-item tab active").value === "Rooms") {
-                innerobjA[key] = "rooms_" + field.value;
+                query.OPTIONS.ORDER.keys.push("rooms_" + field.value);
             } else {
                 query.OPTIONS.ORDER.keys.push("courses_" + field.value);
             }
@@ -141,7 +141,7 @@ CampusExplorer.buildQuery = function() {
     console.log(conditions);
     var prefix = "courses_";
 
-    if (document.getElementsByClassName("nav-item tab active").value = "Rooms") {
+    if (document.getElementsByClassName("nav-item tab active").value === "Rooms") {
         prefix = "rooms_";
     }
 
