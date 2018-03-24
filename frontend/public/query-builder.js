@@ -123,7 +123,7 @@ CampusExplorer.buildQuery = function() {
         /* When multiple keys are selected, which key should we order by? */
         if (field.selected === true) {
             query.OPTIONS.ORDER = {"dir": "UP", "keys": []};
-            if (document.getElementsByClassName("nav-item tab active").value === "Rooms") {
+            if (document.querySelector(".nav-item.tab.active").value === "Rooms") {
                 query.OPTIONS.ORDER.keys.push("rooms_" + field.value);
             } else {
                 query.OPTIONS.ORDER.keys.push("courses_" + field.value);
@@ -141,8 +141,9 @@ CampusExplorer.buildQuery = function() {
     console.log(conditions);
     var prefix = "courses_";
 
-    if (document.getElementsByClassName("nav-item tab active").value === "Rooms") {
+    if (document.querySelector(".nav-item.tab.active").value === "Rooms") {
         prefix = "rooms_";
+        console.log(document.getElementsByClassName("nav-item tab active").value);
     }
 
     if (conditions.length > 1) {
