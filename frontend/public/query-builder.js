@@ -131,7 +131,6 @@ CampusExplorer.buildQuery = function() {
                 if (option.getAttribute("selected")) {
                     obj[option.value] = innerobj;
                     comp = option.value;
-                    // console.log(comp);
                 }
             }
             /* push with logic */
@@ -154,12 +153,13 @@ CampusExplorer.buildQuery = function() {
         var condition = conditions[0];
         var obj = {};
         var innerobj = {};
+        var comp = "";
 
         if (condition) {
             for (var option of condition.children[1].querySelector("select").children) {
 
                 var raw = condition.children[3].querySelector("input").value;
-                var numeric = parseInt(raw);
+                var numeric = parseFloat(raw);
 
                 if (option.getAttribute("selected")) {
                     if (numeric !== numeric || comp === "IS") {
@@ -174,6 +174,7 @@ CampusExplorer.buildQuery = function() {
 
                 if (option.getAttribute("selected")) {
                     obj[option.value] = innerobj;
+                    comp = option.value;
                 }
             }
 
