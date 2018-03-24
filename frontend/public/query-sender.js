@@ -28,7 +28,7 @@ CampusExplorer.sendQuery = function(query) {
             }; */
 
             request.open("POST", "/query", true);
-            request.setRequestHeader("Content-type", "application/json");
+            request.setRequestHeader("content-type", "application/json");
             request.onreadystatechange = function () {
 
                 var result = request.response;
