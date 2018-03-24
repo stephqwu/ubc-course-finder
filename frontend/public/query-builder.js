@@ -60,6 +60,7 @@ CampusExplorer.buildQuery = function() {
             }
         }
         obj[tform.children[0].querySelector("input").value] = innerobj;
+        query.OPTIONS.COLUMNS.push(tform.children[0].querySelector("input").value);
         query.TRANSFORMATIONS.APPLY.push(obj);
     }
 
