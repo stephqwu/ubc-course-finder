@@ -63,6 +63,8 @@ export default class Server {
                         return next();
                     });
 
+                that.rest.use(restify.bodyParser({mapParams: true, mapFiles: true}));
+
                 // This is an example endpoint that you can invoke by accessing this URL in your browser:
                 // http://localhost:4321/echo/hello
                 that.rest.get("/echo/:msg", Server.echo);
@@ -146,12 +148,10 @@ export default class Server {
         const file = buffer.toString("base64");
         Server.insightFacade.addDataset(req.params.id, file, req.params.kind)
             .then(function (response: any) {
-                res.setHeader("content-type", "application/json");
                 res.send(response["code"], response["body"]);
                 return next();
             })
             .catch(function (err: any) {
-                res.setHeader("content-type", "application/json");
                 res.send(err["code"], err["body"]);
                 return next();
             });
@@ -160,12 +160,10 @@ export default class Server {
     private static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         Server.insightFacade.removeDataset(req.params.id)
             .then(function (response: any) {
-                res.setHeader("content-type", "application/json");
                 res.send(response["code"], response["body"]);
                 return next();
             })
             .catch(function (err: any) {
-                res.setHeader("content-type", "application/json");
                 res.send(err["code"], err["body"]);
                 return next();
             });
@@ -174,15 +172,13 @@ export default class Server {
     private static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         const query = req.params;
         Log.info("request: " + req);
-        Log.info("query: " + query);
+        Log.info("query: " + JSON.stringify(query));
         Server.insightFacade.performQuery(query)
             .then(function (response: any) {
-                res.setHeader("content-type", "application/json");
                 res.send(response["code"], response["body"]);
                 return next();
             })
             .catch(function (err: any) {
-                res.setHeader("content-type", "application/json");
                 res.send(err["code"], err["body"]);
                 return next();
             });
@@ -191,12 +187,10 @@ export default class Server {
     private static getDatasets(req: restify.Request, res: restify.Response, next: restify.Next) {
         Server.insightFacade.listDatasets()
             .then(function (response: any) {
-                res.setHeader("content-type", "application/json");
                 res.send(response["code"], response["body"]);
                 return next();
             })
             .catch(function (err: any) {
-                res.setHeader("content-type", "application/json");
                 res.send(err["code"], err["body"]);
                 return next();
             });

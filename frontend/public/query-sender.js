@@ -28,11 +28,13 @@ CampusExplorer.sendQuery = function(query) {
             }; */
 
             request.open("POST", "/query", true);
-            request.setRequestHeader("content-type", "application/json");
+            request.setRequestHeader("content-type", "application/json;charset=UTF-8");
+            console.log("BLAH BLAH");
             request.onreadystatechange = function () {
 
                 var result = request.response;
-
+                console.log("READY STATE: " + request.readyState);
+                console.log("STATUS: " + request.status);
                 if (request.readyState == 4 && request.status == 200) {
                     fulfill(result.body);
                 } else {
@@ -55,6 +57,7 @@ CampusExplorer.sendQuery = function(query) {
             var data = JSON.stringify(query);
             //var json = JSON.parse(query);
             // console.log(query.toString());
+            console.log("THIS IS THE DATA:  " + data);
             request.send(data);
             // console.log(data);
 

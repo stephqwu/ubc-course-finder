@@ -89,7 +89,9 @@ CampusExplorer.buildQuery = function() {
             for (var option of tform.children[2].querySelector("select").children) {
 
                 if (option.getAttribute("selected")) {
-                    if (document.getElementsByClassName("nav-item tab active").value = "Rooms") {
+                    console.log("INSIDE HERE");
+                    console.log(document.getElementsByClassName("nav-item tab active")[0].innerText);
+                    if (document.getElementsByClassName("nav-item tab active")[0].innerText = "Rooms") {
                         innerobjA[key] = "rooms_" + option.value;
                     } else {
                         innerobjA[key] = "courses_" + option.value;
@@ -123,7 +125,7 @@ CampusExplorer.buildQuery = function() {
         /* When multiple keys are selected, which key should we order by? */
         if (field.selected === true) {
             query.OPTIONS.ORDER = {"dir": "UP", "keys": []};
-            if (document.querySelector(".nav-item.tab.active").value === "Rooms") {
+            if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
                 query.OPTIONS.ORDER.keys.push("rooms_" + field.value);
             } else {
                 query.OPTIONS.ORDER.keys.push("courses_" + field.value);
@@ -141,7 +143,7 @@ CampusExplorer.buildQuery = function() {
     console.log(conditions);
     var prefix = "courses_";
 
-    if (document.querySelector(".nav-item.tab.active").value === "Rooms") {
+    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
         prefix = "rooms_";
         console.log(document.getElementsByClassName("nav-item tab active").value);
     }
