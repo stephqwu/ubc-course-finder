@@ -18,13 +18,13 @@ CampusExplorer.buildQuery = function() {
         var column = document.getElementById("courses-columns-field-"+ Csuffixes[i]);
         var group = document.getElementById("courses-groups-field-"+ Csuffixes[i]);
 
-        /*======== BUILDING COLUMNS ========*/
+        /*======== BUILDING COURSES COLUMNS ========*/
 
         if (column.checked === true) {
             query.OPTIONS.COLUMNS.push("courses_"+ Csuffixes[i]);
         }
 
-        /*======== BUILDING GROUPS (under TRANSFORMATIONS) ========*/
+        /*======== BUILDING COURSES GROUPS (under TRANSFORMATIONS) ========*/
 
         if (group.checked === true) {
 
@@ -40,13 +40,13 @@ CampusExplorer.buildQuery = function() {
         var column = document.getElementById("rooms-columns-field-"+ Rsuffixes[i]);
         var group = document.getElementById("rooms-groups-field-"+ Rsuffixes[i]);
 
-        /*======== BUILDING COLUMNS ========*/
+        /*======== BUILDING ROOMS COLUMNS ========*/
 
         if (column.checked === true) {
             query.OPTIONS.COLUMNS.push("rooms_"+ Rsuffixes[i]);
         }
 
-        /*======== BUILDING GROUPS (under TRANSFORMATIONS) ========*/
+        /*======== BUILDING ROOMS GROUPS (under TRANSFORMATIONS) ========*/
 
         if (group.checked === true) {
 
@@ -61,14 +61,16 @@ CampusExplorer.buildQuery = function() {
 
     var tforms = document.getElementsByClassName("control-group transformation");
 
-    if (!query.TRANSFORMATIONS) {
-        query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
-    } else {
-        query.TRANSFORMATIONS.APPLY = [];
+    if (tforms[0]) {
+        if (!query.TRANSFORMATIONS) {
+            query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
+        } else {
+            query.TRANSFORMATIONS.APPLY = [];
+        }
     }
 
     for (var tform of tforms) {
-        if (tform) {
+        if (tform && query.TRANSFORMATIONS) {
 
             var objA = {};
             var innerobjA = {};
@@ -91,6 +93,7 @@ CampusExplorer.buildQuery = function() {
                 if (option.getAttribute("selected")) {
                     console.log("INSIDE HERE");
                     console.log(document.getElementsByClassName("nav-item tab active")[0].innerText);
+                    /* CASE FOR ROOMS */
                     if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
                         innerobjA[key] = "rooms_" + option.value;
                     } else {

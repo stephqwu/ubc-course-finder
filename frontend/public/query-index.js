@@ -12,5 +12,29 @@
 
 var button = document.getElementById("submit-button");
 button.addEventListener("click", function () {
-    CampusExplorer.sendQuery(CampusExplorer.buildQuery());
+
+    // var string;
+    async function stuff() {
+        await CampusExplorer.sendQuery(CampusExplorer.buildQuery());
+        // console.log(string);
+    }
+    var string = stuff().then(function () {
+        // console.log(value);
+        // console.log("STRING: " + string);
+        // console.log(string);
+        // console.log(value);
+        // var obj = JSON.parse(string);
+        console.log("OBJECT: " + string);
+        console.log(string);
+        CampusExplorer.renderResult(string);
+    });
+    //var string = CampusExplorer.buildQuery();
+    //var obj = JSON.parse(string);
+    //CampusExplorer.sendQuery(obj);
+
+    /* CampusExplorer.sendQuery(CampusExplorer.buildQuery()).then(function (value) {
+        console.log(value);
+        // var obj = JSON.parse(value);
+        CampusExplorer.renderResult(value);
+    }) */
 });
