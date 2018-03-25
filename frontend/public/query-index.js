@@ -14,7 +14,7 @@ var button = document.getElementById("submit-button");
 button.addEventListener("click", function () {
 
     // var string;
-    async function stuff() {
+    /* async function stuff() {
         await CampusExplorer.sendQuery(CampusExplorer.buildQuery());
         // console.log(string);
     }
@@ -27,7 +27,8 @@ button.addEventListener("click", function () {
         console.log("OBJECT: " + string);
         console.log(string);
         CampusExplorer.renderResult(string);
-    });
+    }); */
+    CampusExplorer.sendQuery(CampusExplorer.buildQuery());
     //var string = CampusExplorer.buildQuery();
     //var obj = JSON.parse(string);
     //CampusExplorer.sendQuery(obj);

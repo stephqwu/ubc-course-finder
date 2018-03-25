@@ -36,12 +36,17 @@ CampusExplorer.sendQuery = function(query) {
                 console.log("READY STATE: " + request.readyState);
                 console.log("STATUS: " + request.status);
                 if (request.readyState == 4 && request.status == 200) {
-                    // TODO: do something like the following line. Implement renderResult
-                    // CampusExplorer.renderResult(result.body);
-                    fulfill(result.body);
+
+                    // CampusExplorer.renderResult(result);
+                    // console.log(result);
+                    var obj = JSON.parse(result);
+                    // console.log(obj);
+                    CampusExplorer.renderResult(obj);
+                    // console.log(result.body);
+                    fulfill(obj);
                 }
 
-                console.log(result);
+                // console.log(result.body);
 
                 /*var result = request.response;
                 // var json = JSON.parse(result);
