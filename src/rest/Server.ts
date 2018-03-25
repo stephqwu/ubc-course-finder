@@ -60,7 +60,6 @@ export default class Server {
                     function crossOrigin(req, res, next) {
                         res.header("Access-Control-Allow-Origin", "*");
                         res.header("Access-Control-Allow-Headers", "X-Requested-With");
-                        res.setHeader("content-type", "application/json");
                         return next();
                     });
 
@@ -106,7 +105,6 @@ export default class Server {
         Log.trace("Server::echo(..) - params: " + JSON.stringify(req.params));
         try {
             const result = Server.performEcho(req.params.msg);
-            res.setHeader("content-type", "application/json");
             Log.info("Server::echo(..) - responding " + result.code);
             res.json(result.code, result.body);
         } catch (err) {
@@ -133,13 +131,11 @@ export default class Server {
         }
         fs.readFile(path, function (err: Error, file: Buffer) {
             if (err) {
-                res.setHeader("content-type", "application/json");
                 res.send(500);
                 Log.error(JSON.stringify(err));
                 return next();
             }
             res.write(file);
-            res.setHeader("content-type", "application/json");
             res.end();
             return next();
         });
@@ -177,6 +173,8 @@ export default class Server {
 
     private static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         const query = req.params;
+        Log.info("request: " + req);
+        Log.info("query: " + query);
         Server.insightFacade.performQuery(query)
             .then(function (response: any) {
                 res.setHeader("content-type", "application/json");
