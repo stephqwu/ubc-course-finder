@@ -36,7 +36,8 @@ CampusExplorer.sendQuery = function(query) {
                 console.log("READY STATE: " + request.readyState);
                 console.log("STATUS: " + request.status);
                 if (request.readyState == 4 && request.status == 200) {
-                    console.log("inside fulfill");
+                    // TODO: do something like the following line. Implement renderResult
+                    // CampusExplorer.renderResult(result.body);
                     fulfill(result.body);
                 }
 
