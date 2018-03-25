@@ -91,7 +91,7 @@ CampusExplorer.buildQuery = function() {
                 if (option.getAttribute("selected")) {
                     console.log("INSIDE HERE");
                     console.log(document.getElementsByClassName("nav-item tab active")[0].innerText);
-                    if (document.getElementsByClassName("nav-item tab active")[0].innerText = "Rooms") {
+                    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
                         innerobjA[key] = "rooms_" + option.value;
                     } else {
                         innerobjA[key] = "courses_" + option.value;
