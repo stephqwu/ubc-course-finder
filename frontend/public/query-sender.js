@@ -36,9 +36,8 @@ CampusExplorer.sendQuery = function(query) {
                 console.log("READY STATE: " + request.readyState);
                 console.log("STATUS: " + request.status);
                 if (request.readyState == 4 && request.status == 200) {
+                    console.log("inside fulfill");
                     fulfill(result.body);
-                } else {
-                    reject(result.body);
                 }
 
                 console.log(result);
