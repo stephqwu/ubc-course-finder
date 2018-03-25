@@ -3,7 +3,7 @@
         <legend>Conditions</legend>
         <div class="control-group condition-type">
             <div class="control conditions-all-radio">
-                <input id="courses-conditiontype-all" name="conditionType" value="all" type="radio" checked="checked">
+                <input checked="" id="courses-conditiontype-all" name="conditionType" value="all" type="radio">
                 <label for="courses-conditiontype-all">All of the following</label>
             </div>
             <div class="control conditions-any-radio">
@@ -24,9 +24,9 @@
                 <select>
                     <option value="audit">
                         Audit
-                    </option>                <option value="avg">
+                    </option>                <option value="avg" selected="selected">
                     Average
-                </option>                <option value="dept" selected="selected">
+                </option>                <option value="dept">
                     Department
                 </option>                <option value="fail">
                     Fail
@@ -48,16 +48,16 @@
                 <select>
                     <option value="EQ">
                         EQ
-                    </option>                <option value="GT">
+                    </option>                <option value="GT" selected="selected">
                     GT
-                </option>                <option value="IS" selected="selected">
+                </option>                <option value="IS">
                     IS
                 </option>                <option value="LT">
                     LT
                 </option>    </select>
             </div>
             <div class="control term">
-                <input type="text" value="cpsc">
+                <input value="97" type="text">
             </div>    <a class="icon icon-minus" href="#"></a>
         </div></div>
         <div class="icon-container"><a class="icon icon-plus" href="#"></a></div>
@@ -66,43 +66,43 @@
         <legend>Columns</legend>
         <div class="control-group">
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-audit" data-key="audit" value="audit">
+                <input id="courses-columns-field-audit" data-key="audit" value="audit" type="checkbox">
                 <label for="courses-columns-field-audit">Audit</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-avg" data-key="avg" value="avg">
+                <input id="courses-columns-field-avg" data-key="avg" value="avg" checked="checked" type="checkbox">
                 <label for="courses-columns-field-avg">Average</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-dept" data-key="dept" value="dept" checked="checked">
+                <input id="courses-columns-field-dept" data-key="dept" value="dept" checked="checked" type="checkbox">
                 <label for="courses-columns-field-dept">Department</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-fail" data-key="fail" value="fail">
+                <input id="courses-columns-field-fail" data-key="fail" value="fail" type="checkbox">
                 <label for="courses-columns-field-fail">Fail</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-id" data-key="id" value="id" checked="checked">
+                <input id="courses-columns-field-id" data-key="id" value="id" type="checkbox">
                 <label for="courses-columns-field-id">ID</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-instructor" data-key="instructor" value="instructor">
+                <input id="courses-columns-field-instructor" data-key="instructor" value="instructor" type="checkbox">
                 <label for="courses-columns-field-instructor">Instructor</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-pass" data-key="pass" value="pass">
+                <input id="courses-columns-field-pass" data-key="pass" value="pass" type="checkbox">
                 <label for="courses-columns-field-pass">Pass</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-title" data-key="title" value="title">
+                <input id="courses-columns-field-title" data-key="title" value="title" type="checkbox">
                 <label for="courses-columns-field-title">Title</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-uuid" data-key="uuid" value="uuid">
+                <input id="courses-columns-field-uuid" data-key="uuid" value="uuid" type="checkbox">
                 <label for="courses-columns-field-uuid">UUID</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-columns-field-year" data-key="year" value="year">
+                <input id="courses-columns-field-year" data-key="year" value="year" type="checkbox">
                 <label for="courses-columns-field-year">Year</label>
             </div>
         </div>
@@ -114,13 +114,13 @@
                 <select multiple="">
                     <option value="audit">
                         Audit
-                    </option>                <option value="avg">
+                    </option>                <option value="avg" selected="selected">
                     Average
                 </option>                <option value="dept">
                     Department
                 </option>                <option value="fail">
                     Fail
-                </option>                <option value="id" selected="selected">
+                </option>                <option value="id">
                     ID
                 </option>                <option value="instructor">
                     Instructor
@@ -135,7 +135,7 @@
                 </option>    </select>
             </div>
             <div class="control descending">
-                <input type="checkbox" id="courses-order">
+                <input id="courses-order" type="checkbox">
                 <label for="courses-order">Descending</label>
             </div>
         </div>
@@ -144,43 +144,43 @@
         <legend>Groups</legend>
         <div class="control-group">
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-audit" data-key="audit" value="audit">
+                <input id="courses-groups-field-audit" data-key="audit" value="audit" type="checkbox">
                 <label for="courses-groups-field-audit">Audit</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-avg" data-key="avg" value="avg">
+                <input id="courses-groups-field-avg" data-key="avg" value="avg" type="checkbox">
                 <label for="courses-groups-field-avg">Average</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-dept" data-key="dept" value="dept">
+                <input id="courses-groups-field-dept" data-key="dept" value="dept" type="checkbox">
                 <label for="courses-groups-field-dept">Department</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-fail" data-key="fail" value="fail">
+                <input id="courses-groups-field-fail" data-key="fail" value="fail" type="checkbox">
                 <label for="courses-groups-field-fail">Fail</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-id" data-key="id" value="id">
+                <input id="courses-groups-field-id" data-key="id" value="id" type="checkbox">
                 <label for="courses-groups-field-id">ID</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-instructor" data-key="instructor" value="instructor">
+                <input id="courses-groups-field-instructor" data-key="instructor" value="instructor" type="checkbox">
                 <label for="courses-groups-field-instructor">Instructor</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-pass" data-key="pass" value="pass">
+                <input id="courses-groups-field-pass" data-key="pass" value="pass" type="checkbox">
                 <label for="courses-groups-field-pass">Pass</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-title" data-key="title" value="title">
+                <input id="courses-groups-field-title" data-key="title" value="title" type="checkbox">
                 <label for="courses-groups-field-title">Title</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-uuid" data-key="uuid" value="uuid">
+                <input id="courses-groups-field-uuid" data-key="uuid" value="uuid" type="checkbox">
                 <label for="courses-groups-field-uuid">UUID</label>
             </div>
             <div class="control field">
-                <input type="checkbox" id="courses-groups-field-year" data-key="year" value="year">
+                <input id="courses-groups-field-year" data-key="year" value="year" type="checkbox">
                 <label for="courses-groups-field-year">Year</label>
             </div>
         </div>
