@@ -13,15 +13,15 @@ CampusExplorer.buildQuery = function() {
     let Rsuffixes = ["address", "fullname", "furniture", "href", "lat", "lon", "name", "number", "seats", "shortname",
         "type"];
 
-    for (var i = 0; i < Csuffixes.length; i++) {
+    for (var k = 0; k < Csuffixes.length; k++) {
 
-        var column = document.getElementById("courses-columns-field-"+ Csuffixes[i]);
-        var group = document.getElementById("courses-groups-field-"+ Csuffixes[i]);
+        var column = document.getElementById("courses-columns-field-"+ Csuffixes[k]);
+        var group = document.getElementById("courses-groups-field-"+ Csuffixes[k]);
 
         /*======== BUILDING COURSES COLUMNS ========*/
 
         if (column.checked === true) {
-            query.OPTIONS.COLUMNS.push("courses_"+ Csuffixes[i]);
+            query.OPTIONS.COLUMNS.push("courses_"+ Csuffixes[k]);
         }
 
         /*======== BUILDING COURSES GROUPS (under TRANSFORMATIONS) ========*/
@@ -31,19 +31,21 @@ CampusExplorer.buildQuery = function() {
             if (!query.TRANSFORMATIONS) {
                 query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
             }
-            query.TRANSFORMATIONS.GROUP.push("courses_" + Csuffixes[i]);
+            query.TRANSFORMATIONS.GROUP.push("courses_" + Csuffixes[k]);
         }
     }
 
-    for (var i = 0; i < Rsuffixes.length; i++) {
+    query.OPTIONS.COLUMNS = [];
 
-        var column = document.getElementById("rooms-columns-field-"+ Rsuffixes[i]);
-        var group = document.getElementById("rooms-groups-field-"+ Rsuffixes[i]);
+    for (var l = 0; l < Rsuffixes.length; l++) {
+
+        var column = document.getElementById("rooms-columns-field-"+ Rsuffixes[l]);
+        var group = document.getElementById("rooms-groups-field-"+ Rsuffixes[l]);
 
         /*======== BUILDING ROOMS COLUMNS ========*/
 
         if (column.checked === true) {
-            query.OPTIONS.COLUMNS.push("rooms_"+ Rsuffixes[i]);
+            query.OPTIONS.COLUMNS.push("rooms_"+ Rsuffixes[l]);
         }
 
         /*======== BUILDING ROOMS GROUPS (under TRANSFORMATIONS) ========*/
@@ -53,7 +55,7 @@ CampusExplorer.buildQuery = function() {
             if (!query.TRANSFORMATIONS) {
                 query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
             }
-            query.TRANSFORMATIONS.GROUP.push("rooms_" + Rsuffixes[i]);
+            query.TRANSFORMATIONS.GROUP.push("rooms_" + Rsuffixes[l]);
         }
     }
 
@@ -121,17 +123,26 @@ CampusExplorer.buildQuery = function() {
     /*======== BUILDING ORDER ========*/
 
     var div = document.getElementsByClassName("control order fields");
-    var fields = div[0].children[0].children;
+    var rawFields = div[0].children[0].children;
+    var fields = [].slice.call(rawFields);
 
-    for (var field of fields) {
+    for (var i = 0; i < fields.length; i++) {
 
         /* When multiple keys are selected, which key should we order by? */
-        if (field.selected === true) {
+        if (fields[i].selected === true) {
             query.OPTIONS.ORDER = {"dir": "UP", "keys": []};
             if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
-                query.OPTIONS.ORDER.keys.push("rooms_" + field.value);
-            } else {
-                query.OPTIONS.ORDER.keys.push("courses_" + field.value);
+                    if ((fields[i].value === "address" || fields[i].value === "fullname" ||
+                            fields[i].value === "furniture" || fields[i].value === "href" || fields[i].value === "lat"
+                            || fields[i].value === "lon" || fields[i].value === "name" || fields[i].value === "number"
+                            || fields[i].value === "seats" || fields[i].value === "shortname") && i < fields.length) {
+                        // fields.splice(fields[i], fields[i + 1]);
+                        query.OPTIONS.ORDER.keys.push("rooms_" + fields[i].value);
+                    } else {
+                        continue;
+                    }
+            } else if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Courses") {
+                query.OPTIONS.ORDER.keys.push("courses_" + fields[i].value);
             }
         }
     }
@@ -142,12 +153,21 @@ CampusExplorer.buildQuery = function() {
 
     /*======== START BUILDING CONDITIONS ========*/
 
-    var conditions = document.getElementsByClassName("control-group condition");
+    var rawConditions = document.getElementsByClassName("control-group condition");
+    var conditions = [].slice.call(rawConditions);
     console.log(conditions);
     var prefix = "courses_";
 
     if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
         prefix = "rooms_";
+        for (var j = 0; j < conditions.length; j++) {
+            const keys = conditions[j].children[1].querySelector("select").children;
+            for (var key of keys) {
+                if (key.value === "audit" || key.value === "avg" || key.value === "dept") {
+                    conditions.splice(j, j+1);
+                }
+            }
+        }
         console.log(document.getElementsByClassName("nav-item tab active").value);
     }
 
