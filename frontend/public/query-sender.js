@@ -30,7 +30,7 @@ CampusExplorer.sendQuery = function(query) {
             request.open("POST", "/query", true);
             request.setRequestHeader("content-type", "application/json;charset=UTF-8");
             console.log("BLAH BLAH");
-            request.onreadystatechange = function () {
+            request.onload = function () {
 
                 var result = request.response;
                 console.log("READY STATE: " + request.readyState);
