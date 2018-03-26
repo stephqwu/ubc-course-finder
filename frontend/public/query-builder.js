@@ -173,7 +173,7 @@ CampusExplorer.buildQuery = function() {
     var Rconditions = [];
     var conditions = [];
     for (var j = 0; j < onditions.length; j++) {
-        if (onditions[j].textContent === "\n    \n        \n        Not\n    \n    \n        \n                    \n" +
+        if (/*onditions[j].textContent === "\n    \n        \n        Not\n    \n    \n        \n                    \n" +
             "                        Address\n                                    \n" +
             "                        Full Name\n                                    \n                        " +
             "Furniture\n                                    \n                        Link\n" +
@@ -188,11 +188,12 @@ CampusExplorer.buildQuery = function() {
             "                        EQ\n                                    \n                        GT\n" +
             "                                    \n                        IS\n" +
             "                                    \n                        LT\n" +
-            "                        \n    \n    \n        \n        \n") {
-            Rconditions.push(onditions[j]);
+            "                        \n    \n    \n        \n        \n"*/onditions[j].children[1].children[0][0].value
+        === "audit") {
+            conditions.push(onditions[j]);
             // conditions.pop();
         } else {
-            conditions.push(onditions[j]);
+            Rconditions.push(onditions[j]);
         }
     }
     if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
@@ -219,7 +220,6 @@ CampusExplorer.buildQuery = function() {
             }
         } */
     // }
-
 
     console.log(Rquery);
     console.log(Cquery);
