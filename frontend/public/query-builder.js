@@ -24,6 +24,9 @@ CampusExplorer.buildQuery = function() {
         if (column.checked === true) {
             Cquery.OPTIONS.COLUMNS.push("courses_"+ Csuffixes[k]);
         }
+        if (column.checked === false) {
+            Cquery.OPTIONS.COLUMNS.pop();
+        }
 
         /*======== BUILDING COURSES GROUPS (under TRANSFORMATIONS) ========*/
 
@@ -45,6 +48,9 @@ CampusExplorer.buildQuery = function() {
 
         if (column.checked === true) {
             Rquery.OPTIONS.COLUMNS.push("rooms_"+ Rsuffixes[l]);
+        }
+        if (column.checked === false) {
+            Rquery.OPTIONS.COLUMNS.pop();
         }
 
         /*======== BUILDING ROOMS GROUPS (under TRANSFORMATIONS) ========*/
