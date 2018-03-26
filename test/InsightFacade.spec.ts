@@ -481,7 +481,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
 
     // This is an example of a pending test. Add a callback function to make the test run.
     // it("Should remove the courses dataset");
-    /* it("Should remove the courses dataset", async () => { // the dataset is there right
+    it("Should remove the courses dataset", async () => { // the dataset is there right
         const id: string = "courses";
         const expectedCode: number = 204;
         let response: InsightResponse;
@@ -535,7 +535,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         } finally {
             expect(response.code).to.equal(expectedCode);
         }
-    }); */
+    });
 });
 
 // This test suite dynamically generates tests from the JSON files in test/queries.
@@ -543,6 +543,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
 describe("InsightFacade PerformQuery", () => {
     const datasetsToQuery: { [id: string]: string } = {
         courses: "./test/data/courses.zip",
+        rooms: "./test/data/rooms.zip",
     };
     let insightFacade: InsightFacade;
     let testQueries: ITestQuery[] = [];
@@ -584,9 +585,12 @@ describe("InsightFacade PerformQuery", () => {
             const responsePromises: Array<Promise<InsightResponse>> = [];
             const datasets: { [id: string]: string } = Object.assign({}, ...loadedDatasets);
             for (const [id, content] of Object.entries(datasets)) {
-                responsePromises.push(insightFacade.addDataset(id, content, InsightDatasetKind.Courses));
+                if (id === "courses") {
+                    responsePromises.push(insightFacade.addDataset(id, content, InsightDatasetKind.Courses));
+                } else {
+                    responsePromises.push(insightFacade.addDataset(id, content, InsightDatasetKind.Rooms));
+                }
             }
-
             // This try/catch is a hack to let your dynamic tests execute enough the addDataset method fails.
             // In D1, you should remove this try/catch to ensure your datasets load successfully before trying
             // to run you queries.
