@@ -1,4 +1,6 @@
 {
     "query1": "simple query IS comparison for department with two columns and old order syntax",
-    "query2": "SELECT dept, avg WHERE avg > 97"
+    "queryR": "intermediary rooms query",
+    "query2": "SELECT dept, avg WHERE avg > 97",
+    "hidden_order": "query with hidden order key selected"
 }

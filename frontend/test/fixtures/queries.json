@@ -18,6 +18,23 @@
             }
         }
     },
+    "queryR": {
+        "WHERE": {
+            "EQ": {
+                "rooms_seats": 40
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_shortname",
+                "rooms_furniture"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["rooms_furniture"]
+            }
+        }
+    },
     "query2": {
         "WHERE": {
             "GT": {
@@ -32,6 +49,22 @@
             "ORDER": {
                 "dir": "UP",
                 "keys": ["courses_avg"]
+            }
+        }
+    },
+    "hidden_order": {
+        "WHERE": {
+            "EQ": {
+                "rooms_seats": 40
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_shortname"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["rooms_furniture"]
             }
         }
     }
