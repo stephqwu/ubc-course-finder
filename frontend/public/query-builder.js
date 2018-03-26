@@ -5,11 +5,11 @@
  *
  * @returns query object adhering to the query EBNF
  */
+let Rquery = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
+let Cquery = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
 
 CampusExplorer.buildQuery = function() {
 
-    let Rquery = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
-    let Cquery = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
     let Csuffixes = ["audit", "avg", "dept", "fail", "id", "instructor", "pass", "title", "uuid", "year"];
     let Rsuffixes = ["address", "fullname", "furniture", "href", "lat", "lon", "name", "number", "seats", "shortname",
         "type"];
@@ -166,23 +166,83 @@ CampusExplorer.buildQuery = function() {
     /*======== START BUILDING CONDITIONS ========*/
 
     var rawConditions = document.getElementsByClassName("control-group condition");
-    var conditions = [].slice.call(rawConditions);
-    console.log(conditions);
-    var prefix = "courses_";
+    var onditions = [].slice.call(rawConditions);
+    console.log(onditions);
+    console.log(onditions[0]);
 
+    var Rconditions = [];
+    var conditions = [];
+    for (var j = 0; j < onditions.length; j++) {
+        if (onditions[j].textContent === "\n    \n        \n        Not\n    \n    \n        \n                    \n" +
+            "                        Address\n                                    \n" +
+            "                        Full Name\n                                    \n                        " +
+            "Furniture\n                                    \n                        Link\n" +
+            "                                    \n                        Latitude\n" +
+            "                                    \n                        Longitude\n" +
+            "                                    \n                        Name\n" +
+            "                                    \n                        Number\n" +
+            "                                    \n                        Seats\n" +
+            "                                    \n                        Short Name\n" +
+            "                                    \n                        Type\n" +
+            "                        \n    \n    \n        \n                    \n" +
+            "                        EQ\n                                    \n                        GT\n" +
+            "                                    \n                        IS\n" +
+            "                                    \n                        LT\n" +
+            "                        \n    \n    \n        \n        \n") {
+            Rconditions.push(onditions[j]);
+            // conditions.pop();
+        } else {
+            conditions.push(onditions[j]);
+        }
+    }
     if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
-        prefix = "rooms_";
-        for (var j = 0; j < conditions.length; j++) {
+        CampusExplorer.buildRConditions(Rconditions);
+    } else {
+        CampusExplorer.buildConditions(conditions);
+    }
+    console.log("CHECK HERE");
+    console.log(Rconditions);
+    console.log(conditions);
+
+    // var Rprefix = "rooms_";
+
+    // if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
+
+
+        /* for (var j = 0; j < conditions.length; j++) {
+            // if (conditions[j].children[1].querySelector("select").children[0]);
             const keys = conditions[j].children[1].querySelector("select").children;
             for (var key of keys) {
                 if (key.value === "audit" || key.value === "avg" || key.value === "dept") {
                     conditions.splice(j, j+1);
                 }
             }
-        }
-        console.log(document.getElementsByClassName("nav-item tab active").value);
-    }
+        } */
+    // }
 
+
+    console.log(Rquery);
+    console.log(Cquery);
+    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
+        return Rquery;
+    } else {
+        return Cquery;
+    }
+};
+
+/* CampusExplorer.buildQueryHelper(var label) = function() {
+    switch (label) {
+        case "Audit":
+            label = "next";
+            break;
+        case "JHey":
+            break;
+        default:
+    }
+}; */
+
+CampusExplorer.buildConditions = function(conditions) {
+    var prefix = "courses_";
     if (conditions.length > 1) {
         /* Include logic array */
         var word = "";
@@ -227,10 +287,6 @@ CampusExplorer.buildQuery = function() {
                     comp = option.value;
                 }
             }
-            // console.log("NEW CONDITION: " + condition);
-            // console.log("CONDITION.CHILDREN: " + condition.children);
-            // console.log("OPTION CHILD: " + condition.children[2].querySelector("option"));
-            // console.log(condition.children[2].querySelector("select"));
 
             /* push to array with logic */
             if (word === "NOT") {
@@ -287,29 +343,110 @@ CampusExplorer.buildQuery = function() {
             }
         }
     }
-    console.log(Rquery);
-    console.log(Cquery);
-    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
-        return Rquery;
-    } else {
-        return Cquery;
-    }
 };
 
-/* CampusExplorer.buildQueryHelper(var label) = function() {
-    switch (label) {
-        case "Audit":
-            label = "next";
-            break;
-        case "JHey":
-            break;
-        default:
+CampusExplorer.buildRConditions = function(conditions) {
+    var prefix = "rooms_";
+    if (conditions.length > 1) {
+        /* Include logic array */
+        var word = "";
+
+        if (document.getElementById("courses-conditiontype-all").checked) {
+            Rquery.WHERE["AND"] = [];
+            word = "AND";
+        } else if (document.getElementById("courses-conditiontype-any").checked) {
+            Rquery.WHERE["OR"] = [];
+            word = "OR";
+        } else {
+            Rquery.WHERE["NOT"] = {"OR": []};
+            word = "NOT";
+        }
+
+        for (var condition of conditions) {
+
+            // CampusExplorer.buildCondition(condition);
+            var obj = {};
+            var innerobj = {};
+            var comp = "";
+
+            for (var option of condition.children[1].querySelector("select").children) {
+
+                var raw = condition.children[3].querySelector("input").value;
+                var numeric = parseInt(raw);
+
+                if (option.getAttribute("selected")) {
+                    if (numeric !== numeric || comp === "IS") {
+                        innerobj[prefix + option.value] = raw;
+                    } else {
+                        innerobj[prefix + option.value] = numeric;
+                    }
+                }
+            }
+
+            for (var option of condition.children[2].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    obj[option.value] = innerobj;
+                    console.log(obj);
+                    comp = option.value;
+                }
+            }
+
+            /* push to array with logic */
+            if (word === "NOT") {
+                if (condition.children[0].querySelector("input").checked) {
+                    Rquery.WHERE[word].OR.push({"NOT": obj});
+                } else {
+                    Rquery.WHERE[word].OR.push(obj);
+                }
+            } else {
+                if (condition.children[0].querySelector("input").checked) {
+                    Rquery.WHERE[word].push({"NOT": obj});
+                } else {
+                    Rquery.WHERE[word].push(obj);
+                }
+            }
+        }
+    } else if (conditions !== undefined) {
+        /* lone query condition */
+        var condition = conditions[0];
+
+        if (condition) {
+            // CampusExplorer.buildCondition(condition);
+            var obj = {};
+            var innerobj = {};
+            var comp = "";
+
+            for (var option of condition.children[1].querySelector("select").children) {
+
+                var raw = condition.children[3].querySelector("input").value;
+                var numeric = parseInt(raw);
+
+                if (option.getAttribute("selected")) {
+                    if (numeric !== numeric || comp === "IS") {
+                        innerobj[prefix + option.value] = raw;
+                    } else {
+                        innerobj[prefix + option.value] = numeric;
+                    }
+                }
+            }
+
+            for (var option of condition.children[2].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    obj[option.value] = innerobj;
+                    console.log(obj);
+                    comp = option.value;
+                }
+            }
+            /* no preceding logic */
+            if (condition.children[0].querySelector("input").checked) {
+                Rquery.WHERE = {"NOT": obj};
+            } else {
+                Rquery.WHERE = obj;
+            }
+        }
     }
-}; */
-
-CampusExplorer.buildCondition = function(condition) {
-
-
 };
 
 /* let radios = ["any", "all", "none"];
