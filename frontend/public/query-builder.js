@@ -295,10 +295,10 @@ CampusExplorer.buildConditions = function(conditions) {
             for (var option of condition.children[1].querySelector("select").children) {
 
                 var raw = condition.children[3].querySelector("input").value;
-                var numeric = parseInt(raw);
+                var numeric = parseFloat(raw);
 
                 if (option.getAttribute("selected")) {
-                    if (numeric !== numeric || comp === "IS") {
+                    if (numeric !== numeric || comp === "IS" || option.value === "id" || option.value === "uuid") {
                         innerobj[prefix + option.value] = raw;
                     } else {
                         innerobj[prefix + option.value] = numeric;
@@ -346,7 +346,7 @@ CampusExplorer.buildConditions = function(conditions) {
                 var numeric = parseInt(raw);
 
                 if (option.getAttribute("selected")) {
-                    if (numeric !== numeric || comp === "IS") {
+                    if (numeric !== numeric || comp === "IS" || option.value === "id" || option.value === "uuid") {
                         innerobj[prefix + option.value] = raw;
                     } else {
                         innerobj[prefix + option.value] = numeric;
@@ -399,10 +399,10 @@ CampusExplorer.buildRConditions = function(conditions) {
             for (var option of condition.children[1].querySelector("select").children) {
 
                 var raw = condition.children[3].querySelector("input").value;
-                var numeric = parseInt(raw);
+                var numeric = parseFloat(raw);
 
                 if (option.getAttribute("selected")) {
-                    if (numeric !== numeric || comp === "IS") {
+                    if (numeric !== numeric || comp === "IS" || option.value === "number") {
                         innerobj[prefix + option.value] = raw;
                     } else {
                         innerobj[prefix + option.value] = numeric;
@@ -450,7 +450,7 @@ CampusExplorer.buildRConditions = function(conditions) {
                 var numeric = parseInt(raw);
 
                 if (option.getAttribute("selected")) {
-                    if (numeric !== numeric || comp === "IS") {
+                    if (numeric !== numeric || comp === "IS" || option.value === "number") {
                         innerobj[prefix + option.value] = raw;
                     } else {
                         innerobj[prefix + option.value] = numeric;
