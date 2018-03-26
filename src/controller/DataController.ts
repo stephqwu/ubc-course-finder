@@ -486,13 +486,16 @@ export default class DataController {
     }
 
     public removeDataset(id: string): Promise <boolean> {
+        const curr = this;
         return new Promise(function (fulfill, reject) {
             try {
                 fs.unlinkSync("./data/" + id + ".json");
+                curr.courseDatasets = [];
                 return fulfill();
             } catch (err) {
                 try {
                     fs.unlinkSync("./rooms/" + id + ".json");
+                    curr.roomDatasets = [];
                     return fulfill();
                 } catch (err) {
                     return reject();
