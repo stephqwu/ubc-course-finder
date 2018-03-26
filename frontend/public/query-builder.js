@@ -8,7 +8,8 @@
 
 CampusExplorer.buildQuery = function() {
 
-    let query = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
+    let Rquery = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
+    let Cquery = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
     let Csuffixes = ["audit", "avg", "dept", "fail", "id", "instructor", "pass", "title", "uuid", "year"];
     let Rsuffixes = ["address", "fullname", "furniture", "href", "lat", "lon", "name", "number", "seats", "shortname",
         "type"];
@@ -21,21 +22,19 @@ CampusExplorer.buildQuery = function() {
         /*======== BUILDING COURSES COLUMNS ========*/
 
         if (column.checked === true) {
-            query.OPTIONS.COLUMNS.push("courses_"+ Csuffixes[k]);
+            Cquery.OPTIONS.COLUMNS.push("courses_"+ Csuffixes[k]);
         }
 
         /*======== BUILDING COURSES GROUPS (under TRANSFORMATIONS) ========*/
 
         if (group.checked === true) {
 
-            if (!query.TRANSFORMATIONS) {
-                query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
+            if (!Cquery.TRANSFORMATIONS) {
+                Cquery.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
             }
-            query.TRANSFORMATIONS.GROUP.push("courses_" + Csuffixes[k]);
+            Cquery.TRANSFORMATIONS.GROUP.push("courses_" + Csuffixes[k]);
         }
     }
-
-    query.OPTIONS.COLUMNS = [];
 
     for (var l = 0; l < Rsuffixes.length; l++) {
 
@@ -45,34 +44,34 @@ CampusExplorer.buildQuery = function() {
         /*======== BUILDING ROOMS COLUMNS ========*/
 
         if (column.checked === true) {
-            query.OPTIONS.COLUMNS.push("rooms_"+ Rsuffixes[l]);
+            Rquery.OPTIONS.COLUMNS.push("rooms_"+ Rsuffixes[l]);
         }
 
         /*======== BUILDING ROOMS GROUPS (under TRANSFORMATIONS) ========*/
 
         if (group.checked === true) {
 
-            if (!query.TRANSFORMATIONS) {
-                query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
+            if (!Rquery.TRANSFORMATIONS) {
+                Rquery.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
             }
-            query.TRANSFORMATIONS.GROUP.push("rooms_" + Rsuffixes[l]);
+            Rquery.TRANSFORMATIONS.GROUP.push("rooms_" + Rsuffixes[l]);
         }
     }
 
-    /*======== BUILDING APPLY (under TRANSFORMATIONS) ========*/
+    /*======== BUILDING APPLY (under TRANSFORMATIONS) *all Cquery* ========*/
 
     var tforms = document.getElementsByClassName("control-group transformation");
 
     if (tforms[0]) {
-        if (!query.TRANSFORMATIONS) {
-            query.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
+        if (!Cquery.TRANSFORMATIONS) {
+            Cquery.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
         } else {
-            query.TRANSFORMATIONS.APPLY = [];
+            Cquery.TRANSFORMATIONS.APPLY = [];
         }
     }
 
     for (var tform of tforms) {
-        if (tform && query.TRANSFORMATIONS) {
+        if (tform && Cquery.TRANSFORMATIONS) {
 
             var objA = {};
             var innerobjA = {};
@@ -109,14 +108,14 @@ CampusExplorer.buildQuery = function() {
             objA[key] = innerobjA;
 
             // TEMPORARY AND RUSHED PUSHING OF TRANSFORMATION KEY TO COLUMN
-            query.OPTIONS.COLUMNS.push(key); // move down
+            Cquery.OPTIONS.COLUMNS.push(key); // move down
             /* var boxes = document.querySelector("div.control.transformation input[data-key='" + key + "']");
             for (var box in boxes) {
                 if (box.checked) {
                     query.OPTIONS.COLUMNS.push(key);
                 }
             } */
-            query.TRANSFORMATIONS.APPLY.push(objA);
+            Cquery.TRANSFORMATIONS.APPLY.push(objA);
         }
     }
 
@@ -130,26 +129,31 @@ CampusExplorer.buildQuery = function() {
 
         /* When multiple keys are selected, which key should we order by? */
         if (fields[i].selected === true) {
-            query.OPTIONS.ORDER = {"dir": "UP", "keys": []};
-            if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
-                    if ((fields[i].value === "address" || fields[i].value === "fullname" ||
+
+            if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Courses") {
+                    Cquery.OPTIONS.ORDER = {"dir": "UP", "keys": []};
+                    if (!(fields[i].value === "address" || fields[i].value === "fullname" ||
                             fields[i].value === "furniture" || fields[i].value === "href" || fields[i].value === "lat"
                             || fields[i].value === "lon" || fields[i].value === "name" || fields[i].value === "number"
                             || fields[i].value === "seats" || fields[i].value === "shortname") && i < fields.length) {
                         // fields.splice(fields[i], fields[i + 1]);
-                        query.OPTIONS.ORDER.keys.push("rooms_" + fields[i].value);
-                    } else {
-                        continue;
+                        Cquery.OPTIONS.ORDER.keys.push("courses_" + fields[i].value);
+
+                        if (document.getElementById("courses-order").checked === true) {
+                            Cquery.OPTIONS.ORDER.dir = "DOWN";
+                        }
                     }
-            } else if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Courses") {
-                query.OPTIONS.ORDER.keys.push("courses_" + fields[i].value);
+            } else if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
+                Rquery.OPTIONS.ORDER = {"dir": "UP", "keys": []};
+                Rquery.OPTIONS.ORDER.keys.push("rooms_" + fields[i].value);
+
+                if (document.getElementById("courses-order").checked === true) {
+                    Rquery.OPTIONS.ORDER.dir = "DOWN";
+                }
             }
         }
     }
 
-    if (document.getElementById("courses-order").checked === true) {
-        query.OPTIONS.ORDER.dir = "DOWN";
-    }
 
     /*======== START BUILDING CONDITIONS ========*/
 
@@ -176,13 +180,13 @@ CampusExplorer.buildQuery = function() {
         var word = "";
 
         if (document.getElementById("courses-conditiontype-all").checked) {
-            query.WHERE["AND"] = [];
+            Cquery.WHERE["AND"] = [];
             word = "AND";
         } else if (document.getElementById("courses-conditiontype-any").checked) {
-            query.WHERE["OR"] = [];
+            Cquery.WHERE["OR"] = [];
             word = "OR";
         } else {
-            query.WHERE["NOT"] = {"OR": []};
+            Cquery.WHERE["NOT"] = {"OR": []};
             word = "NOT";
         }
 
@@ -223,15 +227,15 @@ CampusExplorer.buildQuery = function() {
             /* push to array with logic */
             if (word === "NOT") {
                 if (condition.children[0].querySelector("input").checked) {
-                    query.WHERE[word].OR.push({"NOT": obj});
+                    Cquery.WHERE[word].OR.push({"NOT": obj});
                 } else {
-                    query.WHERE[word].OR.push(obj);
+                    Cquery.WHERE[word].OR.push(obj);
                 }
             } else {
                 if (condition.children[0].querySelector("input").checked) {
-                    query.WHERE[word].push({"NOT": obj});
+                    Cquery.WHERE[word].push({"NOT": obj});
                 } else {
-                    query.WHERE[word].push(obj);
+                    Cquery.WHERE[word].push(obj);
                 }
             }
         }
@@ -269,14 +273,19 @@ CampusExplorer.buildQuery = function() {
             }
             /* no preceding logic */
             if (condition.children[0].querySelector("input").checked) {
-                query.WHERE = {"NOT": obj};
+                Cquery.WHERE = {"NOT": obj};
             } else {
-                query.WHERE = obj;
+                Cquery.WHERE = obj;
             }
         }
     }
-    console.log(query);
-    return query;
+    console.log(Rquery);
+    console.log(Cquery);
+    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
+        return Rquery;
+    } else {
+        return Cquery;
+    }
 };
 
 /* CampusExplorer.buildQueryHelper(var label) = function() {
