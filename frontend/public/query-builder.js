@@ -88,66 +88,62 @@ CampusExplorer.buildQuery = function() {
         } */
     }
 
-    /*======== BUILDING APPLY (under TRANSFORMATIONS) *all Cquery* ========*/
+    /*======== BUILDING APPLY (under TRANSFORMATIONS) ========*/
 
-    var tforms = document.getElementsByClassName("control-group transformation");
-    // console.log(tforms);
+    var rawTforms = document.getElementsByClassName("control-group transformation");
+    var tforms = [].slice.call(rawTforms);
+    console.log("TFORMS");
+    console.log(tforms);
+    console.log(tforms[1]);
+    console.log(tforms[0]);
 
-    if (tforms[0]) {
-        if (!Cquery.TRANSFORMATIONS) {
-            Cquery.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
+    var rforms = [];
+    var cforms = [];
+
+    for (var t = 0; t < tforms.length; t++) {
+
+        if (tforms[t].children[2].querySelector("select")[0].value === "audit") {
+
+            cforms.push(tforms[t]);
+            console.log(cforms);
+            console.log("ADD HERE");
+            console.log(tforms[t]);
+
         } else {
-            Cquery.TRANSFORMATIONS.APPLY = [];
+            console.log(tforms[t].children[2].querySelector("select")[0]);
+            console.log("LOOK UP");
+            rforms.push(tforms[t]);
+            console.log("ELSE");
         }
+
     }
 
-    for (var tform of tforms) {
-        if (tform && Cquery.TRANSFORMATIONS) {
+    /*if (tforms[0]) {
+        if (!Cquery.TRANSFORMATIONS) {
+            Cquery.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
+            /*} else {
+                Cquery.TRANSFORMATIONS.APPLY = [];
 
-            var objA = {};
-            var innerobjA = {};
-            var key = "";
-
-            // console.log(tform.children[0].querySelector("input").value);
-            // console.log(tform.children[1].querySelector("select").children);
-            // console.log(tform.children[2].querySelector("select").children);
-
-            for (var option of tform.children[1].querySelector("select").children) {
-
-                if (option.getAttribute("selected")) {
-                    key = option.value;
-                    console.log(key);
-                }
-            }
-
-            for (var option of tform.children[2].querySelector("select").children) {
-
-                if (option.getAttribute("selected")) {
-                    console.log("INSIDE HERE");
-                    console.log(document.getElementsByClassName("nav-item tab active")[0].innerText);
-                    /* CASE FOR ROOMS */
-                    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
-                        innerobjA[key] = "rooms_" + option.value;
-                    } else {
-                        innerobjA[key] = "courses_" + option.value;
-                    }
-                }
-            }
-
-            /* When the transformation key name is duplicate, should both be pushed? */
-            var key = tform.children[0].querySelector("input").value;
-            objA[key] = innerobjA;
-
-            // TEMPORARY AND RUSHED PUSHING OF TRANSFORMATION KEY TO COLUMN
-            Cquery.OPTIONS.COLUMNS.push(key); // move down
-            /* var boxes = document.querySelector("div.control.transformation input[data-key='" + key + "']");
-            for (var box in boxes) {
-                if (box.checked) {
-                    query.OPTIONS.COLUMNS.push(key);
-                }
-            } */
-            Cquery.TRANSFORMATIONS.APPLY.push(objA);
         }
+        if (!Rquery.TRANSFORMATIONS) {
+            Cquery.TRANSFORMATIONS = {"GROUP": [], "APPLY": []};
+            /*} else {
+                Cquery.TRANSFORMATIONS.APPLY = [];
+
+        }
+
+    }*/
+
+    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
+
+        CampusExplorer.buildRForms(rforms);
+
+    } else {
+        console.log("going in to call");
+        console.log(cforms);
+        CampusExplorer.buildCForms(cforms);
+        console.log("coming out");
+
     }
 
     /*======== BUILDING ORDER ========*/
@@ -232,9 +228,9 @@ CampusExplorer.buildQuery = function() {
     } else {
         CampusExplorer.buildConditions(conditions);
     }
-    console.log("CHECK HERE");
-    console.log(Rconditions);
-    console.log(conditions);
+    // console.log("CHECK HERE");
+    // console.log(Rconditions);
+    // console.log(conditions);
 
     // var Rprefix = "rooms_";
 
@@ -503,4 +499,105 @@ CampusExplorer.buildRConditions = function(conditions) {
     console.log(options);
     console.log(options[0]);*/
 
+CampusExplorer.buildRForms = function(tforms) {
+    for (var tform of tforms) {
+        if (tform && Rquery.TRANSFORMATIONS) {
 
+            var objA = {};
+            var innerobjA = {};
+            var key = "";
+
+            // console.log(tform.children[0].querySelector("input").value);
+            // console.log(tform.children[1].querySelector("select").children);
+            // console.log(tform.children[2].querySelector("select").children);
+
+            for (var option of tform.children[1].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    key = option.value;
+                    console.log(key);
+                }
+            }
+
+            for (var option of tform.children[2].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    console.log("INSIDE HERE");
+                    console.log(document.getElementsByClassName("nav-item tab active")[0].innerText);
+                    /* CASE FOR ROOMS */
+                    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
+                        innerobjA[key] = "rooms_" + option.value;
+                    } else {
+                        innerobjA[key] = "courses_" + option.value;
+                    }
+                }
+            }
+
+            /* When the transformation key name is duplicate, should both be pushed? */
+            var key = tform.children[0].querySelector("input").value;
+            objA[key] = innerobjA;
+
+            // TEMPORARY AND RUSHED PUSHING OF TRANSFORMATION KEY TO COLUMN
+            Rquery.OPTIONS.COLUMNS.push(key); // move down
+            /* var boxes = document.querySelector("div.control.transformation input[data-key='" + key + "']");
+            for (var box in boxes) {
+                if (box.checked) {
+                    query.OPTIONS.COLUMNS.push(key);
+                }
+            } */
+            Rquery.TRANSFORMATIONS.APPLY.push(objA);
+        }
+    }
+};
+
+CampusExplorer.buildCForms = function(tforms) {
+    for (var tform of tforms) {
+        if (tform) { // && Cquery.TRANSFORMATIONS) {
+
+            var objA = {};
+            var innerobjA = {};
+            var key = "";
+
+            console.log("IN");
+            console.log(tform.children[0].querySelector("input").value);
+            console.log(tform.children[1].querySelector("select").children);
+            console.log(tform.children[2].querySelector("select").children);
+
+            for (var option of tform.children[1].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    key = option.value;
+                    console.log(key);
+                }
+            }
+
+            for (var option of tform.children[2].querySelector("select").children) {
+
+                if (option.getAttribute("selected")) {
+                    console.log("INSIDE HERE");
+                    console.log(document.getElementsByClassName("nav-item tab active")[0].innerText);
+                    /* CASE FOR ROOMS */
+                    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
+                        innerobjA[key] = "rooms_" + option.value;
+                    } else {
+                        innerobjA[key] = "courses_" + option.value;
+                    }
+                }
+            }
+
+            /* When the transformation key name is duplicate, should both be pushed? */
+            var key = tform.children[0].querySelector("input").value;
+            objA[key] = innerobjA;
+
+            // TEMPORARY AND RUSHED PUSHING OF TRANSFORMATION KEY TO COLUMN
+            Cquery.OPTIONS.COLUMNS.push(key); // move down
+            /* var boxes = document.querySelector("div.control.transformation input[data-key='" + key + "']");
+            for (var box in boxes) {
+                if (box.checked) {
+                    query.OPTIONS.COLUMNS.push(key);
+                }
+            } */
+            Cquery.TRANSFORMATIONS.APPLY.push(objA);
+        }
+    }
+};
