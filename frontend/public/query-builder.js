@@ -154,7 +154,7 @@ CampusExplorer.buildQuery = function() {
                     Rquery.OPTIONS.ORDER = {"dir": "UP", "keys": []};
                     Rquery.OPTIONS.ORDER.keys.push("rooms_" + fields[i].value);
 
-                    if (document.getElementById("courses-order").checked === true) {
+                    if (document.getElementById("rooms-order").checked === true) {
                         Rquery.OPTIONS.ORDER.dir = "DOWN";
                     }
                 }
