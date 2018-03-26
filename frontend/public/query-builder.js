@@ -10,6 +10,9 @@ let Cquery = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
 
 CampusExplorer.buildQuery = function() {
 
+    Rquery = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
+    Cquery = {"WHERE": {}, "OPTIONS": {"COLUMNS": []}};
+
     let Csuffixes = ["audit", "avg", "dept", "fail", "id", "instructor", "pass", "title", "uuid", "year"];
     let Rsuffixes = ["address", "fullname", "furniture", "href", "lat", "lon", "name", "number", "seats", "shortname",
         "type"];
@@ -25,7 +28,11 @@ CampusExplorer.buildQuery = function() {
             Cquery.OPTIONS.COLUMNS.push("courses_"+ Csuffixes[k]);
         }
         if (column.checked === false) {
-            Cquery.OPTIONS.COLUMNS.pop();
+            // Cquery.OPTIONS.COLUMNS.pop();
+            const index = Cquery.OPTIONS.COLUMNS.indexOf("courses_" + Rsuffixes[k]);
+            if (index !== -1) {
+                Cquery.OPTIONS.COLUMNS.splice(index, 1);
+            }
         }
 
         /*======== BUILDING COURSES GROUPS (under TRANSFORMATIONS) ========*/
@@ -37,6 +44,13 @@ CampusExplorer.buildQuery = function() {
             }
             Cquery.TRANSFORMATIONS.GROUP.push("courses_" + Csuffixes[k]);
         }
+        /* if (Cquery.TRANSFORMATIONS) {
+            if (group.checked === false && Cquery.TRANSFORMATIONS.GROUP) {
+                Cquery.TRANSFORMATIONS.GROUP.pop();
+            }
+        } else {
+            continue;
+        } */
     }
 
     for (var l = 0; l < Rsuffixes.length; l++) {
@@ -50,7 +64,10 @@ CampusExplorer.buildQuery = function() {
             Rquery.OPTIONS.COLUMNS.push("rooms_"+ Rsuffixes[l]);
         }
         if (column.checked === false) {
-            Rquery.OPTIONS.COLUMNS.pop();
+            const index = Rquery.OPTIONS.COLUMNS.indexOf("rooms_" + Rsuffixes[l]);
+            if (index !== -1) {
+                Rquery.OPTIONS.COLUMNS.splice(index, 1);
+            }
         }
 
         /*======== BUILDING ROOMS GROUPS (under TRANSFORMATIONS) ========*/
@@ -62,11 +79,19 @@ CampusExplorer.buildQuery = function() {
             }
             Rquery.TRANSFORMATIONS.GROUP.push("rooms_" + Rsuffixes[l]);
         }
+        /* if (Rquery.TRANSFORMATIONS) {
+            if (group.checked === false && Rquery.TRANSFORMATIONS.GROUP) {
+                Rquery.TRANSFORMATIONS.GROUP.pop();
+            }
+        } else {
+            continue;
+        } */
     }
 
     /*======== BUILDING APPLY (under TRANSFORMATIONS) *all Cquery* ========*/
 
     var tforms = document.getElementsByClassName("control-group transformation");
+    // console.log(tforms);
 
     if (tforms[0]) {
         if (!Cquery.TRANSFORMATIONS) {
