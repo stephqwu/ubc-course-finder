@@ -123,6 +123,9 @@ CampusExplorer.buildQuery = function() {
 
     var div = document.getElementsByClassName("control order fields");
     var rawFields = div[0].children[0].children;
+    if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
+        rawFields = div[1].children[0].children;
+    }
     var fields = [].slice.call(rawFields);
 
     for (var i = 0; i < fields.length; i++) {
@@ -131,11 +134,9 @@ CampusExplorer.buildQuery = function() {
         if (fields[i].selected === true) {
 
             if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Courses") {
+                console.log(fields);
                     Cquery.OPTIONS.ORDER = {"dir": "UP", "keys": []};
-                    if (!(fields[i].value === "address" || fields[i].value === "fullname" ||
-                            fields[i].value === "furniture" || fields[i].value === "href" || fields[i].value === "lat"
-                            || fields[i].value === "lon" || fields[i].value === "name" || fields[i].value === "number"
-                            || fields[i].value === "seats" || fields[i].value === "shortname") && i < fields.length) {
+                    console.log(fields[i].value);
                         // fields.splice(fields[i], fields[i + 1]);
                         Cquery.OPTIONS.ORDER.keys.push("courses_" + fields[i].value);
 
@@ -143,16 +144,23 @@ CampusExplorer.buildQuery = function() {
                             Cquery.OPTIONS.ORDER.dir = "DOWN";
                         }
                     }
-            } else if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
-                Rquery.OPTIONS.ORDER = {"dir": "UP", "keys": []};
-                Rquery.OPTIONS.ORDER.keys.push("rooms_" + fields[i].value);
+            else if (document.getElementsByClassName("nav-item tab active")[0].innerText === "Rooms") {
+                // console.log(fields);
+                // console.log(i);
+                // console.log(fields[i]);
+                // console.log(fields[i].value);
+                // console.log(fields[i].selected);
+                if (fields[i].selected === true) {
+                    Rquery.OPTIONS.ORDER = {"dir": "UP", "keys": []};
+                    Rquery.OPTIONS.ORDER.keys.push("rooms_" + fields[i].value);
 
-                if (document.getElementById("courses-order").checked === true) {
-                    Rquery.OPTIONS.ORDER.dir = "DOWN";
+                    if (document.getElementById("courses-order").checked === true) {
+                        Rquery.OPTIONS.ORDER.dir = "DOWN";
+                    }
                 }
             }
+            }
         }
-    }
 
 
     /*======== START BUILDING CONDITIONS ========*/
