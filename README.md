@@ -1,6 +1,6 @@
 # UBC Course Finder
 
-Full-stack web application capable of running queries over cached UBC room and course data using a self-built query language.
+Full-stack web application capable of running queries over cached UBC room and course data using a self-built query language. Originally built as a term project, continuous improvements (such as UI overhaul and additional features) are being made.
 
 ## Dev environment configuration
 
